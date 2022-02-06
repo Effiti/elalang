@@ -3,8 +3,7 @@
 #include "Token.hpp"
 
 void Lexer::logLexerError(std::string s) {
-  logger::Logger l;
-  l.log(logger::messageTypes::FATAL_ERROR, s, mCurrentLine, __FILE__);
+  mLogger.log(logger::messageTypes::FATAL_ERROR, s, mCurrentLine, __FILE__);
 }
 
 [[nodiscard]] bool Lexer::consume(char c) {
@@ -23,7 +22,11 @@ void Lexer::logLexerError(std::string s) {
 
 void Lexer::mAddToken(Token token) { mTokens.push_back(token); }
 
-void Lexer::consume() { mCurrentPos++; }
+void Lexer::consume() {
+  mLogger.log(logger::messageTypes::DEBUG, std::string("consuming: ") + peek(),
+              HERE());
+  mCurrentPos++;
+}
 
 // WARNING:THIS DOES NOT HANDLE isOverEnd() !!!!!
 constexpr char Lexer::peek() const { return mStrSource.at(mCurrentPos); }
@@ -96,36 +99,33 @@ TokenType Lexer::mGetSingleCharTokenType(char c) {
 // TODO: Implement
 std::string Lexer::mUnescapeStringLiteral(std::string s) { return s; }
 
+// FIX: this does not work...
 std::string Lexer::mStringLiteralToken() {
-  // removes first '"'
+  //consume first '"'
   consume();
-  char currentChar = peek();
   std::string value;
-  while (currentChar != '"' && !isOverEnd()) {
-    currentChar = peek();
-    if (currentChar == '\\') {
+  bool stringEnded{false};
+  char buf;
+  while(!stringEnded && !isOverEnd()) {
+    buf = peek();
+    if(peek() == '\\') {
       value += peek();
       consume();
-      if (!(mCurrentPos >= mStrSource.length())) {
-        value += peek();
-        consume();
-      } else {
-        logLexerError("unexpected EOF in parsing string literal!");
-        break;
-      }
-    } else if (currentChar == '"' &&
-               !(mCurrentPos == mStrSource.length() - 1)) {
+      value += peek();
+      buf = peek();
       consume();
-      break;
-    } else if (currentChar == '"') {
-      return value;
-    } else {
-      value += currentChar;
+    }
+    if(buf == '"') {
+      stringEnded = true;
+      consume();
+    }
+    else{
+      value += peek();
       consume();
     }
   }
-  if (isOverEnd()) {
-    logLexerError("unexpected EOF in parsing string literal!");
+  if(isOverEnd() && !stringEnded){
+    logLexerError("unexpected EOF in parsing string literal token!");
   }
   return value;
 }
@@ -166,6 +166,7 @@ std::vector<Token> Lexer::parseSource() {
       consume();
       break;
     case '"':
+      mLogger.log(logger::messageTypes::DEBUG, "parsing string Literal!", HERE());
       mAddToken(mParseStringLiteralToken(mStringLiteralToken()));
       break;
     default:
@@ -175,7 +176,7 @@ std::vector<Token> Lexer::parseSource() {
 
     if (!isOverEnd())
       currentChar = peek();
-    if (mCurrentPos == mStrSource.length() - 1)
+    else
       break;
   }
 

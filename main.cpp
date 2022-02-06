@@ -3,7 +3,7 @@
 using namespace std::string_view_literals;
 
 int main() {
-  Lexer l{"var a; print \"Hallo Welt\""sv};
+  Lexer l{"var a; print {\"Hallo Wel}\""sv, 4};
   for (auto tok : l.parseSource()) {
     std::cout << humanReadableTokenType(tok.type) << " : "
               << CmdUtil::colors["bg:black"] << tok.lexeme
