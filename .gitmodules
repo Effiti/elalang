@@ -1,0 +1,3 @@
+[submodule "include/cmdlib"]
+	path = include/cmdlib
+	url = https://github.com/Effiti/cmdlib

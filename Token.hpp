@@ -31,7 +31,9 @@ enum class TokenType {
 
   Identifier,
 
-  Unimplemented
+  Unimplemented,
+
+  EndOfFile
 
 };
 std::string humanReadableTokenType(TokenType t);

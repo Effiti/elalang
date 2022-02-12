@@ -3,7 +3,7 @@
 #include "Token.hpp"
 
 void Lexer::logLexerError(std::string s) {
-  mLogger.log(logger::messageTypes::FATAL_ERROR, s, mCurrentLine, __FILE__);
+  mLogger.log(logger::messageType::FATAL_ERROR, s, mCurrentLine, __FILE__);
 }
 
 [[nodiscard]] bool Lexer::consume(char c) {
@@ -23,8 +23,8 @@ void Lexer::logLexerError(std::string s) {
 void Lexer::mAddToken(Token token) { mTokens.push_back(token); }
 
 void Lexer::consume() {
-  mLogger.log(logger::messageTypes::DEBUG, std::string("consuming: ") + peek(),
-              HERE());
+  //mLogger.log(logger::messageTypes::DEBUG, std::string("consuming: ") + peek(),
+  //            HERE());
   mCurrentPos++;
 }
 
@@ -99,7 +99,6 @@ TokenType Lexer::mGetSingleCharTokenType(char c) {
 // TODO: Implement
 std::string Lexer::mUnescapeStringLiteral(std::string s) { return s; }
 
-// FIX: this does not work...
 std::string Lexer::mStringLiteralToken() {
   //consume first '"'
   consume();
@@ -166,7 +165,7 @@ std::vector<Token> Lexer::parseSource() {
       consume();
       break;
     case '"':
-      mLogger.log(logger::messageTypes::DEBUG, "parsing string Literal!", HERE());
+      //mLogger.log(logger::messageTypes::DEBUG, "parsing string Literal!", HERE());
       mAddToken(mParseStringLiteralToken(mStringLiteralToken()));
       break;
     default:
@@ -179,6 +178,7 @@ std::vector<Token> Lexer::parseSource() {
     else
       break;
   }
+  mAddToken(Token{TokenType::EndOfFile, ""});
 
   return mTokens;
 }

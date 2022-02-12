@@ -44,6 +44,8 @@ std::string humanReadableTokenType(TokenType t) {
     return "Identifier";
   case Semicolon:
     return "Semicolon";
+  case EndOfFile:
+    return "EndOfFile";
   case Unimplemented:
   default:
     return "Unimplemented";

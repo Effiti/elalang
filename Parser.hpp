@@ -11,10 +11,18 @@ struct ParserOpts {
 class Parser {
 public:
   Parser(std::vector<Token> tokens, ParserOpts opts)
-      : mOpts{opts}, mTokens{tokens} {};
+      : mOpts{opts}, mTokens{tokens}, mLogger{opts.verbosityLevel} {};
   [[nodiscard]] std::vector<ElaNode> parse();
 
 private:
+  logger::Logger mLogger;
+
   std::vector<Token> mTokens;
   ParserOpts mOpts;
+
+  std::size_t mCurrentPos{0};
+  Token mCurrentToken();
+  void consume();
+
+  [[nodiscard]] std::vector<ElaNode> mParseUntil(TokenType t);
 };

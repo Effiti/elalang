@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Token.hpp"
 #include "Ela.hpp"
+#include "Token.hpp"
 
 class Lexer {
-  public:
-  Lexer(std::string_view source, int verbosity=1) : mStrSource{source}, mLogger(verbosity)  {}
+public:
+  Lexer(std::string_view source, int verbosity = 1)
+      : mStrSource{source}, mLogger(verbosity) {}
   void consume();
   [[nodiscard]] bool consume(char c);
   constexpr void consumeOrError(char c, std::string_view errorMessage) const
@@ -36,5 +37,6 @@ private:
   Token mParseWordToken(std::string);
   Token mParseSingleCharToken(char c);
   Token mParseStringLiteralToken(std::string s);
+
   logger::Logger mLogger;
 };
