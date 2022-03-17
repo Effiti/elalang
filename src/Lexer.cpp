@@ -1,6 +1,10 @@
 #include "Lexer.hpp"
 #include "Ela.hpp"
 #include "Token.hpp"
+#include "cmdlib/logging.hpp"
+#include <string>
+
+
 
 void Lexer::logLexerError(std::string s) {
   mLogger.log(logger::messageType::FATAL_ERROR, s, mCurrentLine, __FILE__);
@@ -23,8 +27,6 @@ void Lexer::logLexerError(std::string s) {
 void Lexer::mAddToken(Token token) { mTokens.push_back(token); }
 
 void Lexer::consume() {
-  //mLogger.log(logger::messageTypes::DEBUG, std::string("consuming: ") + peek(),
-  //            HERE());
   mCurrentPos++;
 }
 
@@ -56,6 +58,9 @@ Token Lexer::mParseWordToken(std::string word) {
   if (word == "var") {
     return Token{TokenType::VariableKeyword, word};
   }
+  if (word == "import") {
+    return Token{TokenType::ImportKeyword, word};
+  }
   return Token{TokenType::Identifier, word};
 }
 
@@ -64,8 +69,6 @@ TokenType Lexer::mGetSingleCharTokenType(char c) {
   switch (c) {
   case 'c':
     return ExplicitConstQualifier;
-  case '@':
-    return StackEvalQualifier;
   case '-':
     return MinusOperator;
   case '*':
@@ -83,15 +86,17 @@ TokenType Lexer::mGetSingleCharTokenType(char c) {
   case ']':
     return BracketsClose;
   case '{':
-    return SubStackBegin;
+    return BlockBegin;
   case '}':
-    return SubStackClose;
+    return BlockEnd;
   case '>':
     return GreaterThanOperator;
   case '<':
     return LessThanOperator;
   case ';':
     return Semicolon;
+  case '=':
+    return EqualsOperator;
   default:
     return None;
   }
@@ -100,30 +105,29 @@ TokenType Lexer::mGetSingleCharTokenType(char c) {
 std::string Lexer::mUnescapeStringLiteral(std::string s) { return s; }
 
 std::string Lexer::mStringLiteralToken() {
-  //consume first '"'
+  // consume first '"'
   consume();
   std::string value;
   bool stringEnded{false};
   char buf;
-  while(!stringEnded && !isOverEnd()) {
+  while (!stringEnded && !isOverEnd()) {
     buf = peek();
-    if(peek() == '\\') {
+    if (buf == '\\') {
       value += peek();
       consume();
       value += peek();
       buf = peek();
       consume();
     }
-    if(buf == '"') {
+    if (buf == '"') {
       stringEnded = true;
       consume();
-    }
-    else{
+    } else {
       value += peek();
       consume();
     }
   }
-  if(isOverEnd() && !stringEnded){
+  if (isOverEnd() && !stringEnded) {
     logLexerError("unexpected EOF in parsing string literal token!");
   }
   return value;
@@ -142,18 +146,38 @@ std::vector<Token> Lexer::parseSource() {
     currentChar = peek();
     if (std::isspace(currentChar)) {
       consume();
+      if(isOverEnd())
+        break;
       currentChar = peek();
       continue;
     }
 
     switch (currentChar) {
+    case '/':
+      if (mStrSource.length() > mCurrentPos - 1 &&
+          mStrSource.at(mCurrentPos + 1) == '/') {
+        while (mCurrentPos < mStrSource.length() && peek() != '\n' ) {
+          consume();
+        }
+        break;
+      }
+      mAddToken(mParseSingleCharToken(currentChar));
+      consume();
+      break;
+    case '=':
+      if (mStrSource.length() > mCurrentPos - 1 &&
+          mStrSource.at(mCurrentPos + 1) == '=') {
+        mAddToken(Token{TokenType::AssignmentOperator, "=="});
+        consume();
+        consume();
+        break;
+      }
     case 'c':
     case '@':
     case '+':
     case '-':
     case '*':
     case '[':
-    case '/':
     case '(':
     case '^':
     case ']':
@@ -165,7 +189,6 @@ std::vector<Token> Lexer::parseSource() {
       consume();
       break;
     case '"':
-      //mLogger.log(logger::messageTypes::DEBUG, "parsing string Literal!", HERE());
       mAddToken(mParseStringLiteralToken(mStringLiteralToken()));
       break;
     default:

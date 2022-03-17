@@ -1,0 +1,4 @@
+import io;
+var int a (19 + 3);
+//Hallo Welt
+print "Hallo Welt!!"

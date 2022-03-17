@@ -5,7 +5,7 @@
 
 class Lexer {
 public:
-  Lexer(std::string_view source, int verbosity = 1)
+  Lexer(std::string_view source)
       : mStrSource{source}, mLogger(verbosity) {}
   void consume();
   [[nodiscard]] bool consume(char c);

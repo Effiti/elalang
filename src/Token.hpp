@@ -7,10 +7,9 @@ enum class TokenType {
   None,
   StringLiteral,
 
-  SubStackBegin,
-  SubStackClose,
+  BlockBegin, // done
+  BlockEnd,   // done
 
-  StackEvalQualifier,
   ExplicitConstQualifier,
 
   PlusOperator,
@@ -24,10 +23,15 @@ enum class TokenType {
   BracketsClose,
   GreaterThanOperator,
   LessThanOperator,
+  EqualsOperator,
+  EqualOrGreaterThanOperator,
+  EqualOrLessThanOperator,
+  AssignmentOperator,
 
   Semicolon,
 
   VariableKeyword,
+  ImportKeyword,
 
   Identifier,
 

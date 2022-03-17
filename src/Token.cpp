@@ -6,14 +6,14 @@ std::string humanReadableTokenType(TokenType t) {
 
   case None:
     return "None";
+  case ImportKeyword:
+    return "ImportKeyword";
   case StringLiteral:
     return "StringLiteral";
-  case SubStackBegin:
-    return "SubStackBegin";
-  case SubStackClose:
-    return "SubStackClose";
-  case StackEvalQualifier:
-    return "StackEvalQualifier";
+  case BlockBegin:
+    return "BlockBegin";
+  case BlockEnd:
+    return "BlockEnd";
   case ExplicitConstQualifier:
     return "ExplicitConstQualifier";
   case PlusOperator:

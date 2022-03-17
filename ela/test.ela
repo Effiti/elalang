@@ -1,5 +1,12 @@
 import io;
-var int a {19 + 3}@
-print a
-a++ | print;
-a+1 a-4 a+3 a+3 _3$_ _4$[2]
+var int a (19+3);
+"sadadasd"
+'a'
+// comments
+print a;
+fn int add int x int y {
+ x + y
+}
+add 12 a | a;
+print a;
+
