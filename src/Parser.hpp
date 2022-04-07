@@ -23,6 +23,8 @@ private:
   std::size_t mCurrentPos{0};
   Token mCurrentToken();
   void consume();
+  bool consume(TokenType type);
+  void mParserError(TokenType expected, Token found);
 
   [[nodiscard]] std::vector<ElaNode> mParseUntil(TokenType t);
 };

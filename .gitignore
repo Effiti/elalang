@@ -1,1 +1,4 @@
-build
+bin
+obj
+elalang.make
+Makefile
