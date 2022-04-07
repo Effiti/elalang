@@ -2,7 +2,13 @@
 #include "Parser.hpp"
 #include "ElaNode.hpp"
 #include "Token.hpp"
-
+void Parser::mParserError(TokenType expected, Token found){
+  std::string file{found.file};
+    mLogger.log(logger::messageType::FATAL_ERROR,
+                "expected " + humanReadableTokenType(expected) + " but got " +
+                    humanReadableTokenType(found.type),
+                 found.line, file);
+}
 std::vector<ElaNode> Parser::parse() {
   return mParseUntil(TokenType::EndOfFile);
 }
@@ -23,10 +29,7 @@ std::vector<ElaNode> Parser::mParseUntil(TokenType t) {
 
   if (t != TokenType::EndOfFile &&
       mCurrentToken().type == TokenType::EndOfFile) {
-    mLogger.log(logger::messageType::FATAL_ERROR,
-                "expected " + humanReadableTokenType(t) + " but got " +
-                    humanReadableTokenType(TokenType::EndOfFile),
-                -1, "");
+
   }
   return nodes;
 }

@@ -6,6 +6,7 @@ project "elalang"
   cppdialect "C++20"
   includedirs {"./include"}
   targetdir "./bin/"
+  links {"fmt"}
 
   filter "configurations:Debug"
     defines { "DEBUG_BUILD" }

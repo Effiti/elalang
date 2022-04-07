@@ -1,7 +1,10 @@
 #include "ElaNode.hpp"
 #include "Ela.hpp"
-
-std::string ElaNode::toString() { return "empty Node"; }
+#include <fmt/core.h>
+std::string humanReadableNodeType(NodeType type) { return "Unimplemented"; }
+std::string ElaNode::toString() {
+  return fmt::format("Node of Type {0}", humanReadableNodeType(nodeType));
+}
 std::string humanReadableOperatorType(OperatorType type) {
   switch (type) {
   case OperatorType::MultiplicationOperator:

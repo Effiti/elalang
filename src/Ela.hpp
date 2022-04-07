@@ -5,6 +5,7 @@
 #include <cctype>
 #include <cstddef>
 #include <cwchar>
+#include <fmt/core.h>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -13,7 +14,6 @@
 
 #ifdef DEBUG_BUILD
   const int verbosity = 5;
-#endif
-#ifndef DEBUG_BUILD
+#else
   const int verbosity = 0;
 #endif

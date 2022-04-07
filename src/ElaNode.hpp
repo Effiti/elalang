@@ -3,7 +3,12 @@
 #include "Ela.hpp"
 
 enum class NodeType {
-
+  OperatorNode,
+  BlockNode,
+  InbuiltFunctionNode,
+  FunctionCallNode,
+  VariableReferenceNode,
+  None
 };
 
 enum class OperatorType {
@@ -26,38 +31,44 @@ enum class PrimitiveLiteralType {
 class ElaNode {
 public:
   std::string toString();
+  NodeType nodeType;
+  bool isConstComputable;
+  bool isConstComputabilityDetermined;
 };
 
-class OperatorNode : public ElaNode {
+class OperationNode : public ElaNode {
 public:
-  OperatorNode(OperatorType t) : type{t} {};
-
+  OperationNode(OperatorType t) : type{t} {};
   OperatorType type;
+  std::vector<ElaNode> operands;
 };
 class BlockNode : public ElaNode {
 public:
   BlockNode(std::vector<ElaNode> subNodes) : nodes{subNodes} {};
   std::vector<ElaNode> nodes;
 };
-class InbuiltFunctionNode : public ElaNode {
+class FunctionCallNode : public ElaNode {
 public:
-  InbuiltFunctionNode(std::string_view f) : functionName{f} {};
-  std::string_view functionName;
+  FunctionCallNode(std::string_view f) : functionName{f} {};
+  std::string functionName;
+  std::vector<ElaNode> arguments;
+
 };
-class VariableNode : public ElaNode {
+class VariableReferenceNode : public ElaNode {
 public:
-  VariableNode(std::string v) : variableName{v} {};
+  VariableReferenceNode(std::string v) : variableName{v} {};
 
   std::string variableName;
 };
+
+// example: var int a
+class VariableDeclarationNode : public ElaNode {
+
+};
+// example: a = 10;
 class VariableDefinitionNode : public ElaNode {
 public:
   VariableDefinitionNode(std::string v) : variableName{v} {};
-
   std::string variableName;
-};
-class VariableAssingNode : public ElaNode {};
-class ConstNode : public ElaNode {};
-class ConstLiteralNode : public ElaNode {
-  PrimitiveLiteralType type;
+  ElaNode value;
 };
