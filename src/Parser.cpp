@@ -26,9 +26,10 @@ std::vector<ElaNode> Parser::mParseUntil(TokenType t) {
       //break;
     }
   }
-
+  // if we reached the End of the File, and that is not what we are expecting, that means, that the file ended before the needed Token was found 
   if (t != TokenType::EndOfFile &&
       mCurrentToken().type == TokenType::EndOfFile) {
+    mParserError(t, mCurrentToken());
 
   }
   return nodes;
