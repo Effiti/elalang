@@ -118,6 +118,9 @@ Token Lexer::mMakeWordToken(std::size_t line, std::size_t col,
   if (lexeme == "import") {
     return Token{line, col, TokenType::ImportKeyword, lexeme};
   }
+  if (lexeme == "func") {
+    return Token{line, col, TokenType::FunctionKeyword, lexeme };
+  }
   return Token{line, col, TokenType::Identifier, lexeme};
 }
 
@@ -250,28 +253,23 @@ std::vector<Token> Lexer::parseSource() {
       mAddToken(Token{line, col, TokenType::BracketsOpen, "]"});
     } else if (consume('+')) {
       mAddToken(Token{line, col, TokenType::PlusOperator, "+"});
-    }
-    /*
-        return BracketsOpen;
-      case ']':
-        return BracketsClose;
-      case '{':
-        return BlockBegin;
-      case '}':
-        return BlockEnd;
-      case '>':
-        return GreaterThanOperator;
-      case '<':
-        return LessThanOperator;*/
-    else if (consume(';')) {
+    } else if (consume('!')) {
+      if (consume('='))
+        mAddToken(Token{line, col, TokenType::BangEqualsOperator, "!="});
+      else
+        mAddToken(Token{line, col, TokenType::BangOperator, "!"});
+    } else if (consume(']')) {
+      mAddToken(Token{line, col, TokenType::BracketsClose, "]"});
+    } else if (consume('{')) {
+      mAddToken(Token{line, col, TokenType::BlockBegin, "{"});
+    } else if (consume('}')) {
+      mAddToken(Token{line, col, TokenType::BlockEnd, "}"});
+    } else if (consume('>')) {
+      mAddToken(Token{line, col, TokenType::GreaterThanOperator, ">"});
+    } else if (consume('<')) {
+      mAddToken(Token{line, col, TokenType::LessThanOperator, "<"});
+    } else if (consume(';')) {
       mAddToken(Token{line, col, TokenType::Semicolon, ";"});
-    }
-
-    else {
-
-      std::size_t line = mCurrentLine, col = mCurrentCol;
-      mAddToken(mMakeSingleCharToken(line, col, currentChar));
-      consume();
     }
   }
   mAddToken(Token{mCurrentLine, mCurrentCol, TokenType::EndOfFile, ""});

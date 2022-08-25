@@ -27,7 +27,7 @@ TEST_F(LexerTest, RecognizeImport) {
 TEST_F(LexerTest, ParseStringLiteral) {
   EXPECT_EQ(mLexerResult.at(1).type, TokenType::StringLiteral)
       << "String literal was not recognized";
-  EXPECT_EQ(mLexerResult.at(1).lexeme, "io")
+  EXPECT_EQ(mLexerResult.at(1).value, "io")
       << "String literal was not parsed correctly";
 }
 int main(int argc, char **argv) {

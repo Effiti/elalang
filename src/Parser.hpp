@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Ela.hpp"
-#include "ElaNode.hpp"
+#include "Statement.hpp"
 #include "Token.hpp"
+using namespace Expressions;
 
 struct ParserOpts {
   int verbosityLevel;
@@ -12,7 +13,7 @@ class Parser {
 public:
   Parser(std::vector<Token> tokens, ParserOpts opts)
       : mOpts{opts}, mTokens{tokens}, mLogger{opts.verbosityLevel} {};
-  [[nodiscard]] std::vector<ElaNode> parse();
+  [[nodiscard]] Programm parse();
 
 private:
   logger::Logger mLogger;
@@ -24,7 +25,15 @@ private:
   Token mCurrentToken();
   void consume();
   bool consume(TokenType type);
+  bool match(std::initializer_list<TokenType> types);
   void mParserError(TokenType expected, Token found);
+  OperatorType mOperatorType(Token t);
 
-  [[nodiscard]] std::vector<ElaNode> mParseUntil(TokenType t);
+  [[nodiscard]] std::vector<Expression> mParseUntil(TokenType t);
+  Token previous();
+  Token next();
+
+  Expression mTerm();
+  Programm mProgramm();
+
 };

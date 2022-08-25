@@ -25,6 +25,8 @@ enum class TokenType {
   GreaterThanOperator,
   LessThanOperator,
   EqualsOperator,
+  BangEqualsOperator,
+  BangOperator,
   EqualOrGreaterThanOperator,
   EqualOrLessThanOperator,
   AssignmentOperator,
@@ -33,6 +35,7 @@ enum class TokenType {
 
   VariableKeyword,
   ImportKeyword,
+  FunctionKeyword,
 
   Identifier,
 
@@ -45,13 +48,13 @@ std::string humanReadableTokenType(TokenType type);
 
 class Token {
 public:
-  Token(std::size_t l, std::size_t c, TokenType t, string v)
+  Token(std::size_t l, std::size_t c, TokenType t, std::string_view v)
       : line{l}, col{c}, type{t}, value{v}, file{"main.ela"sv} {};
   std::size_t line;
   std::size_t col;
   TokenType type;
   // TODO: change value's type to std::string_view, imlement "file" field in
   // other files
-  string value;
+  std::string_view value;
   std::string_view file;
 };

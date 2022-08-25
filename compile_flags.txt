@@ -1,4 +1,2 @@
 -std=c++20
 -Iinclude
--Iinclude/googletest/googletest
--Iinclude/googletest/googletest/include

@@ -23,6 +23,8 @@ std::string humanReadableTokenType(TokenType type) {
     return "ExplicitConstQualifier";
   case GreaterThanOperator:
     return "GreaterThanOperator";
+  case FunctionKeyword:
+    return "FunctionKeyWord";
   case Identifier:
     return "Identifier";
   case ImportKeyword:
@@ -49,6 +51,10 @@ std::string humanReadableTokenType(TokenType type) {
     return "StringLiteral";
   case VariableKeyword:
     return "VariableKeyword";
+  case BangEqualsOperator:
+    return "BangEqualsOperator";
+  case BangOperator:
+    return "BangOperator";
 
   case None:
     return "None";
