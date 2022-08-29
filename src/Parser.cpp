@@ -10,21 +10,37 @@ void Parser::mParserError(TokenType expected, Token found) {
               found.line, file);
 }
 Programm Parser::parse() {
-  //return mParseUntil(TokenType::EndOfFile);
+  return mProgramm();
 }
 
 
 
 Programm Parser::mProgramm() {
   
+  push(1);
+  T(TokenType::ImportKeyword, t, )
+  mImportStatements();
 }
 
-
+SameTypeNodeList<ImportStatement> mImportStatements() {
+  while (consume(TokenType::ImportKeyword))
+  {
+    
+  }
+}
 
 
 void Parser::consume() {
   if (mCurrentPos < mTokens.size())
     mCurrentPos++;
+}
+
+bool Parser::consume(TokenType type) {
+  if(!mCurrentToken().type != type)
+    return false;
+  consume();
+  return true;
+
 }
 Token Parser::mCurrentToken() { return mTokens.at(mCurrentPos); }
 
