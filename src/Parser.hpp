@@ -1,21 +1,32 @@
 #pragma once
-
-enum class NonTerminalType {
-  Programm,
-
-
-
-}
-
-
-#define T(type, varName, tokenAction) if(match(type)) {Token varName = mCurrentToken(); {tokenAction}}
-#define N(type, row) if(top() == type) {pop(); row}
-
-
 #include "Ela.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
+
 using namespace Expressions;
+
+enum class NonTerminalType {
+  Programm,
+  None,
+
+};
+
+struct Symbol {
+  NonTerminalType type;
+  Token t;
+};
+
+#define T(type, varName, tokenAction)                                          \
+  if (match(type)) {                                                           \
+    Token varName = mCurrentToken();                                           \
+    { tokenAction }                                                            \
+  }
+#define N(type, row)                                                           \
+  if (top() == type) {                                                         \
+    pop();                                                                     \
+    row                                                                        \
+  }
+
 
 struct ParserOpts {
   int verbosityLevel;
@@ -49,13 +60,11 @@ private:
   Expression mTerm();
   Programm mProgramm();
   // sbtrakter mit templates oder Makros schreiben!!
-  SameTypeNodeList<ImportStatement> mImportStatements(); 
-  ImportStatement mImportStatement()
+  SameTypeNodeList<ImportStatement> mImportStatements();
+  ImportStatement mImportStatement();
 
-  std::vector<Node> stack;
+  std::vector<Symbol> stack;
 
   NonTerminalType top();
   void pop();
-
-
 };

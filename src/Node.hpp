@@ -1,5 +1,6 @@
-#pragma onceNode
+#pragma once
 #include "Ela.hpp"
+#include "Token.hpp"
 
 class Node {
 private:
