@@ -16,6 +16,7 @@ struct Symbol {
   Token t;
 };
 
+// do not try to format your macros correctly. It's painful to do. Let clang-fmt do it ;-)
 #define T(type, varName, tokenAction)                                          \
   if (match(type)) {                                                           \
     Token varName = mCurrentToken();                                           \
