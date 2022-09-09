@@ -17,11 +17,14 @@ struct Symbol {
 };
 
 // do not try to format your macros correctly. It's painful to do. Let clang-fmt do it ;-)
+// bsp: N(type, T() else T() else)
 #define T(type, varName, tokenAction)                                          \
   if (match(type)) {                                                           \
     Token varName = mCurrentToken();                                           \
     { tokenAction }                                                            \
   }
+#define NO_T(error)                                                            \
+  error
 #define N(type, row)                                                           \
   if (top() == type) {                                                         \
     pop();                                                                     \
