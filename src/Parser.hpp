@@ -7,14 +7,14 @@ using namespace Expressions;
 
 enum class NonTerminalType {
   Programm,
+  ImportStatementList,
+  ImportStatement,
+  FunctionDefinitinList,
   None,
 
 };
 
-struct Symbol {
-  NonTerminalType type;
-  Token t;
-};
+using Symbol = std::variant<NonTerminalType, Token>;
 
 // do not try to format your macros correctly. It's painful to do. Let clang-fmt do it ;-)
 // bsp: N(type, T() else T() else)
@@ -23,13 +23,14 @@ struct Symbol {
     Token varName = mCurrentToken();                                           \
     { tokenAction }                                                            \
   }
-#define NO_T(error)                                                            \
-  error
+#define NO_T(action)                                                            \
+  else{error}
 #define N(type, row)                                                           \
   if (top() == type) {                                                         \
     pop();                                                                     \
     row                                                                        \
   }
+
 
 
 struct ParserOpts {
@@ -63,12 +64,10 @@ private:
 
   Expression mTerm();
   Programm mProgramm();
-  // sbtrakter mit templates oder Makros schreiben!!
-  SameTypeNodeList<ImportStatement> mImportStatements();
-  ImportStatement mImportStatement();
 
   std::vector<Symbol> stack;
 
   NonTerminalType top();
   void pop();
+  void push(Symbol s);
 };

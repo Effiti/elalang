@@ -1,7 +1,7 @@
 #include "Parser.hpp"
 #include "Statement.hpp"
 #include <algorithm>
-
+using enum NonTerminalType;
 void Parser::mParserError(TokenType expected, Token found) {
   std::string file{found.file};
   mLogger.log(logger::messageType::FATAL_ERROR,
@@ -12,13 +12,24 @@ void Parser::mParserError(TokenType expected, Token found) {
 Programm Parser::parse() {
   return mProgramm();
 }
+void Parser::mParserLoop(){
+  N(
+    ImportStatementList,
+    T(ImportKeyword, k, )
+    NO_T()
 
+
+  )
+}
 
 
 Programm Parser::mProgramm() {
   
-  push(1);
-  T(TokenType::ImportKeyword, t, )
+  push(NonTerminalType::ImportStatementList);
+  push(NonTerminalType::FunctionDefinitionList);
+  while(!stack.size()!=0){
+    mParserLoop();
+  }
   mImportStatements();
 }
 
@@ -55,10 +66,14 @@ bool Parser::match(std::initializer_list<TokenType> types) {
 
 Token Parser::next() {
   //FIXME STUB
+  if(mCurrentToken().type == TokenType::EndOfFile)
+    return NULLTOK;
   return mTokens.at(mCurrentPos+1);
 }
 Token Parser::previous() {
   //FIXME STUB
+  if(mCurrentPos==0)
+    return NULLTOK;
   return mTokens.at(mCurrentPos-1);
 }
 
