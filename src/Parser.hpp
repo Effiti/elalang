@@ -9,12 +9,13 @@ enum class NonTerminalType {
   Programm,
   ImportStatementList,
   ImportStatement,
-  FunctionDefinitinList,
+  FunctionDefinitionList,
+  FunctionDefinition,
   None,
 
 };
 
-using Symbol = std::variant<NonTerminalType, Token>;
+using Symbol = std::variant<NonTerminalType, TokenType>;
 
 // do not try to format your macros correctly. It's painful to do. Let clang-fmt do it ;-)
 // bsp: N(type, T() else T() else)

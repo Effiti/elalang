@@ -15,18 +15,56 @@ Programm Parser::parse() {
 void Parser::mParserLoop(){
   N(
     ImportStatementList,
-    T(ImportKeyword, k, )
+    T(ImportKeyword, k, 
+      {
+      push(ImportStatementList);
+      push(ImportStatement);
+      }  
+    )
     NO_T()
-
-
+  );
+  N(
+    FunctionDefinitionList,
+    T(FunctionKeyword , k, 
+      push(FunctionDefinition);
+    )
+  );
+  N(
+    ImportStatement,
+    T(ImportKeyword, k,
+     {
+      consume(); 
+      push(Semicolon);
+      push(StringLiteral);   
+     }
+    ),
+    NO_T(
+      //UNREACHABLE
+      mParserError(ImportKeyword, mCurrentToken());
+    )
+  );
+  N(
+    FunctionDefinitionList,
+    T(FunctionKeyword, k, 
+    {
+    push(FunctionDefinitionList);
+    push(FunctionDefinition);
+    }
+    )
+  
+  
   )
+  if(std::holds_alternative<TokenType>(top())){
+    consumeOrError(top());
+    pop();
+  }
+
 }
 
 
 Programm Parser::mProgramm() {
-  
-  push(NonTerminalType::ImportStatementList);
   push(NonTerminalType::FunctionDefinitionList);
+  push(NonTerminalType::ImportStatementList);
   while(!stack.size()!=0){
     mParserLoop();
   }

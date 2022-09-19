@@ -1,6 +1,6 @@
 #pragma once
 #include "Expression.hpp"
-
+namespace Statement{
 class ImportStatement : public Node {
 public:
   std::string_view module;
@@ -21,3 +21,4 @@ public:
   SameTypeNodeList<ImportStatement> importStatements;
   SameTypeNodeList<FunctionDefinition> functionDefinitions;
 };
+}
