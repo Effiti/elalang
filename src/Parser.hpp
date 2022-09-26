@@ -24,8 +24,6 @@ using Symbol = std::variant<NonTerminalType, TokenType>;
     Token varName = mCurrentToken();                                           \
     { tokenAction }                                                            \
   }
-#define NO_T(action)                                                            \
-  else{error}
 #define N(type, row)                                                           \
   if (top() == type) {                                                         \
     pop();                                                                     \
@@ -37,6 +35,13 @@ using Symbol = std::variant<NonTerminalType, TokenType>;
 struct ParserOpts {
   int verbosityLevel;
 };
+
+enum ParserLoopResult{
+  Continue,
+  FinishedParsing,
+  ParserError
+
+}
 
 class Parser {
 public:
@@ -71,4 +76,7 @@ private:
   NonTerminalType top();
   void pop();
   void push(Symbol s);
+  Node &currentNode;
+  Programm mP;
+  
 };

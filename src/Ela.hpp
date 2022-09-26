@@ -11,6 +11,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <stdexcept>
 
 #ifdef DEBUG_BUILD
   const int verbosity = 5;

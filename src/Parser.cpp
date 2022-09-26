@@ -12,7 +12,7 @@ void Parser::mParserError(TokenType expected, Token found) {
 Programm Parser::parse() {
   return mProgramm();
 }
-void Parser::mParserLoop(){
+ParserLoopResult Parser::mParserLoop(){
   N(
     ImportStatementList,
     T(ImportKeyword, k, 
@@ -21,7 +21,9 @@ void Parser::mParserLoop(){
       push(ImportStatement);
       }  
     )
-    NO_T()
+    else T(FunctionKeyword) {
+
+    }
   );
   N(
     FunctionDefinitionList,
@@ -38,10 +40,10 @@ void Parser::mParserLoop(){
       push(StringLiteral);   
      }
     ),
-    NO_T(
+    else{
       //UNREACHABLE
       mParserError(ImportKeyword, mCurrentToken());
-    )
+    }
   );
   N(
     FunctionDefinitionList,
@@ -51,7 +53,15 @@ void Parser::mParserLoop(){
     push(FunctionDefinition);
     }
     )
-  
+    T(EndOfFile, k, 
+    {
+      return;
+    }
+    )
+    else {
+
+    }
+    
   
   )
   if(std::holds_alternative<TokenType>(top())){
@@ -66,7 +76,16 @@ Programm Parser::mProgramm() {
   push(NonTerminalType::FunctionDefinitionList);
   push(NonTerminalType::ImportStatementList);
   while(!stack.size()!=0){
-    mParserLoop();
+    switch(mParserLoop()) {
+      case ParserLoopResult::Continue:
+        continue;
+      case ParserLoopResult::FinishedParsing:
+        return mP;
+      case ParserLoopResult::ParserError:
+        throw std::runtime_error("");
+
+
+    };
   }
   mImportStatements();
 }
