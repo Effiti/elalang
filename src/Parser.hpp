@@ -11,6 +11,7 @@ enum class NonTerminalType {
   ImportStatement,
   FunctionDefinitionList,
   FunctionDefinition,
+  Block,
   None,
 
 };
@@ -29,8 +30,7 @@ using Symbol = std::variant<NonTerminalType, TokenType>;
     pop();                                                                     \
     row                                                                        \
   }
-
-
+#define ERRORINLOOP(type) mParserError(type, mCurrentToken()); return ParserLoopResult::ParserError;
 
 struct ParserOpts {
   int verbosityLevel;

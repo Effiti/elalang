@@ -22,7 +22,6 @@ ParserLoopResult Parser::mParserLoop(){
       }  
     )
     else T(FunctionKeyword) {
-
     }
   );
   N(
@@ -40,9 +39,9 @@ ParserLoopResult Parser::mParserLoop(){
       push(StringLiteral);   
      }
     ),
-    else{
+    else {
       //UNREACHABLE
-      mParserError(ImportKeyword, mCurrentToken());
+      ERRORINLOOP(ImportKeyword);
     }
   );
   N(
@@ -53,16 +52,32 @@ ParserLoopResult Parser::mParserLoop(){
     push(FunctionDefinition);
     }
     )
-    T(EndOfFile, k, 
+    else T(EndOfFile, k, 
     {
       return;
     }
     )
     else {
-
+      ERRORINLOOP(FunctionKeyword)
     }
-    
   
+  )
+  N(
+    FunctionDefinition,
+    T(FunctionKeyword, k, {
+      T(Identifier, ident, {
+
+      })
+      else{
+        ERRORINLOOP(Identifier);
+      }
+
+
+    })
+    else{
+      ERRORINLOOP(FunctionKeyword);
+    }
+
   )
   if(std::holds_alternative<TokenType>(top())){
     consumeOrError(top());
