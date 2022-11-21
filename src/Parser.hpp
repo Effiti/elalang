@@ -40,14 +40,13 @@ enum ParserLoopResult{
   Continue,
   FinishedParsing,
   ParserError
-
-}
+};
 
 class Parser {
 public:
   Parser(std::vector<Token> tokens, ParserOpts opts)
       : mOpts{opts}, mTokens{tokens}, mLogger{opts.verbosityLevel} {};
-  [[nodiscard]] Programm parse();
+  [[nodiscard]] Statement::Programm parse();
 
 private:
   logger::Logger mLogger;
@@ -60,8 +59,9 @@ private:
   void consume();
   bool consume(TokenType type);
   Token consumeOrError(TokenType type);
-  bool match(std::initializer_list<TokenType> types);
+  bool match(TokenType type);
   void mParserError(TokenType expected, Token found);
+  ParserLoopResult mParserLoop();
   OperatorType mOperatorType(Token t);
 
   [[nodiscard]] std::vector<Expression> mParseUntil(TokenType t);
@@ -69,14 +69,14 @@ private:
   Token next();
 
   Expression mTerm();
-  Programm mProgramm();
+  Statement::Programm mProgramm();
 
   std::vector<Symbol> stack;
 
-  NonTerminalType top();
+  Symbol top();
   void pop();
   void push(Symbol s);
-  Node &currentNode;
-  Programm mP;
+  //Node &currentNode;
+  Statement::Programm mP;
   
 };

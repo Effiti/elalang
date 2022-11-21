@@ -13,6 +13,7 @@
 #include <vector>
 #include <stdexcept>
 
+using namespace std::string_view_literals;
 #ifdef DEBUG_BUILD
   const int verbosity = 5;
 #else
