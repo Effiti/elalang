@@ -64,7 +64,6 @@ private:
   ParserLoopResult mParserLoop();
   OperatorType mOperatorType(Token t);
 
-  [[nodiscard]] std::vector<Expression> mParseUntil(TokenType t);
   Token previous();
   Token next();
 

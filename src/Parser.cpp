@@ -169,3 +169,14 @@ Token Parser::consumeOrError(TokenType type) {
     }
     return Token{0, 0, TokenType::Unimplemented, ""sv};
 }
+
+OperatorType Parser::mOperatorType(Token t) {
+    switch (t.type) {
+        case TokenType::DivisionOperator
+            return OperatorType::Division;
+        case expression:
+
+    }
+
+    return OperatorType::Division;
+}
