@@ -58,4 +58,4 @@ public:
   std::string_view value;
   std::string_view file;
 };
-#define NULLTOK = Token{0,0,TokenType::None, ""sv}
+#define NULLTOK Token{0,0,TokenType::None, ""sv}

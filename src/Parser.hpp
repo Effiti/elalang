@@ -77,5 +77,4 @@ private:
   void push(Symbol s);
   //Node &currentNode;
   Statement::Programm mP;
-  
 };

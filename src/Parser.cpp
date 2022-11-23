@@ -84,7 +84,8 @@ ParserLoopResult Parser::mParserLoop() {
 
     )
     if (std::holds_alternative<TokenType>(top())) {
-        consumeOrError(top());
+
+        consumeOrError();
         pop();
     }
 
@@ -109,7 +110,7 @@ Programm Parser::mProgramm() {
     mImportStatements();
 }
 
-SameTypeNodeList<ImportStatement> mImportStatements() {
+SameTypeNodeList<Statement::ImportStatement> mImportStatements() {
     while (consume(TokenType::ImportKeyword)) {
 
     }
@@ -122,7 +123,7 @@ void Parser::consume() {
 }
 
 bool Parser::consume(TokenType type) {
-    if (!mCurrentToken().type != type)
+    if (mCurrentToken().type != type)
         return false;
     consume();
     return true;
@@ -131,13 +132,6 @@ bool Parser::consume(TokenType type) {
 
 Token Parser::mCurrentToken() { return mTokens.at(mCurrentPos); }
 
-bool Parser::match(std::initializer_list<TokenType> types) {
-    for (auto type: types) {
-        if (mCurrentToken().type == type)
-            return true;
-    }
-    return false;
-}
 
 Token Parser::next() {
     //FIXME STUB
@@ -172,11 +166,15 @@ Token Parser::consumeOrError(TokenType type) {
 
 OperatorType Parser::mOperatorType(Token t) {
     switch (t.type) {
-        case TokenType::DivisionOperator
+        case TokenType::DivisionOperator:
             return OperatorType::Division;
-        case expression:
-
+        case TokenType::PlusOperator:
+        return OperatorType::Plus;
+        case TokenType::MinusOperator:
+        return OperatorType::Minus;
+        case TokenType::MultiplicationOperator:
+            return OperatorType::Multiplication;
+        default:
+            return OperatorType::None;
     }
-
-    return OperatorType::Division;
 }

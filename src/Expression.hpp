@@ -2,6 +2,7 @@
 #include "Ela.hpp"
 #include "Node.hpp"
 enum class OperatorType {
+    None,
   Multiplication,
   Plus,
   Minus,
