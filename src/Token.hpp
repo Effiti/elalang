@@ -55,7 +55,7 @@ public:
   TokenType type;
   // TODO: change value's type to std::string_view, imlement "file" field in
   // other files
-  std::string_view value;
+  std::string value;
   std::string_view file;
 };
 #define NULLTOK Token{0,0,TokenType::None, ""sv}

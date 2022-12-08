@@ -16,11 +16,12 @@ int main() {
   for (auto tok : tokens) {
     std::cout << CmdUtil::colors["green"] << humanReadableTokenType(tok.type)
               << CmdUtil::colors["end"] << " at " << tok.line << ":" << tok.col
-              << " : " << CmdUtil::colors["bg:black"] << tok.value
-              << CmdUtil::colors["end"] << "\n";
+              << " : ";
+    std::cout << tok.value << "\n";
   }
   ParserOpts opts{10};
   Parser p{tokens, opts};
+  p.parse();
   //std::vector<Expression::Expression> nodes = p.parse();
   //for (auto node : nodes) {
   //}

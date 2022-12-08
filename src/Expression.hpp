@@ -1,60 +1,73 @@
 #pragma once
+
+#include <utility>
+
 #include "Ela.hpp"
 #include "Node.hpp"
+
 enum class OperatorType {
     None,
-  Multiplication,
-  Plus,
-  Minus,
-  Division,
-  RightShift,
-  LeftShift
+    Multiplication,
+    Plus,
+    Minus,
+    Division,
+    RightShift,
+    LeftShift
 
 };
 namespace TypeExpressions {
-  class TypeExpression : public NonLeafNode {
-  
+    class TypeExpression : public NonLeafNode {
 
-  };
-  class PrimaryTypeExpression : public TypeExpression {
 
-  };
-  class TypeVariable : public PrimaryTypeExpression {
+    };
 
-  };
+    class PrimaryTypeExpression : public TypeExpression {
+
+    };
+
+    class TypeVariable : public PrimaryTypeExpression {
+
+    };
 }
 
 
 namespace Expressions {
 
 
+    class Expression : public Node {
+    public:
+        virtual const bool isConstEvaluable();
+    };
 
-class Expression : public Node {
-public:
-  const virtual bool isConstEvaluable();
-};
-class Binary : public Expression {
-private:
-  Expression mLhs;
-  Expression mRhs;
-  OperatorType mOp;
+    class Binary : public Expression {
+    private:
+        Expression mLhs;
+        Expression mRhs;
+        OperatorType mOp;
 
-public:
-  Binary(Expression rhs, OperatorType op, Expression lhs)
-      : mLhs{lhs}, mRhs{rhs}, mOp{op} {};
-  const bool isConstEvaluable();
-};
+    public:
+        Binary(Expression rhs, OperatorType op, Expression lhs)
+                : mLhs{lhs}, mRhs{std::move(rhs)}, mOp{op} {};
 
-class PrimaryExpression : public Expression {};
+        const bool isConstEvaluable() override;
+    };
 
-class Parenthed : public PrimaryExpression {
-public:
-  Parenthed(Expression SubExpr);
-  Expression SubExpr;
-};
-class IntegerLiteral : public PrimaryExpression {
-public:
-  int value;
-  const bool isConstEvaluable() { return true; }
-};
+    class PrimaryExpression : public Expression {
+    };
+
+    class Parenthed : public PrimaryExpression {
+    public:
+        explicit Parenthed(Expression pSubExpr) : SubExpr{pSubExpr}{};
+
+        Expression SubExpr;
+    };
+
+    class IntegerLiteral : public PrimaryExpression {
+    public:
+        IntegerLiteral(int v) : value{v}{};
+
+        int value;
+
+        const bool isConstEvaluable() { return true; }
+    };
 } // namespace Expressions

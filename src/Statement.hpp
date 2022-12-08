@@ -3,6 +3,7 @@
 namespace Statement{
 class ImportStatement : public Node {
 public:
+    explicit ImportStatement(std::string_view mod): module{mod}{}
   std::string_view module;
 };
 class Statement : public Node {};

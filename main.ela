@@ -1,18 +1,5 @@
-import io;
+import "x";
+func test() {
+test
 
-var string a = "";
-const int a = const
-{
-  15+15*1
 }
-const bool b = a ==30;
-const bool c = a ! = 40;
-const bool d = !c;
-
-// Hallo !!
-print "Hallo \"Welt\"";
-
-print a;
-a = { geti } * { 2 }
-"\\"
-const int test = ( const int a = 5;)

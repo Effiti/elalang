@@ -25,3 +25,8 @@ std::string humanReadableOperatorType(OperatorType type) {
 const bool Binary::isConstEvaluable() {
   return mLhs.isConstEvaluable() && mRhs.isConstEvaluable();
 }
+
+const bool Expression::isConstEvaluable() {
+    return 0;
+}
+

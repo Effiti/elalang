@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "Ela.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
@@ -26,7 +28,7 @@ using Symbol = std::variant<NonTerminalType, TokenType>;
     { tokenAction }                                                            \
   }
 #define N(type, row)                                                           \
-  if (top() == type) {                                                         \
+  if (is(top(), type)) {                                                         \
     pop();                                                                     \
     row                                                                        \
   }
@@ -45,8 +47,8 @@ enum ParserLoopResult{
 class Parser {
 public:
   Parser(std::vector<Token> tokens, ParserOpts opts)
-      : mOpts{opts}, mTokens{tokens}, mLogger{opts.verbosityLevel} {};
-  [[nodiscard]] Statement::Programm parse();
+      : mOpts{opts}, mTokens{std::move(tokens)}, mLogger{opts.verbosityLevel} {};
+  [[nodiscard]] std::optional<Statement::Programm> parse();
 
 private:
   logger::Logger mLogger;
@@ -67,8 +69,7 @@ private:
   Token previous();
   Token next();
 
-  Expression mTerm();
-  Statement::Programm mProgramm();
+  std::optional<Statement::Programm> mProgramm();
 
   std::vector<Symbol> stack;
 
@@ -77,4 +78,7 @@ private:
   void push(Symbol s);
   //Node &currentNode;
   Statement::Programm mP;
+
+  static bool is(Symbol s, TokenType t);
+  static bool is(Symbol s, NonTerminalType t);
 };

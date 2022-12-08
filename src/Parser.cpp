@@ -2,7 +2,8 @@
 #include "Statement.hpp"
 #include <algorithm>
 
-using enum NonTerminalType;
+using
+enum NonTerminalType;
 
 void Parser::mParserError(TokenType expected, Token found) {
     std::string file{found.file};
@@ -12,90 +13,104 @@ void Parser::mParserError(TokenType expected, Token found) {
                 found.line, file);
 }
 
-Programm Parser::parse() {
+std::optional<Statement::Programm> Parser::parse() {
     return mProgramm();
 }
 
 ParserLoopResult Parser::mParserLoop() {
     N(
             ImportStatementList,
-            T(TokenType::ImportKeyword, k,
-              {
-                      push(ImportStatementList);
-                      push(ImportStatement);
-              }
-            )
-                    else T(FunctionKeyword) {
+            {
+                T(TokenType::ImportKeyword, k,
+                  {
+                          push(ImportStatementList);
+                          push(ImportStatement);
+                  }
+                )
+                else T(TokenType::FunctionKeyword, k, {})
+                {
+                }
             }
     );
     N(
             FunctionDefinitionList,
-            T(TokenType::FunctionKeyword, k,
-              push(FunctionDefinition);
-            )
+            {
+                T(TokenType::FunctionKeyword, k,
+                  push(FunctionDefinition);
+                )
+            }
     );
     N(
             ImportStatement,
-            T(TokenType::ImportKeyword, k,
-              {
-                      consume();
-                      push(TokenType::Semicolon);
-                      push(TokenType::StringLiteral);
-              }
-            )
-                    else {
-                //UNREACHABLE
-                ERRORINLOOP(TokenType::ImportKeyword);
+            {
+                T(TokenType::ImportKeyword, k,
+                  {
+                          consume();
+                          push(TokenType::Semicolon);
+                          consumeOrError(TokenType::StringLiteral);
+                          if(match(TokenType::StringLiteral)){
+                              mP.importStatements.subNodes.push_back(Statement::ImportStatement(mCurrentToken().value));
+                          }
+                          else{
+                              mParserError(TokenType::StringLiteral, mCurrentToken());
+                          }
+                  }
+                )
+                else {
+                    //UNREACHABLE
+                    ERRORINLOOP(TokenType::ImportKeyword);
+                }
             }
     );
     N(
             FunctionDefinitionList,
-            T(TokenType::FunctionKeyword, k,
-              {
-                      push(FunctionDefinitionList);
-                      push(FunctionDefinition);
-              }
-            )
-                    else T(TokenType::EndOfFile, k,
-                           {
-                                   ERRORINLOOP(TokenType::FunctionKeyword);
-                           }
-            )
-                    else {
-                ERRORINLOOP(TokenType::FunctionKeyword)
+            {
+                T(TokenType::FunctionKeyword, k,
+                  {
+                          push(FunctionDefinitionList);
+                          push(FunctionDefinition);
+                  }
+                )
+                else T(TokenType::EndOfFile, k,
+                       {
+                            consume();
+                            return ParserLoopResult::FinishedParsing;
+                       }
+                )
+                else {
+                    ERRORINLOOP(TokenType::FunctionKeyword)
+                }
             }
 
     )
     N(
             FunctionDefinition,
-            T(TokenType::FunctionKeyword, k, {
-                    T(TokenType::Identifier, ident, {
+            {
+                T(TokenType::FunctionKeyword, k, {
+                        T(TokenType::Identifier, ident, {
 
-                    })
-                    else{
-                        ERRORINLOOP(TokenType::Identifier);
-                    }
-
-
-            })
-                    else{
-                ERRORINLOOP(TokenType::FunctionKeyword);
+                        })
+                        else{
+                            ERRORINLOOP(TokenType::Identifier);
+                        }
+                })
+                else{
+                    ERRORINLOOP(TokenType::FunctionKeyword);
+                }
             }
-
     )
-    if (std::holds_alternative<TokenType>(top())) {
-
-        consumeOrError();
+    if (is(top(), mCurrentToken().type)){
         pop();
     }
+    return ParserLoopResult::Continue;
 
 }
 
 
-Programm Parser::mProgramm() {
+std::optional<Statement::Programm> Parser::mProgramm() {
     push(NonTerminalType::FunctionDefinitionList);
     push(NonTerminalType::ImportStatementList);
-    while (!stack.size() != 0) {
+    while (!stack.empty()) {
         switch (mParserLoop()) {
             case ParserLoopResult::Continue:
                 continue;
@@ -107,15 +122,8 @@ Programm Parser::mProgramm() {
 
         };
     }
-    mImportStatements();
+    return std::nullopt;
 }
-
-SameTypeNodeList<Statement::ImportStatement> mImportStatements() {
-    while (consume(TokenType::ImportKeyword)) {
-
-    }
-}
-
 
 void Parser::consume() {
     if (mCurrentPos < mTokens.size())
@@ -147,10 +155,6 @@ Token Parser::previous() {
     return mTokens.at(mCurrentPos - 1);
 }
 
-Expression Parser::mTerm() {
-    if (mCurrentToken().type == TokenType::NumberLiteral) {
-    }
-}
 
 bool Parser::match(TokenType type) {
     return mCurrentToken().type == type;
@@ -169,12 +173,44 @@ OperatorType Parser::mOperatorType(Token t) {
         case TokenType::DivisionOperator:
             return OperatorType::Division;
         case TokenType::PlusOperator:
-        return OperatorType::Plus;
+            return OperatorType::Plus;
         case TokenType::MinusOperator:
-        return OperatorType::Minus;
+            return OperatorType::Minus;
         case TokenType::MultiplicationOperator:
             return OperatorType::Multiplication;
         default:
             return OperatorType::None;
     }
+}
+
+bool Parser::is(Symbol s, TokenType t) {
+    if (std::holds_alternative<NonTerminalType>(s))
+        return false;
+    if (std::get<TokenType>(s) == t)
+        return true;
+    else
+        return false;
+}
+
+Symbol Parser::top() {
+    if(stack.empty())
+        return TokenType::None;
+    return stack.at(stack.size()-1);
+}
+
+bool Parser::is(Symbol s, NonTerminalType t) {
+    if (std::holds_alternative<TokenType>(s))
+        return false;
+    if (std::get<NonTerminalType>(s) == t)
+        return true;
+    else
+        return false;
+}
+
+void Parser::push(Symbol s) {
+    stack.push_back(s);
+}
+
+void Parser::pop() {
+    stack.pop_back();
 }

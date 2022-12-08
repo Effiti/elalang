@@ -48,11 +48,11 @@ private:
   Token mStringLiteralToken();
 
   TokenType mGetWordTokenType();
-  TokenType mGetSingleCharTokenType(char c);
+  static TokenType mGetSingleCharTokenType(char c);
 
-  Token mMakeWordToken(std::size_t line, std::size_t col, std::string value);
+  static Token mMakeWordToken(std::size_t line, std::size_t col, const std::string& value);
   Token mMakeSingleCharToken(std::size_t line, std::size_t col, char c);
-  Token mMakeStringLiteralToken(std::size_t line, std::size_t col, std::string s);
+  Token mMakeStringLiteralToken(std::size_t line, std::size_t col, const std::string& s);
 
   logger::Logger mLogger;
 };
