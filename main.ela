@@ -1,5 +1,4 @@
-import "x";
-func test() {
-test
-
+import "x"
+func test1(x : Int, y: Int) -> Int = x + y
+func test() -> Tuple[Array[int], Array[Boolean]]  {
 }

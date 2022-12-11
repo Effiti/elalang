@@ -1,5 +1,6 @@
-#include "Parser.hpp"
-#include "Statement.hpp"
+#include "Parser.h"
+#include "Statement.h"
+#include "TypeExpression.h"
 #include <algorithm>
 
 using
@@ -13,7 +14,7 @@ void Parser::mParserError(TokenType expected, Token found) {
                 found.line, file);
 }
 
-std::optional<Statement::Programm> Parser::parse() {
+std::optional<Statements::Programm> Parser::parse() {
     return mProgramm();
 }
 
@@ -40,28 +41,20 @@ ParserLoopResult Parser::mParserLoop() {
                 )
             }
     );
-    N(
-            ImportStatement,
-            {
-                T(TokenType::ImportKeyword, k,
-                  {
-                          consume();
-                          push(TokenType::Semicolon);
-                          consumeOrError(TokenType::StringLiteral);
-                          if(match(TokenType::StringLiteral)){
-                              mP.importStatements.subNodes.push_back(Statement::ImportStatement(mCurrentToken().value));
-                          }
-                          else{
-                              mParserError(TokenType::StringLiteral, mCurrentToken());
-                          }
-                  }
-                )
-                else {
-                    //UNREACHABLE
-                    ERRORINLOOP(TokenType::ImportKeyword);
-                }
-            }
-    );
+    N(ImportStatement,
+    {
+       T(TokenType::ImportKeyword, k,
+         {
+             Statements::ImportStatement statement = mImportStatement();
+             {{ mP.importStatements.subNodes.push_back(statement); }}
+         }
+       )
+        else {
+            mParserError(TokenType::ImportKeyword, mCurrentToken());
+            return ParserLoopResult::ParserError;;
+        }
+    }
+    )
     N(
             FunctionDefinitionList,
             {
@@ -73,8 +66,8 @@ ParserLoopResult Parser::mParserLoop() {
                 )
                 else T(TokenType::EndOfFile, k,
                        {
-                            consume();
-                            return ParserLoopResult::FinishedParsing;
+                               consume();
+                               return ParserLoopResult::FinishedParsing;
                        }
                 )
                 else {
@@ -87,27 +80,28 @@ ParserLoopResult Parser::mParserLoop() {
             FunctionDefinition,
             {
                 T(TokenType::FunctionKeyword, k, {
-                        T(TokenType::Identifier, ident, {
-
-                        })
-                        else{
-                            ERRORINLOOP(TokenType::Identifier);
-                        }
+                    mP.functionDefinitions.subNodes.push_back(mFunctionDefinition());
                 })
                 else{
                     ERRORINLOOP(TokenType::FunctionKeyword);
                 }
             }
     )
-    if (is(top(), mCurrentToken().type)){
+    if (
+
+            is(top(), mCurrentToken()
+
+                    .type)) {
         pop();
+
     }
-    return ParserLoopResult::Continue;
+    return
+            ParserLoopResult::Continue;
 
 }
 
 
-std::optional<Statement::Programm> Parser::mProgramm() {
+std::optional<Statements::Programm> Parser::mProgramm() {
     push(NonTerminalType::FunctionDefinitionList);
     push(NonTerminalType::ImportStatementList);
     while (!stack.empty()) {
@@ -122,7 +116,7 @@ std::optional<Statement::Programm> Parser::mProgramm() {
 
         };
     }
-    return std::nullopt;
+    return mP;
 }
 
 void Parser::consume() {
@@ -162,21 +156,29 @@ bool Parser::match(TokenType type) {
 }
 
 Token Parser::consumeOrError(TokenType type) {
+    Token t = mCurrentToken();
+    if (!consume(type)) {
+        mParserError(type, mCurrentToken());
+    }
+    return  t;
+}
+
+Token Parser::matchOrError(TokenType type) {
     if (!match(type)) {
         mParserError(type, mCurrentToken());
     }
-    return Token{0, 0, TokenType::Unimplemented, ""sv};
+    return mCurrentToken();
 }
 
 OperatorType Parser::mOperatorType(Token t) {
     switch (t.type) {
         case TokenType::DivisionOperator:
             return OperatorType::Division;
-        case TokenType::PlusOperator:
+        case TokenType::Plus:
             return OperatorType::Plus;
-        case TokenType::MinusOperator:
+        case TokenType::Hyphen:
             return OperatorType::Minus;
-        case TokenType::MultiplicationOperator:
+        case TokenType::Asterisk:
             return OperatorType::Multiplication;
         default:
             return OperatorType::None;
@@ -193,9 +195,9 @@ bool Parser::is(Symbol s, TokenType t) {
 }
 
 Symbol Parser::top() {
-    if(stack.empty())
+    if (stack.empty())
         return TokenType::None;
-    return stack.at(stack.size()-1);
+    return stack.at(stack.size() - 1);
 }
 
 bool Parser::is(Symbol s, NonTerminalType t) {
@@ -213,4 +215,36 @@ void Parser::push(Symbol s) {
 
 void Parser::pop() {
     stack.pop_back();
+}
+
+Statements::ImportStatement Parser::mImportStatement() {
+    consumeOrError(TokenType::ImportKeyword);
+    // nice and concise!
+    auto mod = consumeOrError(TokenType::StringLiteral);
+    return {mod.value};
+}
+
+Statements::FunctionDefinition Parser::mFunctionDefinition() {
+    consumeOrError(TokenType::FunctionKeyword);
+    auto name = consumeOrError(TokenType::Identifier).value;
+    // parse parameterList
+    /*
+     * parameterList -> parameter , parameterList | EPSILON
+     * parameter -> Identifier : TypeExpression
+     */
+    consumeOrError(TokenType::LParen);
+    if (!match(TokenType::RParen)) {
+        do {
+
+
+        } while (match(TokenType::Comma));
+
+    }
+    auto returnType = new TypeExpressions::SimpleType{TypeExpressions::BaseType::Integer};
+
+    return Statements::FunctionDefinition{
+            returnType, "test"sv,
+            SameTypeNodeList<Statements::Parameter>{}};
+
+
 }

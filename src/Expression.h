@@ -3,7 +3,7 @@
 #include <utility>
 
 #include "Ela.hpp"
-#include "Node.hpp"
+#include "Node.h"
 
 enum class OperatorType {
     None,
@@ -15,21 +15,6 @@ enum class OperatorType {
     LeftShift
 
 };
-namespace TypeExpressions {
-    class TypeExpression : public NonLeafNode {
-
-
-    };
-
-    class PrimaryTypeExpression : public TypeExpression {
-
-    };
-
-    class TypeVariable : public PrimaryTypeExpression {
-
-    };
-}
-
 
 namespace Expressions {
 
@@ -52,17 +37,17 @@ namespace Expressions {
         const bool isConstEvaluable() override;
     };
 
-    class PrimaryExpression : public Expression {
+    class Primary: public Expression {
     };
 
-    class Parenthed : public PrimaryExpression {
+    class Parenthed : public Primary{
     public:
         explicit Parenthed(Expression pSubExpr) : SubExpr{pSubExpr}{};
 
         Expression SubExpr;
     };
 
-    class IntegerLiteral : public PrimaryExpression {
+    class IntegerLiteral : public Primary{
     public:
         IntegerLiteral(int v) : value{v}{};
 

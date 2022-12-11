@@ -1,6 +1,6 @@
-#include "Lexer.hpp"
+#include "Lexer.h"
 #include "Ela.hpp"
-#include "Token.hpp"
+#include "Token.h"
 #include "cmdlib/logging.hpp"
 #include <cctype>
 #include <string>
@@ -118,54 +118,17 @@ std::string Lexer::mWordToken() {
 Token Lexer::mMakeWordToken(std::size_t line, std::size_t col,
                             const std::string &lexeme) {
     if (lexeme == "var") {
-        return Token{line, col, TokenType::VariableKeyword, lexeme};
+        return Token{line, col, TokenType::VariableKeyword, ""};
     }
     if (lexeme == "import") {
-        Token t = Token{line, col, TokenType::ImportKeyword, lexeme};
+        Token t = Token{line, col, TokenType::ImportKeyword, ""};
         return t;
     }
     if (lexeme == "func") {
-        return Token{line, col, TokenType::FunctionKeyword, lexeme};
+        return Token{line, col, TokenType::FunctionKeyword, ""};
     }
-    return Token{line, col, TokenType::Identifier, lexeme};
-}
 
-TokenType Lexer::mGetSingleCharTokenType(char input) {
-    // TODO put back into parseSource()
-    using
-    enum TokenType;
-    switch (input) {
-        case '-':
-            return MinusOperator;
-        case '*':
-            return MultiplicationOperator;
-        case '/':
-            return DivisionOperator;
-        case '^':
-            return PowerOperator;
-        case '(':
-            return ParenthesesOpen;
-        case ')':
-            return ParenthesesClose;
-        case '[':
-            return BracketsOpen;
-        case ']':
-            return BracketsClose;
-        case '{':
-            return BlockBegin;
-        case '}':
-            return BlockEnd;
-        case '>':
-            return GreaterThanOperator;
-        case '<':
-            return LessThanOperator;
-        case ';':
-            return Semicolon;
-        case '=':
-            return EqualsOperator;
-        default:
-            return None;
-    }
+    return Token{line, col, TokenType::Identifier, lexeme};
 }
 
 std::string Lexer::mStringLiteralCharacter() {
@@ -216,11 +179,6 @@ Token Lexer::mMakeStringLiteralToken(std::size_t line, std::size_t col,
     return Token{line, col, TokenType::StringLiteral, stringContent};
 }
 
-// WARNING: DEPRECATED
-Token Lexer::mMakeSingleCharToken(std::size_t line, std::size_t col, char c) {
-    return Token{line, col, mGetSingleCharTokenType(c), std::string(1, c)};
-}
-
 std::vector<Token> Lexer::parseSource() {
     char currentChar = peek();
     while (isUnderEnd()) {
@@ -250,36 +208,45 @@ std::vector<Token> Lexer::parseSource() {
         } else if (peek() == '"') {
             mAddToken(mStringLiteralToken());
         } else if (consume('-')) {
-            mAddToken(Token{line, col, TokenType::MinusOperator, "-"});
+            if (consume('>'))
+                mAddToken({line, col, TokenType::HyphenArrow, ""});
+            else
+                mAddToken({line, col, TokenType::Hyphen, ""});
         } else if (consume('*')) {
-            mAddToken(Token{line, col, TokenType::MultiplicationOperator, "*"});
+            mAddToken({line, col, TokenType::Asterisk, ""});
         } else if (consume('^')) {
-            mAddToken(Token{line, col, TokenType::PowerOperator, "^"});
+            mAddToken({line, col, TokenType::Caret, ""});
         } else if (consume('(')) {
-            mAddToken(Token{line, col, TokenType::ParenthesesOpen, "("});
+            mAddToken({line, col, TokenType::LParen, ""});
         } else if (consume(')')) {
-            mAddToken(Token{line, col, TokenType::ParenthesesClose, ")"});
+            mAddToken({line, col, TokenType::RParen, ""});
         } else if (consume('[')) {
-            mAddToken(Token{line, col, TokenType::BracketsOpen, "]"});
+            mAddToken({line, col, TokenType::BracketsOpen, ""});
         } else if (consume('+')) {
-            mAddToken(Token{line, col, TokenType::PlusOperator, "+"});
+            mAddToken({line, col, TokenType::Plus, ""});
         } else if (consume('!')) {
             if (consume('='))
-                mAddToken(Token{line, col, TokenType::BangEqualsOperator, "!="});
+                mAddToken({line, col, TokenType::BangEqualsOperator, ""});
             else
-                mAddToken(Token{line, col, TokenType::BangOperator, "!"});
+                mAddToken({line, col, TokenType::ExclamationMark, ""});
         } else if (consume(']')) {
-            mAddToken(Token{line, col, TokenType::BracketsClose, "]"});
+            mAddToken({line, col, TokenType::BracketsClose, ""});
         } else if (consume('{')) {
-            mAddToken(Token{line, col, TokenType::BlockBegin, "{"});
+            mAddToken({line, col, TokenType::BlockBegin, ""});
         } else if (consume('}')) {
-            mAddToken(Token{line, col, TokenType::BlockEnd, "}"});
+            mAddToken({line, col, TokenType::BlockEnd, ""});
         } else if (consume('>')) {
-            mAddToken(Token{line, col, TokenType::GreaterThanOperator, ">"});
+            mAddToken({line, col, TokenType::GreaterThanOperator, ""});
         } else if (consume('<')) {
-            mAddToken(Token{line, col, TokenType::LessThanOperator, "<"});
+            mAddToken({line, col, TokenType::LessThanOperator, ""});
         } else if (consume(';')) {
-            mAddToken(Token{line, col, TokenType::Semicolon, ";"});
+            mAddToken({line, col, TokenType::Semicolon, ""});
+        } else if (consume('.')) {
+            mAddToken({line, col, TokenType::Period, ""});
+        } else if (consume(',')) {
+            mAddToken({line, col, TokenType::Comma, ""});
+        } else if (consume(':')) {
+            mAddToken({line, col, TokenType::Colon, ""});
         }
     }
     mAddToken(Token{mCurrentLine, mCurrentCol, TokenType::EndOfFile, ""});

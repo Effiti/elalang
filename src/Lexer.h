@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Ela.hpp"
-#include "Token.hpp"
+#include "Token.h"
 
 class Lexer {
 public:

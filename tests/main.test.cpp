@@ -1,6 +1,6 @@
 #include "../src/Ela.hpp"
-#include "../src/Lexer.hpp"
-#include "../src/Parser.hpp"
+#include "../src/Lexer.h"
+#include "../src/Parser.h"
 #include <gtest/gtest.h>
 
 using namespace std::string_view_literals;

@@ -1,4 +1,4 @@
-#include "Expression.hpp"
+#include "Expression.h"
 #include "Ela.hpp"
 #include <fmt/core.h>
 using namespace Expressions;
@@ -6,7 +6,7 @@ using namespace Expressions;
 std::string humanReadableOperatorType(OperatorType type) {
   switch (type) {
   case OperatorType::Multiplication:
-    return "MultiplicationOperator";
+    return "Asterisk";
   case OperatorType::Plus:
     return "AdditionOperator";
   case OperatorType::Minus:

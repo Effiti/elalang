@@ -1,6 +1,6 @@
 #pragma once
 #include "Ela.hpp"
-#include "Token.hpp"
+#include "Token.h"
 
 class Node {
 private:
@@ -17,8 +17,7 @@ class TokenNode : public Node {
 template <class T> class SameTypeNodeList {
 public:
   SameTypeNodeList(std::vector<T> nodes):subNodes{subNodes}{
-
-  }  
+ }
   SameTypeNodeList() {
     subNodes = std::vector<T>();
   }
