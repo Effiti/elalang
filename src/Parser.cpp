@@ -19,84 +19,62 @@ std::optional<Statements::Programm> Parser::parse() {
 }
 
 ParserLoopResult Parser::mParserLoop() {
-    N(
-            ImportStatementList,
-            {
-                T(TokenType::ImportKeyword, k,
-                  {
-                          push(ImportStatementList);
-                          push(ImportStatement);
-                  }
-                )
-                else T(TokenType::FunctionKeyword, k, {})
+    if (match(TokenType::ImportKeyword)) {
+
+    }
+    if (is(top(), ImportStatementList)) {
+        pop();
+        {
+            if (match(TokenType::ImportKeyword)) {
                 {
+                    push(ImportStatementList);
+                    push(ImportStatement);
                 }
             }
-    );
-    N(
-            FunctionDefinitionList,
-            {
-                T(TokenType::FunctionKeyword, k,
-                  push(FunctionDefinition);
-                )
+        }
+    };
+    if (is(top(), ImportStatement)) {
+        pop();
+        {
+            if (match(TokenType::ImportKeyword)) {
+                Statements::ImportStatement statement = mImportStatement();
+                mP.importStatements.subNodes.push_back(statement);
+            } else {
+                mParserError(TokenType::ImportKeyword, mCurrentToken());
+                return ParserLoopResult::ParserError;;
             }
-    );
-    N(ImportStatement,
-    {
-       T(TokenType::ImportKeyword, k,
-         {
-             Statements::ImportStatement statement = mImportStatement();
-             {{ mP.importStatements.subNodes.push_back(statement); }}
-         }
-       )
-        else {
-            mParserError(TokenType::ImportKeyword, mCurrentToken());
-            return ParserLoopResult::ParserError;;
         }
     }
-    )
-    N(
-            FunctionDefinitionList,
-            {
-                T(TokenType::FunctionKeyword, k,
-                  {
-                          push(FunctionDefinitionList);
-                          push(FunctionDefinition);
-                  }
-                )
-                else T(TokenType::EndOfFile, k,
-                       {
-                               consume();
-                               return ParserLoopResult::FinishedParsing;
-                       }
-                )
-                else {
-                    ERRORINLOOP(TokenType::FunctionKeyword)
-                }
-            }
-
-    )
-    N(
-            FunctionDefinition,
-            {
-                T(TokenType::FunctionKeyword, k, {
-                    mP.functionDefinitions.subNodes.push_back(mFunctionDefinition());
-                })
-                else{
-                    ERRORINLOOP(TokenType::FunctionKeyword);
-                }
-            }
-    )
-    if (
-
-            is(top(), mCurrentToken()
-
-                    .type)) {
+    if (is(top(), FunctionDefinitionList)) {
         pop();
-
+        {
+            if (match(TokenType::FunctionKeyword)) {
+                push(FunctionDefinitionList);
+                push(FunctionDefinition);
+            } else if (match(TokenType::EndOfFile)) {
+                consume();
+                return ParserLoopResult::FinishedParsing;
+            } else {
+                mParserError(TokenType::FunctionKeyword, mCurrentToken());
+                return ParserLoopResult::ParserError;
+            }
+        }
     }
-    return
-            ParserLoopResult::Continue;
+    if (is(top(), FunctionDefinition)) {
+        pop();
+        {
+            if (match(TokenType::FunctionKeyword)) {
+                mP.functionDefinitions.subNodes.push_back(mFunctionDefinition());
+            } else {
+                mParserError(TokenType::FunctionKeyword, mCurrentToken());
+                return ParserLoopResult::ParserError;;
+            }
+        }
+    }
+    if (is(top(), mCurrentToken().type)) {
+        pop();
+    }
+    return ParserLoopResult::Continue;
 
 }
 
@@ -160,7 +138,7 @@ Token Parser::consumeOrError(TokenType type) {
     if (!consume(type)) {
         mParserError(type, mCurrentToken());
     }
-    return  t;
+    return t;
 }
 
 Token Parser::matchOrError(TokenType type) {
@@ -221,30 +199,62 @@ Statements::ImportStatement Parser::mImportStatement() {
     consumeOrError(TokenType::ImportKeyword);
     // nice and concise!
     auto mod = consumeOrError(TokenType::StringLiteral);
-    return {mod.value};
+    consumeOrError(TokenType::Semicolon);
+    return Statements::ImportStatement{mod.value};
 }
 
 Statements::FunctionDefinition Parser::mFunctionDefinition() {
     consumeOrError(TokenType::FunctionKeyword);
-    auto name = consumeOrError(TokenType::Identifier).value;
+    std::string name = consumeOrError(TokenType::Identifier).value;
     // parse parameterList
     /*
      * parameterList -> parameter , parameterList | EPSILON
      * parameter -> Identifier : TypeExpression
      */
     consumeOrError(TokenType::LParen);
+    SameTypeNodeList<Statements::Parameter> params;
     if (!match(TokenType::RParen)) {
+        std::string paramName;
         do {
+            paramName = consumeOrError(TokenType::Identifier).value;
+            consumeOrError(TokenType::Colon);
+            params.subNodes.emplace_back(mTypeExpression(), paramName);
 
 
-        } while (match(TokenType::Comma));
+        } while (consume(TokenType::Comma));
 
     }
-    auto returnType = new TypeExpressions::SimpleType{TypeExpressions::BaseType::Integer};
+    consumeOrError(TokenType::RParen);
+    TypeExpressions::TypeExpression *returnType;
+    if (!consume(TokenType::HyphenArrow)) {
+        returnType = new TypeExpressions::SimpleType{TypeExpressions::Void};
+    } else {
+        returnType = mTypeExpression();
+    }
 
     return Statements::FunctionDefinition{
-            returnType, "test"sv,
-            SameTypeNodeList<Statements::Parameter>{}};
+            returnType, name,
+            params};
+}
 
+TypeExpressions::TypeExpression *Parser::mTypeExpression() {
+    const std::string baseTypeName = consumeOrError(TokenType::Identifier).value;
+    const std::optional<TypeExpressions::BaseType> base = TypeExpressions::getBaseType(baseTypeName);
+    std::variant<const std::string, TypeExpressions::BaseType> baseVar = baseTypeName;
+    if (base.has_value()) {
+        baseVar = base.value();
 
+    }
+    auto *simpleType = new TypeExpressions::SimpleType{baseVar};
+    if (!consume(TokenType::LBracket)) {
+        return simpleType;
+    }
+    SameTypeNodeList<TypeExpressions::TypeExpression *> args;
+    do {
+        args.subNodes.push_back(mTypeExpression());
+
+    } while (consume(TokenType::Comma));
+    consumeOrError(TokenType::RBracket);
+
+    return new TypeExpressions::TypeTemplateExpression(*simpleType, args);
 }

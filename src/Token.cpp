@@ -10,10 +10,10 @@ std::string humanReadableTokenType(TokenType type) {
             return "BlockBegin";
         case BlockEnd:
             return "BlockEnd";
-        case BracketsClose:
-            return "BracketsClose";
-        case BracketsOpen:
-            return "BracketsOpen";
+        case RBracket:
+            return "RBracket";
+        case LBracket:
+            return "LBracket";
         case DivisionOperator:
             return "DivisionOperator";
         case EndOfFile:

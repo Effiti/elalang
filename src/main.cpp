@@ -34,10 +34,10 @@ int main() {
     for(auto &def : program->functionDefinitions.subNodes) {
         std::string params;
         for_each(begin(def.parameters.subNodes), end(def.parameters.subNodes), [&](Statements::Parameter p) {
-            params += " " + p.parameterType.to_string() + ":" + std::string(p.parameterName);
+            params += " " + p.parameterName  + " : " + p.parameterType->to_string();
+            params += ",";
 
         });
-
         std::cout << "functionDefinition: " << def.functionName << "(" <<params << ") -> " << def.returnType->to_string() << std::endl;
     }
 

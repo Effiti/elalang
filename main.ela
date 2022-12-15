@@ -1,4 +1,6 @@
-import "x"
-func test1(x : Int, y: Int) -> Int = x + y
-func test() -> Tuple[Array[int], Array[Boolean]]  {
-}
+import "x";
+import "y";
+import "tuple";
+func test1( test : int) -> int
+func test( x : tuple[tuple[int, bool], list[int]]) -> tuple[list[int], bool]
+func test2( x : list[tuple] )

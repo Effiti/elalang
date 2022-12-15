@@ -221,7 +221,7 @@ std::vector<Token> Lexer::parseSource() {
         } else if (consume(')')) {
             mAddToken({line, col, TokenType::RParen, ""});
         } else if (consume('[')) {
-            mAddToken({line, col, TokenType::BracketsOpen, ""});
+            mAddToken({line, col, TokenType::LBracket, ""});
         } else if (consume('+')) {
             mAddToken({line, col, TokenType::Plus, ""});
         } else if (consume('!')) {
@@ -230,7 +230,7 @@ std::vector<Token> Lexer::parseSource() {
             else
                 mAddToken({line, col, TokenType::ExclamationMark, ""});
         } else if (consume(']')) {
-            mAddToken({line, col, TokenType::BracketsClose, ""});
+            mAddToken({line, col, TokenType::RBracket, ""});
         } else if (consume('{')) {
             mAddToken({line, col, TokenType::BlockBegin, ""});
         } else if (consume('}')) {

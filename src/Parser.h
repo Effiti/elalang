@@ -28,11 +28,6 @@ using Symbol = std::variant<NonTerminalType, TokenType>;
     Token varName = mCurrentToken();                                           \
     { tokenAction }                                                            \
   }
-#define N(type, row)                                                           \
-  if (is(top(), type)) {                                                         \
-    pop();                                                                     \
-    row                                                                        \
-  }
 #define ERRORINLOOP(type) mParserError(type, mCurrentToken()); return ParserLoopResult::ParserError;
 
 struct ParserOpts {
@@ -99,6 +94,7 @@ private:
 
     Statements::FunctionDefinition mFunctionDefinition();
     Statements::ImportStatement mImportStatement();
+    TypeExpressions::TypeExpression * mTypeExpression();
 
     Token matchOrError(TokenType type);
 };

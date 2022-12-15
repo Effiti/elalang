@@ -9,7 +9,7 @@
 namespace Statements {
     class ImportStatement : public Node {
     public:
-        ImportStatement(std::string m) :
+        explicit ImportStatement(std::string m) :
                 mod{std::move(m)} {}
 
         std::string mod;
@@ -17,23 +17,29 @@ namespace Statements {
 
     class Statement : public Node {
     };
-
-    class Parameter : public Node {
-        Parameter(TypeExpressions::TypeExpression type, std::string_view name) : parameterType{type},
-                                                                                 parameterName{name} {};
+    class BlockStatement : public Statement {
     public:
-        std::string_view parameterName;
-        TypeExpressions::TypeExpression parameterType;
+        SameTypeNodeList<Statement*> subNodes;
+    };
+
+    class Parameter : public Node { ;
+    public:
+        std::string parameterName;
+        TypeExpressions::TypeExpression *parameterType;
+
+        Parameter(TypeExpressions::TypeExpression *type, std::string name) : parameterType{type},
+                                                                                 parameterName{std::move(name)} {}
     };
 
     class FunctionDefinition : public Statement {
     public:
-        FunctionDefinition(TypeExpressions::TypeExpression *ret, std::string_view name,
-                           SameTypeNodeList<Parameter> params) : functionName{name},
-                                                                 parameters{std::move(params)} { returnType = ret;};
+        FunctionDefinition(TypeExpressions::TypeExpression *ret, std::string name,
+                           SameTypeNodeList<Parameter> params, BlockStatement code) : functionName{std::move(name)},
+                                                                 parameters{std::move(params)}, statements(std::move(code)) { returnType = ret;};
         TypeExpressions::TypeExpression *returnType;
-        std::string_view functionName;
+        const std::string functionName;
         SameTypeNodeList<Parameter> parameters;
+        BlockStatement statements;
     };
 
     class Programm : public Node {

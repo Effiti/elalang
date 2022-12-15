@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <variant>
 #include "Ela.hpp"
 #include "Node.h"
@@ -11,8 +12,12 @@ namespace TypeExpressions {
         Char,
         Float,
         Double,
-        Pointer
+        Pointer,
+        List,
+        Boolean,
+        Void
     };
+
     static std::string to_string(BaseType type) {
         switch (type) {
 
@@ -28,30 +33,32 @@ namespace TypeExpressions {
                 return "Double";
             case Pointer:
                 return "Pointer";
+            case List:
+                return "List";
+            case Boolean:
+                return "Boolean";
+            case Void:
+                return "Void";
         }
-
     }
 
 
-
-
-
-    class TypeExpression : public NonLeafNode{
+    class TypeExpression : public NonLeafNode {
     public:
-         virtual std::string to_string() {
+        virtual std::string to_string() {
             return {"None"};
         }
     };
 
     class SimpleType : public TypeExpression {
     public:
-        explicit SimpleType(const std::variant<std::string_view, BaseType> &name) : type{name} {};
-        std::variant<std::string_view, BaseType> type;
-         std::string to_string() override{
-            if (std::holds_alternative<std::string_view>(type)) {
-                return std::string(get<std::string_view>(type));
-            }
-            else{
+        explicit SimpleType(const std::variant<const std::string, BaseType> &name) : type{name} {};
+        std::variant<const std::string, BaseType> type;
+
+        std::string to_string() override {
+            if (std::holds_alternative<const std::string>(type)) {
+                return get<const std::string>(type);
+            } else {
                 return TypeExpressions::to_string(get<BaseType>(type));
             }
         }
@@ -61,20 +68,45 @@ namespace TypeExpressions {
     class TypeTemplateExpression : public TypeExpression {
     public:
         SimpleType templatedType;
-        SameTypeNodeList<TypeExpression> templateArguments;
-         std::string to_string() override{
+        SameTypeNodeList<TypeExpression *> templateArguments;
+
+        TypeTemplateExpression(SimpleType baseType, SameTypeNodeList<TypeExpression *> templateArguments)
+                : templateArguments(std::move(
+                templateArguments)), templatedType(std::move(baseType)) {}
+
+        std::string to_string() override {
             std::string template_args;
-            for (TypeExpression &item: templateArguments.subNodes){
-                template_args += item.to_string();
+            for (TypeExpression *&item: templateArguments.subNodes) {
+                template_args += item->to_string() + ", ";
             }
-            return templatedType.to_string() +"[" + template_args + "]";
+            return templatedType.to_string() + "[" + template_args + "]";
 
         }
     };
 
 
-    static std::optional<BaseType> getBaseType(std::string_view type) {
-        return std::nullopt;
+    static std::optional<BaseType> getBaseType(const std::string &type) {
+        // we do not check for the void-type as it does not occur in identifiers:
+        // void-type functions do not have an explicitly annotated return type.
+        if (type == "int")
+            return Integer;
+        if (type == "string")
+            return String;
+        if (type == "pointer")
+            return Pointer;
+        if (type == "char")
+            return Char;
+        if (type == "list")
+            return List;
+        if (type == "float")
+            return Float;
+        if (type == "double")
+            return Double;
+        if (type == "bool")
+            return Boolean;
+        else
+            return std::nullopt;
     }
+
 } // TypeExpressions
 
