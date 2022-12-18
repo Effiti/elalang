@@ -1,6 +1,5 @@
 #include "Expression.h"
 #include "Ela.hpp"
-#include <fmt/core.h>
 using namespace Expressions;
 
 std::string humanReadableOperatorType(OperatorType type) {
