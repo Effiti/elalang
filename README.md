@@ -1,9 +1,8 @@
 # Ela
 ## Requirements
 to build, you need
-- [googletest](https://github.com/google/googletest/) for unit tests
 - [premake](https://premake.github.io/) to generate project files
-- [fmt](https://fmt.dev/) for String formatting
+alternatively, you could just use the already generate [gnu](https://www.gnu.org)-[make](https://www.gnu.org/software/make/)-[Makefile](https://www.gnu.org/software/make/manual/make.html) which is published in this repo. 
 # Design
 
 ## Semicolon
@@ -29,6 +28,3 @@ func testFunc() {
 }
 import "testModule"
 ```
-
-
-
