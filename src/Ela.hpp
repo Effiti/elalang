@@ -5,7 +5,6 @@
 #include <cctype>
 #include <cstddef>
 #include <cwchar>
-#include <fmt/core.h>
 #include <fstream>
 #include <iostream>
 #include <string>
