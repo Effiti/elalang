@@ -293,7 +293,7 @@ Statements::VariableDefinitionStatement *Parser::mVariableDefinition() {
 }
 
 Expressions::Expression *Parser::mExpression() {
-    return Expressions::IntegerLiteral(12);
+    return new Expressions::IntegerLiteral(12);
 
 
 }
