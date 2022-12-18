@@ -38,7 +38,7 @@ ParserLoopResult Parser::mParserLoop() {
         {
             if (match(TokenType::ImportKeyword)) {
                 Statements::ImportStatement statement = mImportStatement();
-                mP.importStatements.subNodes.push_back(statement);
+                mP.importStatements.push_back(statement);
             } else {
                 mParserError(TokenType::ImportKeyword, mCurrentToken());
                 return ParserLoopResult::ParserError;;
@@ -64,7 +64,7 @@ ParserLoopResult Parser::mParserLoop() {
         pop();
         {
             if (match(TokenType::FunctionKeyword)) {
-                mP.functionDefinitions.subNodes.push_back(mFunctionDefinition());
+                mP.functionDefinitions.push_back(mFunctionDefinition());
             } else {
                 mParserError(TokenType::FunctionKeyword, mCurrentToken());
                 return ParserLoopResult::ParserError;;
@@ -212,13 +212,13 @@ Statements::FunctionDefinition Parser::mFunctionDefinition() {
      * parameter -> Identifier : TypeExpression
      */
     consumeOrError(TokenType::LParen);
-    SameTypeNodeList<Statements::Parameter> params;
+    vector<Statements::Parameter> params;
     if (!match(TokenType::RParen)) {
         std::string paramName;
         do {
             paramName = consumeOrError(TokenType::Identifier).value;
             consumeOrError(TokenType::Colon);
-            params.subNodes.emplace_back(mTypeExpression(), paramName);
+            params.emplace_back(mTypeExpression(), paramName);
 
 
         } while (consume(TokenType::Comma));
@@ -231,10 +231,11 @@ Statements::FunctionDefinition Parser::mFunctionDefinition() {
     } else {
         returnType = mTypeExpression();
     }
+    Statements::BlockStatement block = mBlockStatement();
 
     return Statements::FunctionDefinition{
             returnType, name,
-            params};
+            params, block};
 }
 
 TypeExpressions::TypeExpression *Parser::mTypeExpression() {
@@ -249,12 +250,50 @@ TypeExpressions::TypeExpression *Parser::mTypeExpression() {
     if (!consume(TokenType::LBracket)) {
         return simpleType;
     }
-    SameTypeNodeList<TypeExpressions::TypeExpression *> args;
+    vector<TypeExpressions::TypeExpression *> args;
     do {
-        args.subNodes.push_back(mTypeExpression());
+        args.push_back(mTypeExpression());
 
     } while (consume(TokenType::Comma));
     consumeOrError(TokenType::RBracket);
 
     return new TypeExpressions::TypeTemplateExpression(*simpleType, args);
+}
+
+Statements::BlockStatement Parser::mBlockStatement() {
+    consumeOrError(TokenType::LCurly);
+    std::vector<Statements::Statement *> statements;
+    // TODO: emit a warning or *mark the AST-Node* if the block is empty
+    //       this also includes blocks which only contain an arbitrary amount of Semicolons:
+    //       {;;;;;;;;} //is semantically empty!
+    //       add an isEmpty-member to Statement?
+    // we allow empty blocks, so we do not need a do{ }while loop
+    while (!match(TokenType::RCurly)) {
+        statements.push_back(mStatement());
+    }
+    consumeOrError(TokenType::RCurly);
+    return {statements};
+}
+
+Statements::Statement *Parser::mStatement() {
+    //if(match(TokenType::VariableKeyword))
+    return mVariableDefinition();
+
+
+}
+
+Statements::VariableDefinitionStatement *Parser::mVariableDefinition() {
+    // TODO
+    consumeOrError(TokenType::VariableKeyword);
+    std::string name = consumeOrError(TokenType::Identifier).value;
+    consumeOrError(TokenType::Colon);
+    TypeExpressions::TypeExpression *type = mTypeExpression();
+    consumeOrError(TokenType::Semicolon);
+    return new Statements::VariableDefinitionStatement{name, type, new Expressions::IntegerLiteral{12}};
+}
+
+Expressions::Expression *Parser::mExpression() {
+    return Expressions::IntegerLiteral(12);
+
+
 }

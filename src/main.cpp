@@ -28,17 +28,17 @@ int main() {
     if(program == std::nullopt) {
         return EXIT_FAILURE;
     }
-    for(const Statements::ImportStatement &imp : program->importStatements.subNodes) {
+    for(const Statements::ImportStatement &imp : program->importStatements) {
         std::cout<< "importStatement: "<<  imp.mod << std::endl;
     }
-    for(auto &def : program->functionDefinitions.subNodes) {
+    for(auto &def : program->functionDefinitions) {
         std::string params;
-        for_each(begin(def.parameters.subNodes), end(def.parameters.subNodes), [&](Statements::Parameter p) {
-            params += " " + p.parameterName  + " : " + p.parameterType->to_string();
+        for_each(begin(def.parameters), end(def.parameters), [&](Statements::Parameter p) {
+            params += " " + p.parameterName  + " : " + p.parameterType->toString();
             params += ",";
 
         });
-        std::cout << "functionDefinition: " << def.functionName << "(" <<params << ") -> " << def.returnType->to_string() << std::endl;
+        std::cout << "functionDefinition: " << def.functionName << "(" << params << ") -> " << def.returnType->toString() << std::endl;
     }
 
 

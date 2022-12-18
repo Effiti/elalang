@@ -22,17 +22,20 @@ namespace Expressions {
     class Expression : public Node {
     public:
         virtual const bool isConstEvaluable();
+        virtual std::string toString();
     };
 
     class Binary : public Expression {
     private:
-        Expression mLhs;
-        Expression mRhs;
-        OperatorType mOp;
+
 
     public:
-        Binary(Expression rhs, OperatorType op, Expression lhs)
-                : mLhs{lhs}, mRhs{std::move(rhs)}, mOp{op} {};
+        Binary(Expression *left, OperatorType operatorType, Expression *right)
+                : lhs{left}, rhs{right}, op{operatorType} {};
+
+        Expression *lhs;
+        Expression *rhs;
+        OperatorType op;
 
         const bool isConstEvaluable() override;
     };
@@ -42,9 +45,10 @@ namespace Expressions {
 
     class Parenthed : public Primary{
     public:
-        explicit Parenthed(Expression pSubExpr) : SubExpr{pSubExpr}{};
+        explicit Parenthed(Expression *pSubExpr) : subExpr{pSubExpr}{};
+        std::string toString() override;
 
-        Expression SubExpr;
+        Expression *subExpr;
     };
 
     class IntegerLiteral : public Primary{
@@ -52,7 +56,12 @@ namespace Expressions {
         IntegerLiteral(int v) : value{v}{};
 
         int value;
+        std::string toString() override;
 
-        const bool isConstEvaluable() { return true; }
+        const bool isConstEvaluable() override { return true; }
+    };
+
+    class NullExpression : public Primary {
+        
     };
 } // namespace Expressions

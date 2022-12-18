@@ -6,10 +6,10 @@ std::string humanReadableTokenType(TokenType type) {
     switch (type) {
         case AssignmentOperator:
             return "AssignmentOperator";
-        case BlockBegin:
-            return "BlockBegin";
-        case BlockEnd:
-            return "BlockEnd";
+        case LCurly:
+            return "LCurly";
+        case RCurly:
+            return "RCurly";
         case RBracket:
             return "RBracket";
         case LBracket:

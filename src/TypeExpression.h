@@ -45,7 +45,7 @@ namespace TypeExpressions {
 
     class TypeExpression : public NonLeafNode {
     public:
-        virtual std::string to_string() {
+        virtual std::string toString() {
             return {"None"};
         }
     };
@@ -55,7 +55,7 @@ namespace TypeExpressions {
         explicit SimpleType(const std::variant<const std::string, BaseType> &name) : type{name} {};
         std::variant<const std::string, BaseType> type;
 
-        std::string to_string() override {
+        std::string toString() override {
             if (std::holds_alternative<const std::string>(type)) {
                 return get<const std::string>(type);
             } else {
@@ -68,18 +68,18 @@ namespace TypeExpressions {
     class TypeTemplateExpression : public TypeExpression {
     public:
         SimpleType templatedType;
-        SameTypeNodeList<TypeExpression *> templateArguments;
+        vector<TypeExpression *> templateArguments;
 
-        TypeTemplateExpression(SimpleType baseType, SameTypeNodeList<TypeExpression *> templateArguments)
+        TypeTemplateExpression(SimpleType baseType, std::vector<TypeExpression *> templateArguments)
                 : templateArguments(std::move(
                 templateArguments)), templatedType(std::move(baseType)) {}
 
-        std::string to_string() override {
+        std::string toString() override {
             std::string template_args;
-            for (TypeExpression *&item: templateArguments.subNodes) {
-                template_args += item->to_string() + ", ";
+            for (TypeExpression *&item: templateArguments) {
+                template_args += item->toString() + ", ";
             }
-            return templatedType.to_string() + "[" + template_args + "]";
+            return templatedType.toString() + "[" + template_args + "]";
 
         }
     };

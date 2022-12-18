@@ -8,8 +8,8 @@ enum class TokenType {
   NumberLiteral,
   StringLiteral,
 
-  BlockBegin, // done
-  BlockEnd,   // done
+  LCurly, // done
+  RCurly,   // done
 
   ExplicitConstQualifier,
 

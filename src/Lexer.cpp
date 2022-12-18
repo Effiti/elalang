@@ -232,9 +232,9 @@ std::vector<Token> Lexer::parseSource() {
         } else if (consume(']')) {
             mAddToken({line, col, TokenType::RBracket, ""});
         } else if (consume('{')) {
-            mAddToken({line, col, TokenType::BlockBegin, ""});
+            mAddToken({line, col, TokenType::LCurly, ""});
         } else if (consume('}')) {
-            mAddToken({line, col, TokenType::BlockEnd, ""});
+            mAddToken({line, col, TokenType::RCurly, ""});
         } else if (consume('>')) {
             mAddToken({line, col, TokenType::GreaterThanOperator, ""});
         } else if (consume('<')) {

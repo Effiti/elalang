@@ -23,10 +23,22 @@ std::string humanReadableOperatorType(OperatorType type) {
 }
 
 const bool Binary::isConstEvaluable() {
-  return mLhs.isConstEvaluable() && mRhs.isConstEvaluable();
+  return rhs->isConstEvaluable() && rhs->isConstEvaluable();
 }
 
 const bool Expression::isConstEvaluable() {
-    return 0;
+    throw new std::runtime_error("Expression does not implement ");
+    return false;
 }
 
+std::string Expression::toString() {
+    return {};
+}
+
+std::string IntegerLiteral::toString() {
+   return std::to_string(value);
+}
+
+std::string Parenthed::toString() {
+   return subExpr->toString();
+}

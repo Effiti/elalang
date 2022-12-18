@@ -97,4 +97,12 @@ private:
     TypeExpressions::TypeExpression * mTypeExpression();
 
     Token matchOrError(TokenType type);
+
+    Statements::BlockStatement mBlockStatement();
+
+    Statements::Statement *mStatement();
+
+    Statements::VariableDefinitionStatement * mVariableDefinition();
+
+    Expression *mExpression();
 };
