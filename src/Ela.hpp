@@ -5,13 +5,13 @@
 #include <cctype>
 #include <cstddef>
 #include <cwchar>
-#include <fmt/core.h>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
 #include <stdexcept>
+#include <optional>
 
 using namespace std::string_view_literals;
 #ifdef DEBUG_BUILD

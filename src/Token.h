@@ -8,31 +8,35 @@ enum class TokenType {
   NumberLiteral,
   StringLiteral,
 
-  BlockBegin, // done
-  BlockEnd,   // done
+  LCurly, // done
+  RCurly,   // done
 
   ExplicitConstQualifier,
 
-  PlusOperator,
-  MinusOperator,
-  PowerOperator,
-  MultiplicationOperator,
+  Plus,
+  Hyphen,
+  Caret,
+  Asterisk,
   DivisionOperator,
-  ParenthesesOpen,
-  ParenthesesClose,
-  BracketsOpen,
-  BracketsClose,
+  LParen,
+  RParen,
+  LBracket,
+  RBracket,
   GreaterThanOperator,
   LessThanOperator,
   EqualsOperator,
   BangEqualsOperator,
-  BangOperator,
+  ExclamationMark,
   EqualOrGreaterThanOperator,
   EqualOrLessThanOperator,
+  HyphenArrow,
   AssignmentOperator,
+  Period,
+  Comma,
+  Colon,
+
 
   Semicolon,
-
   VariableKeyword,
   ImportKeyword,
   FunctionKeyword,
@@ -55,7 +59,7 @@ public:
   TokenType type;
   // TODO: change value's type to std::string_view, imlement "file" field in
   // other files
-  std::string_view value;
+  std::string value;
   std::string_view file;
 };
-#define NULLTOK = Token{0,0,TokenType::None, ""sv}
+#define NULLTOK Token{0,0,TokenType::None, ""sv}
