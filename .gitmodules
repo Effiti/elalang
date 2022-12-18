@@ -1,3 +1,6 @@
 [submodule "include/cmdlib"]
 	path = include/cmdlib
 	url = https://github.com/Effiti/cmdlib
+[submodule "include/googletest"]
+    path = include/googletest
+    url = https://github.com/google/googletest
