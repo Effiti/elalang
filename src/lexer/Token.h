@@ -46,6 +46,7 @@ enum class TokenType {
   ElseKeyword,
   TrueKeyword,
   FalseKeyword,
+  ReturnKeyword,
 
   Identifier,
 

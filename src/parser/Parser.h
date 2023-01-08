@@ -117,4 +117,6 @@ private:
     std::unique_ptr<Expressions::FunctionCall> mFunctionCall();
 
     std::unique_ptr<Expressions::Expression> mSecondaryExpression();
+
+    std::unique_ptr<Statements::ReturnStatement> mReturnStatement();
 };

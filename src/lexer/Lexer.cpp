@@ -139,6 +139,9 @@ Token Lexer::mMakeWordToken(std::size_t line, std::size_t col,
     if (lexeme == "false") {
         return Token{line, col, TokenType::FalseKeyword, ""};
     }
+    if(lexeme == "return") {
+        return Token{line, col, TokenType::ReturnKeyword, ""};
+    }
 
     return Token{line, col, TokenType::Identifier, lexeme};
 }

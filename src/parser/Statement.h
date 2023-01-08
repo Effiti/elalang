@@ -55,6 +55,14 @@ namespace Statements {
         string toString() override;
     };
 
+    class ReturnStatement : public Statement {
+    public:
+        ReturnStatement(std::unique_ptr<Expressions::Expression> expr) : expression{std::move(expr)} {};
+        std::unique_ptr<Expressions::Expression> expression;
+
+        string toString() override;
+    };
+
     class VariableDefinitionStatement : public Statement {
     public:
         VariableDefinitionStatement(std::string varName, std::unique_ptr<TypeExpressions::TypeExpression> varType,

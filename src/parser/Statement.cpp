@@ -34,3 +34,7 @@ std::string Statements::ElseStatement::toString() {
 std::string Statements::ExpressionStatement::toString() {
     return "( " + expression->toString() + " )";
 }
+
+string Statements::ReturnStatement::toString() {
+    return "return " + expression->toString();
+}

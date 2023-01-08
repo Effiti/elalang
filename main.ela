@@ -1,6 +1,8 @@
-func test2( x : list[tuple] ) {
+func test2( x : int ) {
     var x : int = 8*12+8;
     0*9;
-    testThiingy();
+    if ( true )
+        return 12;
+    return x +12;
 
 }

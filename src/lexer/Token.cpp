@@ -34,6 +34,8 @@ std::string humanReadableTokenType(TokenType type) {
             return "Identifier";
         case ImportKeyword:
             return "ImportKeyword";
+        case ReturnKeyword:
+            return "ReturnKeyword";
         case LessThanOperator:
             return "LessThanOperator";
         case Hyphen:

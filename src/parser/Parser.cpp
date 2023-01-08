@@ -290,7 +290,19 @@ unique_ptr<Statements::Statement> Parser::mStatement() {
         return std::move(mBlockStatement());
     else if (match(TokenType::ElseKeyword))
         return std::move(mElseStatement());
+    else if (match(TokenType::ReturnKeyword))
+        return std::move(mReturnStatement());
     return std::move(mExpressionStatement());
+}
+
+unique_ptr<Statements::ReturnStatement> Parser::mReturnStatement() {
+    consumeOrError(TokenType::ReturnKeyword);
+    if(consume(TokenType::Semicolon))
+        // returning in void functions is the same thing as returning null.
+        return make_unique<Statements::ReturnStatement>(make_unique<Expressions::NullExpression>());
+    auto expr = mExpression();
+    consumeOrError(TokenType::Semicolon);
+    return make_unique<Statements::ReturnStatement>(std::move(expr));
 }
 
 unique_ptr<Statements::ElseStatement> Parser::mElseStatement() {
