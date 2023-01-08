@@ -1,3 +1,10 @@
+// TODO (Lexer): Add support for multiline-comments
+// TODO (Parser/lexer) Add support for more operators:
+//   Modulo,
+//   Right/leftshift
+//   logical negation
+//   bitwise and logical and/or/xor
+
 func test2( x : int ) {
     var x : int = 8*12+8;
     0*9;
