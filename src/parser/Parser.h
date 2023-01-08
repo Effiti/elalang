@@ -2,11 +2,10 @@
 
 #include <utility>
 
-#include "Ela.hpp"
+#include "../Ela.hpp"
 #include "Statement.h"
-#include "Token.h"
+#include "../lexer/Token.h"
 
-using namespace Expressions;
 
 enum class NonTerminalType {
     Programm,
@@ -43,9 +42,9 @@ enum ParserLoopResult {
 class Parser {
 public:
     Parser(std::vector<Token> tokens, ParserOpts opts)
-            : mOpts{opts}, mTokens{std::move(tokens)}, mLogger{opts.verbosityLevel} {};
+            : mOpts{opts}, mTokens{std::move(tokens)}, mLogger{opts.verbosityLevel}  {};
 
-    [[nodiscard]] std::optional<Statements::Programm> parse();
+    [[nodiscard]] std::optional<Statements::Program> parse();
 
 private:
     logger::Logger mLogger;
@@ -69,13 +68,13 @@ private:
 
     ParserLoopResult mParserLoop();
 
-    OperatorType mOperatorType(Token t);
+    static BinaryOperatorType getBinaryOperatorType(const Token& t);
 
     Token previous();
 
     Token next();
 
-    std::optional<Statements::Programm> mProgramm();
+    std::optional<Statements::Program> mProgramm();
 
     std::vector<Symbol> stack;
 
@@ -86,7 +85,7 @@ private:
     void push(Symbol s);
 
     //Node &currentNode;
-    Statements::Programm mP;
+    Statements::Program mP;
 
     static bool is(Symbol s, TokenType t);
 
@@ -94,15 +93,28 @@ private:
 
     Statements::FunctionDefinition mFunctionDefinition();
     Statements::ImportStatement mImportStatement();
-    TypeExpressions::TypeExpression * mTypeExpression();
+    std::unique_ptr<TypeExpressions::TypeExpression>  mTypeExpression();
 
     Token matchOrError(TokenType type);
 
-    Statements::BlockStatement mBlockStatement();
+    std::unique_ptr<Statements::BlockStatement> mBlockStatement();
 
-    Statements::Statement *mStatement();
+    std::unique_ptr<Statements::Statement> mStatement();
 
-    Statements::VariableDefinitionStatement * mVariableDefinition();
+    std::unique_ptr<Statements::VariableDefinitionStatement> mVariableDefinition();
 
-    Expression *mExpression();
+    std::unique_ptr<Statements::IfStatement> mIfStatement();
+
+    std::unique_ptr<Statements::ExpressionStatement> mExpressionStatement();
+
+    std::unique_ptr<Statements::ElseStatement> mElseStatement();
+
+
+    std::unique_ptr<Expressions::Expression> mExpression();
+
+    std::unique_ptr<Expressions::Expression> mPrimaryExpression();
+
+    std::unique_ptr<Expressions::FunctionCall> mFunctionCall();
+
+    std::unique_ptr<Expressions::Expression> mSecondaryExpression();
 };

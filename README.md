@@ -28,3 +28,8 @@ func testFunc() {
 }
 import "testModule"
 ```
+
+## Statements and Expressions
+Expressions work as they normally would in most c-style languages.
+unlike java, for example, we *do* allow expression statements
+

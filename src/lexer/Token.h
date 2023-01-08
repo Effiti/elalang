@@ -1,5 +1,5 @@
 #pragma once
-#include "Ela.hpp"
+#include "../Ela.hpp"
 
 using std::string;
 using namespace std::string_view_literals;
@@ -29,6 +29,8 @@ enum class TokenType {
   ExclamationMark,
   EqualOrGreaterThanOperator,
   EqualOrLessThanOperator,
+  Increment,
+  Decrement,
   HyphenArrow,
   AssignmentOperator,
   Period,
@@ -40,6 +42,10 @@ enum class TokenType {
   VariableKeyword,
   ImportKeyword,
   FunctionKeyword,
+  IfKeyword,
+  ElseKeyword,
+  TrueKeyword,
+  FalseKeyword,
 
   Identifier,
 

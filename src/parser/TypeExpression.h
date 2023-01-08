@@ -2,7 +2,7 @@
 
 #include <utility>
 #include <variant>
-#include "Ela.hpp"
+#include "../Ela.hpp"
 #include "Node.h"
 
 namespace TypeExpressions {
@@ -68,15 +68,15 @@ namespace TypeExpressions {
     class TypeTemplateExpression : public TypeExpression {
     public:
         SimpleType templatedType;
-        vector<TypeExpression *> templateArguments;
+        vector<std::unique_ptr<TypeExpression> > templateArguments;
 
-        TypeTemplateExpression(SimpleType baseType, std::vector<TypeExpression *> templateArguments)
+        TypeTemplateExpression(SimpleType baseType, std::vector<std::unique_ptr<TypeExpression>> templateArguments)
                 : templateArguments(std::move(
                 templateArguments)), templatedType(std::move(baseType)) {}
 
         std::string toString() override {
             std::string template_args;
-            for (TypeExpression *&item: templateArguments) {
+            for (const auto &item: templateArguments) {
                 template_args += item->toString() + ", ";
             }
             return templatedType.toString() + "[" + template_args + "]";

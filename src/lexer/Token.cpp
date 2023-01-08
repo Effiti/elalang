@@ -26,6 +26,10 @@ std::string humanReadableTokenType(TokenType type) {
             return "GreaterThanOperator";
         case FunctionKeyword:
             return "FunctionKeyword";
+        case IfKeyword:
+            return "IfKeyword";
+        case ElseKeyword:
+            return "ElseKeyword";
         case Identifier:
             return "Identifier";
         case ImportKeyword:
@@ -62,10 +66,24 @@ std::string humanReadableTokenType(TokenType type) {
             return "Comma";
         case Period:
             return "Period";
+        case TrueKeyword:
+            return "True";
+        case FalseKeyword:
+            return "False";
+        case Increment:
+            return "Increment";
+        case Decrement:
+            return "Decrement";
+        case EqualOrGreaterThanOperator:
+            return "EqualOrGreaterThan";
+        case EqualOrLessThanOperator:
+            return "EqualOrLessThan";
+        case Colon:
+            return "Colon";
         case None:
             return "None";
         case Unimplemented:
-        default:
+        //default:
             return "Unimplemented";
     }
 }

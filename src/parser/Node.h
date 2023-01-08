@@ -1,6 +1,6 @@
 #pragma once
-#include "Ela.hpp"
-#include "Token.h"
+#include "../Ela.hpp"
+#include "../lexer/Token.h"
 
 class Node {
 private:

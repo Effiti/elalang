@@ -12,6 +12,7 @@
 #include <vector>
 #include <stdexcept>
 #include <optional>
+#include <memory>
 
 using namespace std::string_view_literals;
 #ifdef DEBUG_BUILD

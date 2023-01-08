@@ -1,6 +1,6 @@
 #include "Ela.hpp"
-#include "Lexer.h"
-#include "Parser.h"
+#include "lexer/Lexer.h"
+#include "parser/Parser.h"
 #include "cmdlib/common.hpp"
 #include <string_view>
 #include <numeric>
@@ -24,21 +24,25 @@ int main() {
     ParserOpts opts{10};
     Parser p{tokens, opts};
     //p.parse();
-    std::optional<Statements::Programm> program = p.parse();
+    std::optional<Statements::Program> program = p.parse();
     if(program == std::nullopt) {
         return EXIT_FAILURE;
     }
     for(const Statements::ImportStatement &imp : program->importStatements) {
         std::cout<< "importStatement: "<<  imp.mod << std::endl;
     }
-    for(auto &def : program->functionDefinitions) {
+    for(const auto &def : program->functionDefinitions) {
         std::string params;
-        for_each(begin(def.parameters), end(def.parameters), [&](Statements::Parameter p) {
+        std::for_each(begin(def.parameters), end(def.parameters), [&](const auto &p) {
             params += " " + p.parameterName  + " : " + p.parameterType->toString();
             params += ",";
 
         });
-        std::cout << "functionDefinition: " << def.functionName << "(" << params << ") -> " << def.returnType->toString() << std::endl;
+        std::cout << "functionDefinition: " << def.functionName << "(" << params << ") -> " << def.returnType->toString() << " {" <<std::endl;
+
+        std:: cout << def.statements->toString();
+
+        std::cout << "}" << std::endl;
     }
 
 

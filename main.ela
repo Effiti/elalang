@@ -1,6 +1,6 @@
-import "x";
-import "y";
-import "tuple";
-func test1( test : int) -> int{}
-func test( x : tuple[tuple[int, bool], list[int]]) -> tuple[list[int], bool] {}
-func test2( x : list[tuple] ) {}
+func test2( x : list[tuple] ) {
+    var x : int = 8*12+8;
+    0*9;
+    testThiingy();
+
+}

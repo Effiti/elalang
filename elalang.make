@@ -122,9 +122,11 @@ OBJECTS := \
 	$(OBJDIR)/common.o \
 	$(OBJDIR)/logging.o \
 	$(OBJDIR)/Lexer.o \
-	$(OBJDIR)/Node.o \
-	$(OBJDIR)/Statement.o \
 	$(OBJDIR)/Token.o \
+	$(OBJDIR)/Expression.o \
+	$(OBJDIR)/Node.o \
+	$(OBJDIR)/Parser.o \
+	$(OBJDIR)/Statement.o \
 	$(OBJDIR)/TypeExpression.o \
 
 RESOURCES := \
@@ -133,25 +135,13 @@ CUSTOMFILES := \
 
 ifeq ($(config),debug)
   OBJECTS += \
-	$(OBJDIR)/Expression.o \
-	$(OBJDIR)/Parser.o \
 	$(OBJDIR)/main.o \
 
 endif
 
 ifeq ($(config),release)
   OBJECTS += \
-	$(OBJDIR)/Expression.o \
-	$(OBJDIR)/Parser.o \
 	$(OBJDIR)/main.o \
-
-endif
-
-ifeq ($(config),testela)
-  OBJECTS += \
-	$(OBJDIR)/Expression.o \
-	$(OBJDIR)/Parser.o \
-	$(OBJDIR)/main.test.o \
 
 endif
 
@@ -220,31 +210,28 @@ $(OBJDIR)/common.o: include/cmdlib/common.cpp
 $(OBJDIR)/logging.o: include/cmdlib/logging.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Expression.o: src/Expression.cpp
+$(OBJDIR)/Lexer.o: src/lexer/Lexer.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Lexer.o: src/Lexer.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Node.o: src/Node.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Parser.o: src/Parser.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Statement.o: src/Statement.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Token.o: src/Token.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/TypeExpression.o: src/TypeExpression.cpp
+$(OBJDIR)/Token.o: src/lexer/Token.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/main.test.o: tests/main.test.cpp
+$(OBJDIR)/Expression.o: src/parser/Expression.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Node.o: src/parser/Node.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Parser.o: src/parser/Parser.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Statement.o: src/parser/Statement.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/TypeExpression.o: src/parser/TypeExpression.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

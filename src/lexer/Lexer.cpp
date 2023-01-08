@@ -1,5 +1,5 @@
 #include "Lexer.h"
-#include "Ela.hpp"
+#include "../Ela.hpp"
 #include "Token.h"
 #include "cmdlib/logging.hpp"
 #include <cctype>
@@ -127,6 +127,18 @@ Token Lexer::mMakeWordToken(std::size_t line, std::size_t col,
     if (lexeme == "func") {
         return Token{line, col, TokenType::FunctionKeyword, ""};
     }
+    if (lexeme == "if") {
+        return Token{line, col, TokenType::IfKeyword, ""};
+    }
+    if (lexeme == "else") {
+        return Token{line, col, TokenType::ElseKeyword, ""};
+    }
+    if (lexeme == "true") {
+        return Token{line, col, TokenType::TrueKeyword, ""};
+    }
+    if (lexeme == "false") {
+        return Token{line, col, TokenType::FalseKeyword, ""};
+    }
 
     return Token{line, col, TokenType::Identifier, lexeme};
 }
@@ -210,6 +222,8 @@ std::vector<Token> Lexer::parseSource() {
         } else if (consume('-')) {
             if (consume('>'))
                 mAddToken({line, col, TokenType::HyphenArrow, ""});
+            else if (consume('-'))
+                mAddToken({line, col, TokenType::Decrement, ""});
             else
                 mAddToken({line, col, TokenType::Hyphen, ""});
         } else if (consume('*')) {
@@ -223,7 +237,10 @@ std::vector<Token> Lexer::parseSource() {
         } else if (consume('[')) {
             mAddToken({line, col, TokenType::LBracket, ""});
         } else if (consume('+')) {
-            mAddToken({line, col, TokenType::Plus, ""});
+            if (consume('+'))
+                mAddToken({line, col, TokenType::Increment, ""});
+            else
+                mAddToken({line, col, TokenType::Plus, ""});
         } else if (consume('!')) {
             if (consume('='))
                 mAddToken({line, col, TokenType::BangEqualsOperator, ""});
