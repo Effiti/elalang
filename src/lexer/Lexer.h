@@ -5,7 +5,7 @@
 namespace Ela::Lexer {
     class Lexer {
     public:
-        explicit Lexer(std::string_view source) : mStrSource{source}, mLogger(verbosity) {}
+        explicit Lexer(std::string_view source) : mStrSource{source} {}
 
         [[nodiscard]] std::vector<Token> parseSource();
 
@@ -62,7 +62,5 @@ namespace Ela::Lexer {
         static Token mMakeWordToken(std::size_t line, std::size_t col, const std::string &value);
 
         static Token mMakeStringLiteralToken(std::size_t line, std::size_t col, const std::string &s);
-
-        logger::Logger mLogger;
     };
 };

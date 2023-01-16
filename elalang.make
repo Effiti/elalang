@@ -16,7 +16,7 @@ ifeq ($(config),debug)
   TARGET = $(TARGETDIR)/elalang
   OBJDIR = obj/Debug
   DEFINES += -DDEBUG_BUILD
-  INCLUDES += -Iinclude
+  INCLUDES +=
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g
@@ -43,7 +43,7 @@ ifeq ($(config),release)
   TARGET = $(TARGETDIR)/elalang
   OBJDIR = obj/Release
   DEFINES += -DRELEASE_BUILD
-  INCLUDES += -Iinclude
+  INCLUDES +=
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2
@@ -70,7 +70,7 @@ ifeq ($(config),testela)
   TARGET = $(TARGETDIR)/test
   OBJDIR = obj/Testela
   DEFINES += -DDEBUG_BUILD
-  INCLUDES += -Iinclude
+  INCLUDES +=
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS)
@@ -94,18 +94,18 @@ endif
 ifeq ($(config),scan)
   RESCOMP = windres
   TARGETDIR = bin
-  TARGET = $(TARGETDIR)/lexer
+  TARGET = $(TARGETDIR)/elalang
   OBJDIR = obj/Scan
-  DEFINES += -DDEBUG_BUILD
-  INCLUDES += -Iinclude
+  DEFINES +=
+  INCLUDES +=
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS)
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -std=c++20
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS +=
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS)
+  ALL_LDFLAGS += $(LDFLAGS) -s
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef
@@ -119,15 +119,6 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
-	$(OBJDIR)/common.o \
-	$(OBJDIR)/logging.o \
-	$(OBJDIR)/Lexer.o \
-	$(OBJDIR)/Token.o \
-	$(OBJDIR)/Expression.o \
-	$(OBJDIR)/Node.o \
-	$(OBJDIR)/Parser.o \
-	$(OBJDIR)/Statement.o \
-	$(OBJDIR)/TypeExpression.o \
 
 RESOURCES := \
 
@@ -135,19 +126,48 @@ CUSTOMFILES := \
 
 ifeq ($(config),debug)
   OBJECTS += \
+	$(OBJDIR)/Ela.o \
+	$(OBJDIR)/SymbolTable.o \
+	$(OBJDIR)/Visitor.o \
+	$(OBJDIR)/Lexer.o \
+	$(OBJDIR)/Token.o \
 	$(OBJDIR)/main.o \
+	$(OBJDIR)/Expression.o \
+	$(OBJDIR)/Node.o \
+	$(OBJDIR)/Parser.o \
+	$(OBJDIR)/Statement.o \
+	$(OBJDIR)/TypeExpression.o \
 
 endif
 
 ifeq ($(config),release)
   OBJECTS += \
+	$(OBJDIR)/Ela.o \
+	$(OBJDIR)/SymbolTable.o \
+	$(OBJDIR)/Visitor.o \
+	$(OBJDIR)/Lexer.o \
+	$(OBJDIR)/Token.o \
 	$(OBJDIR)/main.o \
+	$(OBJDIR)/Expression.o \
+	$(OBJDIR)/Node.o \
+	$(OBJDIR)/Parser.o \
+	$(OBJDIR)/Statement.o \
+	$(OBJDIR)/TypeExpression.o \
 
 endif
 
-ifeq ($(config),scan)
+ifeq ($(config),testela)
   OBJECTS += \
-	$(OBJDIR)/main.o \
+	$(OBJDIR)/Ela.o \
+	$(OBJDIR)/SymbolTable.o \
+	$(OBJDIR)/Visitor.o \
+	$(OBJDIR)/Lexer.o \
+	$(OBJDIR)/Token.o \
+	$(OBJDIR)/Expression.o \
+	$(OBJDIR)/Node.o \
+	$(OBJDIR)/Parser.o \
+	$(OBJDIR)/Statement.o \
+	$(OBJDIR)/TypeExpression.o \
 
 endif
 
@@ -204,10 +224,13 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
-$(OBJDIR)/common.o: include/cmdlib/common.cpp
+$(OBJDIR)/Ela.o: src/Ela.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/logging.o: include/cmdlib/logging.cpp
+$(OBJDIR)/SymbolTable.o: src/analysis/SymbolTable.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Visitor.o: src/analysis/Visitor.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Lexer.o: src/lexer/Lexer.cpp

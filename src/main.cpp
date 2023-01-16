@@ -1,7 +1,6 @@
 #include "Ela.hpp"
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
-#include "cmdlib/common.hpp"
 #include <string_view>
 #include <numeric>
 #include <algorithm>
@@ -13,13 +12,13 @@ using namespace std::string_view_literals;
         std::ifstream ifs("main.ela");
         std::string content((std::istreambuf_iterator<char>(ifs)),
                             (std::istreambuf_iterator<char>()));
-        Lexer::Lexer l{
+        Ela::Lexer::Lexer l{
                 std::string_view(content),
         };
         auto tokens = l.parseSource();
         for (auto tok: tokens) {
-            std::cout << CmdUtil::colors["green"] << humanReadableTokenType(tok.type)
-                      << CmdUtil::colors["end"] << " at " << tok.line << ":" << tok.col
+            std::cout << Ela::colors["green"] << humanReadableTokenType(tok.type)
+                      << Ela::colors["end"] << " at " << tok.line << ":" << tok.col
                       << " : ";
             std::cout << tok.value << "\n";
         }

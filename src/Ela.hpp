@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/cmdlib/common.hpp"
-#include "../include/cmdlib/logging.hpp"
+#include <algorithm>
+#include <map>
 #include <cctype>
 #include <cstddef>
 #include <cwchar>
@@ -20,3 +20,7 @@ using namespace std::string_view_literals;
 #else
   const int verbosity = 0;
 #endif
+namespace Ela {
+    using std::vector;
+    extern std::map<std::string, std::string> colors;
+}

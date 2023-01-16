@@ -43,13 +43,11 @@ namespace Ela {
     class Parser {
     public:
         Parser(std::vector<Token> tokens, ParserOpts opts)
-                : mOpts{opts}, mTokens{std::move(tokens)}, mLogger{opts.verbosityLevel} {};
+                : mOpts{opts}, mTokens{std::move(tokens)} {};
 
         [[nodiscard]] std::optional<Statements::Program> parse();
 
     private:
-        logger::Logger mLogger;
-
         std::vector<Token> mTokens;
         ParserOpts mOpts;
 

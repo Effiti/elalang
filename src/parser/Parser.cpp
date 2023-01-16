@@ -11,7 +11,7 @@ namespace Ela {
 
     void Parser::mParserError(TokenType expected, Token found) {
         std::string file{found.file};
-        std::cerr << CmdUtil::colors["red"] << "[ERROR] " << found.file << ":" << found.line << ":" << found.col
+        std::cerr << colors["red"] << "[ERROR] " << found.file << ":" << found.line << ":" << found.col
                   << " expected " << humanReadableTokenType(expected) << " but found "
                   << humanReadableTokenType(found.type)
                   << std::endl;
@@ -19,7 +19,7 @@ namespace Ela {
     }
 
     std::optional<Statements::Program> Parser::parse() {
-        return mProgramm();
+        return mProgram();
     }
 
     ParserLoopResult Parser::mParserLoop() {
@@ -83,7 +83,7 @@ namespace Ela {
     }
 
 
-    std::optional<Statements::Program> Parser::mProgramm() {
+    std::optional<Statements::Program> Parser::mProgram() {
         push(NonTerminalType::FunctionDefinitionList);
         push(NonTerminalType::ImportStatementList);
         while (!stack.empty()) {

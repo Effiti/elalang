@@ -1,14 +1,12 @@
 #include "Lexer.h"
 #include "../Ela.hpp"
 #include "Token.h"
-#include "cmdlib/logging.hpp"
 #include <cctype>
 #include <string>
 namespace Ela::Lexer {
 // NOTE: CLEAN
     void Lexer::logLexerError(std::string errorMessage) {
-        mLogger.log(logger::messageType::FATAL_ERROR, errorMessage, mCurrentLine,
-                    __FILE__);
+        std::cerr << colors["red"] << "Error in Lexer: " <<errorMessage << " on line: " << mCurrentLine;
     }
 
 // NOTE: CLEAN
