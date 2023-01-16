@@ -6,7 +6,7 @@
 #include "Expression.h"
 #include "TypeExpression.h"
 
-namespace Statements {
+namespace Ela::Statements {
     class ImportStatement : public Node {
     public:
         explicit ImportStatement(std::string m) :

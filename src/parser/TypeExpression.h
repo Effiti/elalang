@@ -5,7 +5,7 @@
 #include "../Ela.hpp"
 #include "Node.h"
 
-namespace TypeExpressions {
+namespace Ela::TypeExpressions {
     enum BaseType {
         Integer,
         String,
@@ -15,6 +15,7 @@ namespace TypeExpressions {
         Pointer,
         List,
         Boolean,
+        Array,
         Void
     };
 
@@ -39,6 +40,8 @@ namespace TypeExpressions {
                 return "Boolean";
             case Void:
                 return "Void";
+            case Array:
+                return "Array";
         }
     }
 
@@ -104,6 +107,8 @@ namespace TypeExpressions {
             return Double;
         if (type == "bool")
             return Boolean;
+        if (type == "array")
+            return Array;
         else
             return std::nullopt;
     }

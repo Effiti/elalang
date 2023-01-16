@@ -30,7 +30,7 @@ enum class UnaryOperatorType {
 
 };
 
-namespace Expressions {
+namespace Ela::Expressions {
 
 
     class Expression : public Node {

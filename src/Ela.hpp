@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cmdlib/common.hpp"
-#include "cmdlib/logging.hpp"
+#include "../include/cmdlib/common.hpp"
+#include "../include/cmdlib/logging.hpp"
 #include <cctype>
 #include <cstddef>
 #include <cwchar>
