@@ -13,8 +13,8 @@
 #include <stdexcept>
 #include <optional>
 #include <memory>
+#include <variant>
 
-using namespace std::string_view_literals;
 #ifdef DEBUG_BUILD
   const int verbosity = 5;
 #else

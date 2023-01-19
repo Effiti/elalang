@@ -1,8 +1,9 @@
 #pragma once
 #include "../Ela.hpp"
+#define NULLTOK Token{0,0,TokenType::None, ""};
+
 namespace Ela::Lexer {
     using std::string;
-    using namespace std::string_view_literals;
     enum class TokenType {
         None,
         NumberLiteral,
@@ -61,7 +62,7 @@ namespace Ela::Lexer {
     class Token {
     public:
         Token(std::size_t l, std::size_t c, TokenType t, std::string_view v)
-                : line{l}, col{c}, type{t}, value{v}, file{"main.ela"sv} {};
+                : line{l}, col{c}, type{t}, value{v}, file{"main.ela"} {};
         std::size_t line;
         std::size_t col;
         TokenType type;
@@ -71,5 +72,4 @@ namespace Ela::Lexer {
         std::string_view file;
     };
 
-#define NULLTOK Token{0,0,TokenType::None, ""sv}
 };

@@ -94,8 +94,6 @@ namespace Ela {
                     return std::move(mP);
                 case ParserLoopResult::ParserError:
                     throw std::runtime_error("");
-
-
             };
         }
         return std::move(mP);
