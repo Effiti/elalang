@@ -75,11 +75,10 @@ namespace Ela::Expressions {
 
     std::string FunctionCall::toString() {
         std::string params;
-        std::for_each(begin(callParams), end(callParams),
-                      [&](std::unique_ptr<Expression> const &param) -> void {
-                          params += param->toString() + ", ";
-                      }
-        );
+        for(const std::shared_ptr<Expression> & param : callParams)
+        {
+          params += param->toString();
+        }
         if (params.length() != 0)
             params = params.substr(0, params.length() - 2);
         return "[" + functionName + "(" + params + "))" + "]";

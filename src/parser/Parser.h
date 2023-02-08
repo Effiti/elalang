@@ -93,31 +93,31 @@ namespace Ela {
 
         Statements::ImportStatement mImportStatement();
 
-        std::unique_ptr<TypeExpressions::TypeExpression> mTypeExpression();
+        std::shared_ptr<TypeExpressions::TypeExpression> mTypeExpression();
 
         Token matchOrError(TokenType type);
 
-        std::unique_ptr<Statements::BlockStatement> mBlockStatement();
+        std::shared_ptr<Statements::BlockStatement> mBlockStatement();
 
-        std::unique_ptr<Statements::Statement> mStatement();
+        std::shared_ptr<Statements::Statement> mStatement();
 
-        std::unique_ptr<Statements::VariableDefinitionStatement> mVariableDefinition();
+        std::shared_ptr<Statements::VariableDefinitionStatement> mVariableDefinition();
 
-        std::unique_ptr<Statements::IfStatement> mIfStatement();
+        std::shared_ptr<Statements::IfStatement> mIfStatement();
 
-        std::unique_ptr<Statements::ExpressionStatement> mExpressionStatement();
+        std::shared_ptr<Statements::ExpressionStatement> mExpressionStatement();
 
-        std::unique_ptr<Statements::ElseStatement> mElseStatement();
+        std::shared_ptr<Statements::ElseStatement> mElseStatement();
 
 
-        std::unique_ptr<Expressions::Expression> mExpression();
+        std::shared_ptr<Expressions::Expression> mExpression();
 
-        std::unique_ptr<Expressions::Expression> mPrimaryExpression();
+        std::shared_ptr<Expressions::Expression> mPrimaryExpression();
 
-        std::unique_ptr<Expressions::FunctionCall> mFunctionCall();
+        std::shared_ptr<Expressions::FunctionCall> mFunctionCall();
 
-        std::unique_ptr<Expressions::Expression> mSecondaryExpression();
+        std::shared_ptr<Expressions::Expression> mSecondaryExpression();
 
-        std::unique_ptr<Statements::ReturnStatement> mReturnStatement();
+        std::shared_ptr<Statements::ReturnStatement> mReturnStatement();
     };
 };

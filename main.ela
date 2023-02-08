@@ -1,13 +1,12 @@
 /*
-TODONE (Lexer): Add support for multiline-comments // DONE
 TODO (Parser/lexer) Add support for more operators:
    Modulo,
    Right/leftshift
    logical negation
    bitwise and logical and/or/xor
-
-TODONE (Parser): PostDecrement // Done
 */
 func test2( arr : array[int] ) {
+var x: int;
+var x: int;
 
 }

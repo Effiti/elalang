@@ -7,7 +7,7 @@ namespace Ela {
 
     using
     enum NonTerminalType;
-    using std::unique_ptr, std::make_unique;
+    using std::unique_ptr, std::make_unique, std::shared_ptr, std::make_shared;
 
     void Parser::mParserError(TokenType expected, Token found) {
         std::string file{found.file};
@@ -232,20 +232,20 @@ namespace Ela {
 
         }
         consumeOrError(TokenType::RParen);
-        unique_ptr<TypeExpressions::TypeExpression> returnType;
+        shared_ptr<TypeExpressions::TypeExpression> returnType;
         if (!consume(TokenType::HyphenArrow)) {
             returnType = make_unique<TypeExpressions::SimpleType>(TypeExpressions::Void);
         } else {
             returnType = mTypeExpression();
         }
-        auto block = std::move(mBlockStatement());
+        auto block = *std::move(mBlockStatement());
 
         return Statements::FunctionDefinition{
                 std::move(returnType), name,
                 std::move(params), std::move(block)};
     }
 
-    unique_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
+    shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
         const std::string baseTypeName = consumeOrError(TokenType::Identifier).value;
         const std::optional<TypeExpressions::BaseType> base = TypeExpressions::getBaseType(baseTypeName);
         std::variant<const std::string, TypeExpressions::BaseType> baseVar = baseTypeName;
@@ -255,20 +255,20 @@ namespace Ela {
         }
         auto simpleType = TypeExpressions::SimpleType(baseVar);
         if (!consume(TokenType::LBracket)) {
-            return make_unique<TypeExpressions::SimpleType>(simpleType);
+            return make_shared<TypeExpressions::SimpleType>(simpleType);
         }
-        vector<unique_ptr<TypeExpressions::TypeExpression>> args;
+        vector<shared_ptr<TypeExpressions::TypeExpression>> args;
         do {
             args.push_back(mTypeExpression());
         } while (consume(TokenType::Comma));
         consumeOrError(TokenType::RBracket);
 
-        return make_unique<TypeExpressions::TypeTemplateExpression>(simpleType, std::move(args));
+        return make_shared<TypeExpressions::TypeTemplateExpression>(simpleType, std::move(args));
     }
 
-    unique_ptr<Statements::BlockStatement> Parser::mBlockStatement() {
+    shared_ptr<Statements::BlockStatement> Parser::mBlockStatement() {
         consumeOrError(TokenType::LCurly);
-        std::vector<unique_ptr<Statements::Statement>> statements;
+        std::vector<shared_ptr<Statements::Statement>> statements;
         // TODO: emit a warning or *mark the AST-Node* if the block is empty
         //       this also includes blocks which only contain an arbitrary amount of Semicolons:
         //       {;;;;;;;;} //is semantically empty!
@@ -278,10 +278,10 @@ namespace Ela {
             statements.push_back(std::move(mStatement()));
         }
         consumeOrError(TokenType::RCurly);
-        return make_unique<Statements::BlockStatement>(std::move(statements));
+        return make_shared<Statements::BlockStatement>(std::move(statements));
     }
 
-    unique_ptr<Statements::Statement> Parser::mStatement() {
+    shared_ptr<Statements::Statement> Parser::mStatement() {
         if (match(TokenType::VariableKeyword))
             return std::move(mVariableDefinition());
         else if (match(TokenType::IfKeyword))
@@ -295,37 +295,37 @@ namespace Ela {
         return std::move(mExpressionStatement());
     }
 
-    unique_ptr<Statements::ReturnStatement> Parser::mReturnStatement() {
+    shared_ptr<Statements::ReturnStatement> Parser::mReturnStatement() {
         consumeOrError(TokenType::ReturnKeyword);
         if (consume(TokenType::Semicolon))
             // returning in void functions is the same thing as returning null.
-            return make_unique<Statements::ReturnStatement>(make_unique<Expressions::NullExpression>());
+            return make_shared<Statements::ReturnStatement>(make_shared<Expressions::NullExpression>());
         auto expr = mExpression();
         consumeOrError(TokenType::Semicolon);
-        return make_unique<Statements::ReturnStatement>(std::move(expr));
+        return make_shared<Statements::ReturnStatement>(std::move(expr));
     }
 
-    unique_ptr<Statements::ElseStatement> Parser::mElseStatement() {
+    shared_ptr<Statements::ElseStatement> Parser::mElseStatement() {
         consumeOrError(TokenType::ElseKeyword);
-        return make_unique<Statements::ElseStatement>(std::move(mStatement()));
+        return make_shared<Statements::ElseStatement>(std::move(mStatement()));
     }
 
-    unique_ptr<Statements::ExpressionStatement> Parser::mExpressionStatement() {
-        auto statement = std::make_unique<Statements::ExpressionStatement>(std::move(mExpression()));
+    shared_ptr<Statements::ExpressionStatement> Parser::mExpressionStatement() {
+        auto statement = std::make_shared<Statements::ExpressionStatement>(std::move(mExpression()));
         consumeOrError(TokenType::Semicolon);
         return statement;
     }
 
-    unique_ptr<Statements::IfStatement> Parser::mIfStatement() {
+    shared_ptr<Statements::IfStatement> Parser::mIfStatement() {
         consumeOrError(TokenType::IfKeyword);
         consumeOrError(TokenType::LParen);
-        unique_ptr<Expressions::Expression> condition = mExpression();
+        shared_ptr<Expressions::Expression> condition = mExpression();
         consumeOrError(TokenType::RParen);
-        unique_ptr<Statements::Statement> statement = mStatement();
+        shared_ptr<Statements::Statement> statement = mStatement();
         return std::make_unique<Statements::IfStatement>(std::move(condition), std::move(statement));
     }
 
-    unique_ptr<Statements::VariableDefinitionStatement> Parser::mVariableDefinition() {
+    shared_ptr<Statements::VariableDefinitionStatement> Parser::mVariableDefinition() {
         // TODO
         consumeOrError(TokenType::VariableKeyword);
         std::string name = consumeOrError(TokenType::Identifier).value;
@@ -343,8 +343,8 @@ namespace Ela {
 
     }
 
-    unique_ptr<Expressions::Expression> Parser::mExpression() {
-        unique_ptr<Expressions::Expression> expr = mPrimaryExpression();
+    shared_ptr<Expressions::Expression> Parser::mExpression() {
+        shared_ptr<Expressions::Expression> expr = mPrimaryExpression();
         while (getBinaryOperatorType(mCurrentToken()) != BinaryOperatorType::None) {
             if (match(TokenType::Asterisk)) {
                 consume();
@@ -367,12 +367,12 @@ namespace Ela {
         return expr;
     }
 
-    unique_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
+    shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
         if (match(TokenType::NumberLiteral)) {
             return make_unique<Expressions::IntegerLiteral>(std::stoi(consumeOrError(TokenType::NumberLiteral).value));
         }
         if (match(TokenType::Identifier)) {
-            unique_ptr<Expressions::Expression> expr;
+            shared_ptr<Expressions::Expression> expr;
 
             if (next().type == TokenType::LParen) {
                 auto call = mFunctionCall();
@@ -390,7 +390,7 @@ namespace Ela {
                             BinaryOperatorType::MemberAccess,
                             std::move(call));
                 } else {
-                    unique_ptr<Expressions::Expression> var = std::make_unique<Expressions::VariableReference>(
+                    shared_ptr<Expressions::Expression> var = std::make_shared<Expressions::VariableReference>(
                             consumeOrError(TokenType::Identifier).value
                     );
                     expr = make_unique<Expressions::Binary>(
@@ -415,7 +415,7 @@ namespace Ela {
             );
         }
         if (consume(TokenType::LParen)) {
-            unique_ptr<Expressions::Expression> expr = make_unique<Expressions::Parenthed>(mExpression());
+            shared_ptr<Expressions::Expression> expr = make_shared<Expressions::Parenthed>(mExpression());
             consumeOrError(TokenType::RParen);
             while (consume(TokenType::Period)) {
                 if (next().type == TokenType::LParen) {
@@ -445,8 +445,8 @@ namespace Ela {
                     "Expected Primary Expression, but found: " + humanReadableTokenType(mCurrentToken().type));
     }
 
-    std::unique_ptr<Expressions::Expression> Parser::mSecondaryExpression() {
-        unique_ptr<Expressions::Expression> expr = mPrimaryExpression();
+    shared_ptr<Expressions::Expression> Parser::mSecondaryExpression() {
+        shared_ptr<Expressions::Expression> expr = mPrimaryExpression();
         do {
             if (match(TokenType::Asterisk)) {
                 consume();
@@ -460,12 +460,12 @@ namespace Ela {
 
     }
 
-    unique_ptr<Expressions::FunctionCall> Parser::mFunctionCall() {
-        vector<std::unique_ptr<Expressions::Expression>> params;
+    shared_ptr<Expressions::FunctionCall> Parser::mFunctionCall() {
+        vector<std::shared_ptr<Expressions::Expression>> params;
         string name = consumeOrError(TokenType::Identifier).value;
         consumeOrError(TokenType::LParen);
         if (consume(TokenType::RParen)) {
-            return make_unique<Expressions::FunctionCall>(name, std::move(params));
+            return make_shared<Expressions::FunctionCall>(name, std::move(params));
         }
         do {
             params.push_back(mExpression());

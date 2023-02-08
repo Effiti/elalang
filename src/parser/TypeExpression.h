@@ -13,7 +13,6 @@ namespace Ela::TypeExpressions {
         Float,
         Double,
         Pointer,
-        List,
         Boolean,
         Array,
         Void
@@ -34,8 +33,6 @@ namespace Ela::TypeExpressions {
                 return "Double";
             case Pointer:
                 return "Pointer";
-            case List:
-                return "List";
             case Boolean:
                 return "Boolean";
             case Void:
@@ -46,7 +43,7 @@ namespace Ela::TypeExpressions {
     }
 
 
-    class TypeExpression : public NonLeafNode {
+    class TypeExpression : public Ela::Node  {
     public:
         virtual std::string toString() {
             return {"None"};
@@ -71,9 +68,9 @@ namespace Ela::TypeExpressions {
     class TypeTemplateExpression : public TypeExpression {
     public:
         SimpleType templatedType;
-        vector<std::unique_ptr<TypeExpression> > templateArguments;
+        vector<std::shared_ptr<TypeExpression> > templateArguments;
 
-        TypeTemplateExpression(SimpleType baseType, std::vector<std::unique_ptr<TypeExpression>> templateArguments)
+        TypeTemplateExpression(SimpleType baseType, std::vector<std::shared_ptr<TypeExpression>> templateArguments)
                 : templateArguments(std::move(
                 templateArguments)), templatedType(std::move(baseType)) {}
 
@@ -99,8 +96,6 @@ namespace Ela::TypeExpressions {
             return Pointer;
         if (type == "char")
             return Char;
-        if (type == "list")
-            return List;
         if (type == "float")
             return Float;
         if (type == "double")

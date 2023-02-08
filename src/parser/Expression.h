@@ -40,8 +40,8 @@ namespace Ela::Expressions {
 
     class Unary : public Expression {
     public:
-        Unary(std::unique_ptr<Expression> p, UnaryOperatorType type) : expression{std::move(p)}, op{type} {};
-        std::unique_ptr<Expression> expression;
+        Unary(std::shared_ptr<Expression> p, UnaryOperatorType type) : expression{std::move(p)}, op{type} {};
+        std::shared_ptr<Expression> expression;
         UnaryOperatorType op;
 
         std::string toString() override;
@@ -50,11 +50,11 @@ namespace Ela::Expressions {
 
     class Binary : public Expression {
     public:
-        Binary(std::unique_ptr<Expression> left, BinaryOperatorType operatorType, std::unique_ptr<Expression> right)
+        Binary(std::shared_ptr<Expression> left, BinaryOperatorType operatorType, std::shared_ptr<Expression> right)
                 : lhs{std::move(left)}, rhs{std::move(right)}, op{operatorType} {};
 
-        std::unique_ptr<Expression> lhs;
-        std::unique_ptr<Expression> rhs;
+        std::shared_ptr<Expression> lhs;
+        std::shared_ptr<Expression> rhs;
         const BinaryOperatorType op;
 
         std::string toString() override;
@@ -66,11 +66,11 @@ namespace Ela::Expressions {
 
     class Parenthed : public Primary {
     public:
-        explicit Parenthed(std::unique_ptr<Expression> pSubExpr) : subExpr{std::move(pSubExpr)} {};
+        explicit Parenthed(std::shared_ptr<Expression> pSubExpr) : subExpr{std::move(pSubExpr)} {};
 
         std::string toString() override;
 
-        std::unique_ptr<Expression> subExpr;
+        std::shared_ptr<Expression> subExpr;
     };
 
     class IntegerLiteral : public Primary {
@@ -90,11 +90,11 @@ namespace Ela::Expressions {
 
     class FunctionCall : public Primary {
     public:
-        FunctionCall(std::string name, vector<std::unique_ptr<Expression>> params) : callParams{std::move(params)},
+        FunctionCall(std::string name, vector<std::shared_ptr<Expression>> params) : callParams{std::move(params)},
                                                                              functionName{std::move(name)} {}
 
         const string functionName;
-        const vector<std::unique_ptr<Expression>> callParams;
+        const vector<std::shared_ptr<Expression>> callParams;
 
         string toString() override;
     };

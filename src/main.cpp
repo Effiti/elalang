@@ -1,6 +1,7 @@
 #include "Ela.hpp"
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
+#include "analysis/Visitor.h"
 #include <algorithm>
 #include <numeric>
 #include <string_view>
@@ -25,7 +26,7 @@ int main() {
   ParserOpts opts{10};
   Parser p{tokens, opts};
   // p.parse();
-  auto program = p.parse();
+  const auto program = p.parse();
   if (!program) {
     return EXIT_FAILURE;
   }
@@ -46,6 +47,8 @@ int main() {
 
     std::cout << "}" << std::endl;
   }
+  Analysis::ProgramVisitor v = Analysis::ProgramVisitor{*program};
+  v.check();
 
   return EXIT_SUCCESS;
 }
