@@ -1,12 +1,3 @@
-/*
-TODO (Parser/lexer) Add support for more operators:
-   Modulo,
-   Right/leftshift
-   logical negation
-   bitwise and logical and/or/xor
-*/
-func test2( arr : array[int] ) {
-var x: int;
-var x: int;
-
+func test2() {
+  var x: int = 12+ 18 *9;
 }

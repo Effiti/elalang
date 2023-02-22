@@ -21,13 +21,13 @@ void StatementVisitor::visitBlock(const Statements::BlockStatement& block) {
     s.get()->accept(this);
   }
   nesting--;
+  variables.removeAllLowerThan(nesting);
+
 }
 void ProgramVisitor::check() {
   auto x = StatementVisitor();
   for (const auto& function : program.functionDefinitions) {
     x.visitBlock(*std::move(function.statements));
-    // x.visitBlock(statement);
-    // x.visitBlock(statement);
   }
 }
 }  // namespace Analysis

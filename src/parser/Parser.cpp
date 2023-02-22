@@ -226,10 +226,7 @@ namespace Ela {
                 paramName = consumeOrError(TokenType::Identifier).value;
                 consumeOrError(TokenType::Colon);
                 params.emplace_back(std::move(mTypeExpression()), paramName);
-
-
             } while (consume(TokenType::Comma));
-
         }
         consumeOrError(TokenType::RParen);
         shared_ptr<TypeExpressions::TypeExpression> returnType;
