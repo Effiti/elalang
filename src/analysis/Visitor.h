@@ -30,7 +30,7 @@ class TypeExpressionVisitor {
 };
 class StatementVisitor {
  private:
-  uint nesting;
+  unsigned int nesting;
 
   VariableSymbolTable variables;
   ExpressionVisitor expressionVisitor;
