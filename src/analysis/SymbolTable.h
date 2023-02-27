@@ -14,7 +14,7 @@ using std::unique_ptr;
 
 class VariableDefinitionSymbol {
  public:
-  const uint nesting;
+  const unsigned int nesting;
   const std::string name;
   const std::shared_ptr<TypeExpressions::TypeExpression> type;
   const std::shared_ptr<Expressions::Expression> initialValue;
