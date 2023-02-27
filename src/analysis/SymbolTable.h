@@ -19,7 +19,7 @@ class VariableDefinitionSymbol {
   const std::shared_ptr<TypeExpressions::TypeExpression> type;
   const std::shared_ptr<Expressions::Expression> initialValue;
   VariableDefinitionSymbol(
-      uint nesting_, std::string name_,
+      unsigned int nesting_, std::string name_,
       std::shared_ptr<TypeExpressions::TypeExpression> type_,
       std::shared_ptr<Expressions::Expression> initialValue_)
       : nesting{nesting_},
