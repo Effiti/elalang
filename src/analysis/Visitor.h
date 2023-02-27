@@ -36,6 +36,7 @@ class StatementVisitor {
   ExpressionVisitor expressionVisitor;
 
  public:
+  StatementVisitor() : nesting{0}, variables{}, expressionVisitor(variables) {}
   void visitBlock(Ela::Statements::BlockStatement const& s);
   void visitVariableDefinition(
       const Ela::Statements::VariableDefinitionStatement& s);

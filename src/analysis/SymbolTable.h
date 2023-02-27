@@ -42,7 +42,7 @@ class VariableSymbolTable {
 
  public:
   [[nodiscard]] const bool& has(std::string name);
-  std::optional<VariableSymbolTable> get(std::string name);
+  std::optional<VariableDefinitionSymbol> get(std::string name);
   void add(const VariableDefinitionSymbol& symbol);
   bool hasSymbol(std::string name);
   void removeAllLowerThan(int nesting);
