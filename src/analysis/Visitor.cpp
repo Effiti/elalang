@@ -9,7 +9,13 @@ void StatementVisitor::visitVariableDefinition(
     std::cerr << colors["yellow"] << "WARN: overriding local variable"
               << colors["end"] << std::endl;
 
-  auto symbol = VariableDefinitionSymbol{nesting, s.name, s.type, s.value};
+  int typeId = typeTable.getType(s.type->toString());
+  if (typeId == -1) {
+    typeId = typeTable.add(TypeEntry(s.type->toString(), s.type));
+  }
+
+  auto symbol =
+      VariableDefinitionSymbol{nesting, s.name, (unsigned)typeId, s.value};
 
   std::cout << "adding variable " << s.toString() << std::endl;
   variables.add(symbol);
@@ -22,14 +28,21 @@ void StatementVisitor::visitBlock(const Statements::BlockStatement& block) {
   }
   nesting--;
   variables.removeAllLowerThan(nesting);
-
 }
 void ProgramVisitor::check() {
-  auto x = StatementVisitor();
   for (const auto& function : program.functionDefinitions) {
-    x.visitBlock(*std::move(function.statements));
+    v.visitBlock(*std::move(function.statements));
+    v.print();
   }
 }
+
+std::size_t ExpressionVisitor::getVariableType(const std::string& name) {
+  if (auto var = variables.get(name)) {
+    return (*var).type;
+  }
+  throw std::runtime_error("unknown variable");
+}
+
 }  // namespace Analysis
 void Statements::BlockStatement::accept(StatementVisitor* visitor) {
   visitor->visitBlock(*this);
@@ -37,6 +50,38 @@ void Statements::BlockStatement::accept(StatementVisitor* visitor) {
 void Statements::VariableDefinitionStatement::accept(
     StatementVisitor* visitor) {
   visitor->visitVariableDefinition(*this);
+}
+std::size_t Expressions::Unary::getType(Analysis::ExpressionVisitor& c) const {
+  // unary expressions, by default, do not change the type of an expression.
+  // This can be overriden in special cases.
+  return expression->getType(c);
+}
+std::size_t Expressions::Binary::getType(Analysis::ExpressionVisitor& c) const {
+  auto lhsType = lhs->getType(c), rhsType = rhs->getType(c);
+  if (rhsType != lhsType) {
+    throw std::runtime_error("binary with different types not supported");
+  }
+  return lhsType;
+}
+std::size_t Expressions::BooleanLiteral::getType(
+    Analysis::ExpressionVisitor& c) const {
+  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean);
+}
+std::size_t Expressions::IntegerLiteral::getType(
+    Analysis::ExpressionVisitor& c) const {
+  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Integer);
+}
+std::size_t Expressions::StringLiteral::getType(
+    Analysis::ExpressionVisitor& c) const {
+  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::String);
+}
+std::size_t Expressions::NullExpression::getType(
+    Analysis::ExpressionVisitor& c) const {
+  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Void);
+}
+std::size_t Expressions::VariableReference::getType(
+    Analysis::ExpressionVisitor& c) const {
+  return c.getVariableType(variableName);
 }
 
 }  // namespace Ela
