@@ -4,7 +4,9 @@ to build, you need
 - [premake](https://premake.github.io/) to generate project files
 alternatively, you could just use the already generate [gnu](https://www.gnu.org)-[make](https://www.gnu.org/software/make/)-[Makefile](https://www.gnu.org/software/make/manual/make.html) which is published in this repo. 
 # Design
-
+## TODO
+- Type Inference for Variable Definitions
+- Static Array type: `var x : [int,4];` (shorthand form for `var x : array[int,4];`)
 ## Semicolon
 Oh, the age-old question of the semicolon; enemy of any beginner programmer,
 friend of some people. 
