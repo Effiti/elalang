@@ -1,0 +1,3 @@
+#+title: Todo
+* TODO make parser use humanReadableTokenType for Error messages and expected tokens
+* TODO TypeChecking
