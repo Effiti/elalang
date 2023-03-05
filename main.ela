@@ -1,8 +1,8 @@
-func test2() {
+func test2() -> int {
   var x: int = 12+ 18 *9;
   var z: float;
-  var a: array[int];
-  var a1: array[int];
+  var a: [int];
+  var a1: array[int, 12];
   var a2: array[int];
   var a3: array[int];
 }

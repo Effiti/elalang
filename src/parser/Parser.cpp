@@ -224,29 +224,34 @@ Statements::FunctionDefinition Parser::mFunctionDefinition() {
 }
 
 shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
-  TypeExpressions::SimpleType simpleType(TypeExpressions::BaseType::Void);
   if (!match(Lexer::TokenType::Identifier) &&
       !match(Lexer::TokenType::LBracket))
     mParserError(Lexer::TokenType::Identifier, mCurrentToken());
-  // FIXME Hack
   const std::string baseTypeName =
       match(Lexer::TokenType::Identifier)
           ? consumeOrError(TokenType::Identifier).value
           : "array";
+
   const std::optional<TypeExpressions::BaseType> base =
       TypeExpressions::getBaseType(baseTypeName);
   std::variant<const std::string, TypeExpressions::BaseType> baseVar =
       baseTypeName;
   if (base.has_value()) {
+    //    std::cout << TypeExpressions::to_string(*base) << std::endl;
     baseVar = base.value();
   }
-  simpleType = TypeExpressions::SimpleType(baseVar);
+  auto simpleType = TypeExpressions::SimpleType(baseVar);
+
   if (!consume(TokenType::LBracket)) {
     return make_shared<TypeExpressions::SimpleType>(simpleType);
   }
-  vector<shared_ptr<TypeExpressions::TypeExpression>> args;
+  vector<std::variant<shared_ptr<TypeExpressions::TypeExpression>, int>> args;
   do {
-    args.push_back(mTypeExpression());
+    if (match(Lexer::TokenType::NumberLiteral))
+      args.push_back(
+          std::stoi(consumeOrError(Lexer::TokenType::NumberLiteral).value));
+    else
+      args.push_back(mTypeExpression());
   } while (consume(TokenType::Comma));
   consumeOrError(TokenType::RBracket);
 

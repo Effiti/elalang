@@ -5,6 +5,7 @@
 
 #include "../Ela.hpp"
 #include "Node.h"
+#include "Expression.h"
 
 namespace Ela::TypeExpressions {
 enum BaseType {
@@ -67,18 +68,23 @@ class SimpleType : public TypeExpression {
 class TypeTemplateExpression : public TypeExpression {
  public:
   SimpleType templatedType;
-  vector<std::shared_ptr<TypeExpression>> templateArguments;
+  vector<std::variant<std::shared_ptr<TypeExpression>, int>> templateArguments;
 
   TypeTemplateExpression(
       SimpleType baseType,
-      std::vector<std::shared_ptr<TypeExpression>> templateArguments)
+      std::vector<std::variant<std::shared_ptr<TypeExpression>, int >> templateArguments)
       : templateArguments(std::move(templateArguments)),
         templatedType(std::move(baseType)) {}
 
   std::string toString() override {
     std::string template_args;
     for (const auto &item : templateArguments) {
-      template_args += item->toString() + ", ";
+      std::string str;
+      if(std::holds_alternative<int>(item))
+        str = std::to_string(std::get<int>(item));
+      else
+        str = std::get<std::shared_ptr<TypeExpression>>(item)->toString();
+      template_args += str + ", ";
     }
     return templatedType.toString() + "[" + template_args + "]";
   }
