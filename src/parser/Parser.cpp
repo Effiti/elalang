@@ -328,7 +328,7 @@ Parser::mVariableDefinition() {
   consumeOrError(TokenType::VariableKeyword);
   std::string name = consumeOrError(TokenType::Identifier).value;
   consumeOrError(TokenType::Colon);
-  auto type = mTypeExpression();
+  auto type = match(TokenType::AssignmentOperator) ? std::make_shared<TypeExpressions::SimpleType>(TypeExpressions::Void) : mTypeExpression() ;
   if (match(TokenType::Semicolon)) {
     consumeOrError(TokenType::Semicolon);
     return make_unique<Statements::VariableDefinitionStatement>(

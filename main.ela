@@ -3,6 +3,6 @@ func test2() -> int {
   var z: float;
   var a: [int];
   var a1: array[int, 12];
-  var a2: array[int];
-  var a3: array[int];
+//  var a2 :; //does not work because the equal sign is needed by the parser
+  var a3:= 12;
 }

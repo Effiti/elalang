@@ -1,7 +1,6 @@
 #include "Statement.h"
 namespace Ela::Statements {
 
-
 const std::string Statements::Statement::toString() const {
   throw std::runtime_error("");
 }
@@ -29,7 +28,7 @@ const std::string Statements::ElseStatement::toString() const {
   return "else : {\n" + statement->toString() + "\n}";
 }
 
-const std::string Statements::ExpressionStatement::toString() const{
+const std::string Statements::ExpressionStatement::toString() const {
   return "( " + expression->toString() + " )";
 }
 

@@ -9,10 +9,25 @@ void StatementVisitor::visitVariableDefinition(
     std::cerr << colors["yellow"] << "WARN: overriding local variable"
               << colors["end"] << std::endl;
 
+  // TODO: Type inference
   int typeId = typeTable.getType(s.type->toString());
   if (typeId == -1) {
     typeId = typeTable.add(TypeEntry(s.type->toString(), s.type));
   }
+  int exprTypeId = s.value->getType(expressionVisitor);
+  // if the types are not equal, there are two possibilities
+  if (exprTypeId != typeId) {
+    // if the type is supposed to be inferred, *only* the lhs type is Void.
+    if (typeId == typeTable.getBaseTypeId(TypeExpressions::Void)) {
+      typeId = exprTypeId;
+    }
+    // if the expressionType is void, the lhs type can not be null, this case is caught above. if both types are defined but different, error
+    else if (exprTypeId != typeTable.getBaseTypeId(TypeExpressions::Void)) {
+      throw std::runtime_error(
+          "type of variable not equal to rhs of assignment");
+    }
+  }
+
 
   auto symbol =
       VariableDefinitionSymbol{nesting, s.name, (unsigned)typeId, s.value};
