@@ -10,12 +10,16 @@ namespace Ela {
 using enum NonTerminalType;
 using std::unique_ptr, std::make_unique, std::shared_ptr, std::make_shared;
 
-void Parser::mParserError(TokenType expected, Token found) {
+void Parser::mParserError(Symbol expected, Token found) {
   std::string file{found.file};
   std::cerr << colors["red"] << "[ERROR] " << found.file << ":" << found.line
-            << ":" << found.col << " expected "
-            << humanReadableTokenType(expected) << " but found "
-            << humanReadableTokenType(found.type) << std::endl;
+            << ":" << found.col << " expected ";
+  if (std::holds_alternative<TokenType>(expected))
+    std::cerr << humanReadableTokenType(std::get<TokenType>(expected));
+
+  else
+    std::cerr << humanReadableNonTerminalType(std::get<NonTerminalType>(expected));
+  std::cerr << " but found " << humanReadableTokenType(found.type) << std::endl;
   throw std::runtime_error("parser error");
 }
 
@@ -142,13 +146,10 @@ BinaryOperatorType Parser::getBinaryOperatorType(const Token &t) {
   switch (t.type) {
     case TokenType::DivisionOperator:
       return BinaryOperatorType::Division;
-
     case TokenType::Plus:
       return BinaryOperatorType::Plus;
-
     case TokenType::Hyphen:
       return BinaryOperatorType::Minus;
-
     case TokenType::Asterisk:
       return BinaryOperatorType::Multiplication;
     case TokenType::EqualsOperator:
@@ -328,7 +329,10 @@ Parser::mVariableDefinition() {
   consumeOrError(TokenType::VariableKeyword);
   std::string name = consumeOrError(TokenType::Identifier).value;
   consumeOrError(TokenType::Colon);
-  auto type = match(TokenType::AssignmentOperator) ? std::make_shared<TypeExpressions::SimpleType>(TypeExpressions::Void) : mTypeExpression() ;
+  auto type =
+      match(TokenType::AssignmentOperator)
+          ? std::make_shared<TypeExpressions::SimpleType>(TypeExpressions::Void)
+          : mTypeExpression();
   if (match(TokenType::Semicolon)) {
     consumeOrError(TokenType::Semicolon);
     return make_unique<Statements::VariableDefinitionStatement>(
@@ -446,8 +450,7 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
     return make_unique<Expressions::Unary>(mPrimaryExpression(),
                                            UnaryOperatorType::PreIncrement);
   } else
-    throw std::runtime_error("Expected Primary Expression, but found: " +
-                             humanReadableTokenType(mCurrentToken().type));
+    mParserError(NonTerminalType::Expression, mCurrentToken());
 }
 
 shared_ptr<Expressions::Expression> Parser::mSecondaryExpression() {
