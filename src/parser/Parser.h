@@ -19,29 +19,7 @@ enum class NonTerminalType {
   None,
 
 };
-std::string humanReadableNonTerminalType(NonTerminalType type) {
-  switch (type) {
-    case NonTerminalType::Block:
-      return "Block";
-    case NonTerminalType::Expression:
-      return "Expression";
-    case NonTerminalType::FunctionDefinition:
-      return "FunctionDefinition";
-    case NonTerminalType::FunctionDefinitionList:
-      return "FunctionDefinition[]";
-    case NonTerminalType::ImportStatement:
-      return "ImportStatement";
-    case NonTerminalType::None:
-      return "None";
-    case NonTerminalType::PrimaryExpression:
-      return "PrimaryExpression";
-    case NonTerminalType::Program:
-      return "Program";
-    default:
-      return "Unimplemented";
-  }
-}
-
+std::string humanReadableNonTerminalType(NonTerminalType type);
 using Symbol = std::variant<NonTerminalType, TokenType>;
 
 // do not try to format your macros correctly. It's painful to do. Let clang-fmt

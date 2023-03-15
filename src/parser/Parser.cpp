@@ -9,6 +9,31 @@ namespace Ela {
 
 using enum NonTerminalType;
 using std::unique_ptr, std::make_unique, std::shared_ptr, std::make_shared;
+std::string humanReadableNonTerminalType(NonTerminalType type)
+{
+  switch (type) {
+    case NonTerminalType::Block:
+      return "Block";
+    case NonTerminalType::Expression:
+      return "Expression";
+    case NonTerminalType::FunctionDefinition:
+      return "FunctionDefinition";
+    case NonTerminalType::FunctionDefinitionList:
+      return "FunctionDefinition[]";
+    case NonTerminalType::ImportStatement:
+      return "ImportStatement";
+    case NonTerminalType::None:
+      return "None";
+    case NonTerminalType::PrimaryExpression:
+      return "PrimaryExpression";
+    case NonTerminalType::Program:
+      return "Program";
+    default:
+      return "Unimplemented";
+  }
+}
+
+
 
 void Parser::mParserError(Symbol expected, Token found) {
   std::string file{found.file};
