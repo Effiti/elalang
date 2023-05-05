@@ -106,6 +106,14 @@ class FunctionCall : public Primary {
 
   string toString() override;
 };
+class ArrayLiteral : public Primary {
+ public:
+  ArrayLiteral(vector<std::shared_ptr<Expression>> elements)
+      : elements(elements){};
+  const vector<std::shared_ptr<Expression>> elements;
+  string toString() override;
+  std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+};
 
 class VariableReference : public Primary {
  public:

@@ -18,10 +18,10 @@ void VariableSymbolTable::add(const VariableDefinitionSymbol &symbol) {
   symbols.emplace_back(symbol);
 }
 
-void VariableSymbolTable::removeAllLowerThan(int nesting) {
+void VariableSymbolTable::removeAllHigherThan(int nesting) {
   auto newSyms = std::vector<VariableDefinitionSymbol>();
   for (const auto &sym : symbols) {
-    if (sym.nesting >= nesting) {
+    if (sym.nesting <= nesting) {
       newSyms.emplace_back(std::move(sym));
     }
   }
@@ -59,6 +59,10 @@ TypeTable::TypeTable() {
   addBaseType(TypeExpressions::String);
   addBaseType(TypeExpressions::Char);
   addBaseType(TypeExpressions::Float);
+  addBaseType(TypeExpressions::Pointer);
+  addBaseType(TypeExpressions::Infer);
+  addBaseType(TypeExpressions::Function);
+
 }
 
 std::size_t TypeTable::getBaseTypeId(TypeExpressions::BaseType type) {
@@ -79,6 +83,10 @@ std::size_t TypeTable::getBaseTypeId(TypeExpressions::BaseType type) {
       return 7;
     case TypeExpressions::Pointer:
       return 8;
+    case TypeExpressions::Infer:
+      return 9;
+    case TypeExpressions::Function:
+      return 10;
     case TypeExpressions::Void:
       return 0;
   }

@@ -1,8 +1,7 @@
-func test2() -> int {
-  var x: int = 12+ 18 *9;
-  var z: float;
-  var a: [int];
-  var a1: array[int, 12];
-//  var a2 :; //does not work because the equal sign is needed by the parser
-  var a3:= 12;
+fn test2(x:int, y:s) -> int {
+
+  var a: [int] = [1,2,4,];
+}
+fn test3(x:int, y:s) -> int {
+  var a: [int] = [1,2,4,];
 }

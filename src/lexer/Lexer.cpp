@@ -117,7 +117,7 @@ namespace Ela::Lexer {
             Token t = Token{line, col, TokenType::ImportKeyword, ""};
             return t;
         }
-        if (lexeme == "func") {
+        if (lexeme == "fn") {
             return Token{line, col, TokenType::FunctionKeyword, ""};
         }
         if (lexeme == "if") {

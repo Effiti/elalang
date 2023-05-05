@@ -6,6 +6,7 @@ alternatively, you could just use the already generate [gnu](https://www.gnu.org
 # Design.
 ## TODO.
 - [ ] Type Inference for Variable Definitions
+- [ ] Array Literals -> check types
 - [x] Static Array type: `var x : [int,4];` (shorthand form for `var x : array[int,4];`)
 - [ ] become more functional, by adding a `function[tuple[x, x1, x2, x3], y]`-type with a possible shorthand form of `func()->array[func(int, float)->[int, 12], 12]` or `(int,int)->(int,int)->(int,int)->int` (a first step towards lambda functions)
 
@@ -21,7 +22,7 @@ func main( args : list[string]) -> int {
 func testFunc() {
     // is this function in scope?
     // even if it is, the reader may not know where it comes from,
-    // or how it was imported, because he has not seen the import-statement
+    // or how it is imported, because they have not seen the import-statement
     someFuncFromTestModule();
 }
 import "testModule"

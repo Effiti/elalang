@@ -7,7 +7,7 @@
 #include "./TypeExpression.h"
 
 namespace Ela::Analysis {
-  class StatementVisitor;
+class StatementVisitor;
 };
 
 namespace Ela::Statements {
@@ -33,6 +33,7 @@ class IfStatement : public Statement {
   std::shared_ptr<Expressions::Expression> condition;
   std::shared_ptr<Statement> statement;
 
+  void accept(Analysis::StatementVisitor* visitor) override;
   const string toString() const override;
 };
 
@@ -51,6 +52,7 @@ class ExpressionStatement : public Statement {
       : expression{std::move(expr)} {};
   std::shared_ptr<Expressions::Expression> expression;
 
+  void accept(Analysis::StatementVisitor* visitor) override;
   const std::string toString() const override;
 };
 
@@ -61,7 +63,7 @@ class BlockStatement : public Statement {
 
   std::vector<std::shared_ptr<Statement>> subNodes;
 
-  void accept(StatementVisitor * visitor) override;
+  void accept(StatementVisitor* visitor) override;
   const string toString() const override;
 };
 
@@ -88,7 +90,7 @@ class VariableDefinitionStatement : public Statement {
   std::shared_ptr<TypeExpressions::TypeExpression> type;
   std::shared_ptr<Expressions::Expression> value;
 
-  void accept(StatementVisitor * visitor) override;
+  void accept(StatementVisitor* visitor) override;
   const std::string toString() const override;
 };
 

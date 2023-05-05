@@ -72,7 +72,7 @@ class VariableSymbolTable {
   std::optional<VariableDefinitionSymbol> get(std::string name) const;
   void add(const VariableDefinitionSymbol& symbol);
   bool hasSymbol(std::string name) const;
-  void removeAllLowerThan(int nesting);
+  void removeAllHigherThan(int nesting);
   void print() {
     int i = 0;
     for (const auto& entry : symbols) {

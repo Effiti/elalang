@@ -9,8 +9,7 @@ namespace Ela {
 
 using enum NonTerminalType;
 using std::unique_ptr, std::make_unique, std::shared_ptr, std::make_shared;
-std::string humanReadableNonTerminalType(NonTerminalType type)
-{
+std::string humanReadableNonTerminalType(NonTerminalType type) {
   switch (type) {
     case NonTerminalType::Block:
       return "Block";
@@ -33,8 +32,6 @@ std::string humanReadableNonTerminalType(NonTerminalType type)
   }
 }
 
-
-
 void Parser::mParserError(Symbol expected, Token found) {
   std::string file{found.file};
   std::cerr << colors["red"] << "[ERROR] " << found.file << ":" << found.line
@@ -43,7 +40,8 @@ void Parser::mParserError(Symbol expected, Token found) {
     std::cerr << humanReadableTokenType(std::get<TokenType>(expected));
 
   else
-    std::cerr << humanReadableNonTerminalType(std::get<NonTerminalType>(expected));
+    std::cerr << humanReadableNonTerminalType(
+        std::get<NonTerminalType>(expected));
   std::cerr << " but found " << humanReadableTokenType(found.type) << std::endl;
   throw std::runtime_error("parser error");
 }
@@ -250,6 +248,14 @@ Statements::FunctionDefinition Parser::mFunctionDefinition() {
 }
 
 shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
+  if (consume(Lexer::TokenType::LParen)) {
+    vector<std::shared_ptr<TypeExpressions::TypeExpression>> types;
+    do {
+      types.push_back(mTypeExpression());
+    } while (consume(Lexer::TokenType::Comma));
+    return std::make_shared<TypeExpressions::TypeExpression>(
+        TypeExpressions::TupleTypeExpression(types));
+  }
   if (!match(Lexer::TokenType::Identifier) &&
       !match(Lexer::TokenType::LBracket))
     mParserError(Lexer::TokenType::Identifier, mCurrentToken());
@@ -354,10 +360,10 @@ Parser::mVariableDefinition() {
   consumeOrError(TokenType::VariableKeyword);
   std::string name = consumeOrError(TokenType::Identifier).value;
   consumeOrError(TokenType::Colon);
-  auto type =
-      match(TokenType::AssignmentOperator)
-          ? std::make_shared<TypeExpressions::SimpleType>(TypeExpressions::Void)
-          : mTypeExpression();
+  auto type = match(TokenType::AssignmentOperator)
+                  ? std::make_shared<TypeExpressions::SimpleType>(
+                        TypeExpressions::Infer)
+                  : mTypeExpression();
   if (match(TokenType::Semicolon)) {
     consumeOrError(TokenType::Semicolon);
     return make_unique<Statements::VariableDefinitionStatement>(
@@ -399,6 +405,21 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
   if (match(TokenType::NumberLiteral)) {
     return make_unique<Expressions::IntegerLiteral>(
         std::stoi(consumeOrError(TokenType::NumberLiteral).value));
+  }
+  if (consume(Lexer::TokenType::LBracket)) {
+    vector<shared_ptr<Expressions::Expression>> exprs;
+    if (consume(Lexer::TokenType::RBracket))
+      return make_shared<Expressions::ArrayLiteral>(
+          std::vector<std::shared_ptr<Expressions::Expression>>{});
+    while (!consume(TokenType::RBracket)) {
+      exprs.push_back(mExpression());
+      if (!match(Lexer::TokenType::RBracket))
+        consumeOrError(Lexer::TokenType::Comma);
+      else
+        // allow trailing comma
+        consume(TokenType::Comma);
+    }
+    return make_shared<Expressions::ArrayLiteral>(exprs);
   }
   if (match(TokenType::Identifier)) {
     shared_ptr<Expressions::Expression> expr;

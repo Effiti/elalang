@@ -4,8 +4,8 @@
 #include <variant>
 
 #include "../Ela.hpp"
-#include "Node.h"
 #include "Expression.h"
+#include "Node.h"
 
 namespace Ela::TypeExpressions {
 enum BaseType {
@@ -17,7 +17,15 @@ enum BaseType {
   Pointer,
   Boolean,
   Array,
-  Void
+  Function,
+  //"Special" Types
+  // Type of functions with no return value
+  Void,
+  // Type of defined variables wihout type specification (can also be used for
+  // other things)
+  Infer,
+  // Type of the "null" literal
+  Null
 };
 
 static std::string to_string(BaseType type) {
@@ -40,12 +48,18 @@ static std::string to_string(BaseType type) {
       return "Void";
     case Array:
       return "Array";
+    case Infer:
+      return "Infer";
+    case Null:
+      return "Null";
+    case Function:
+      return "Function";
   }
 }
 
 class TypeExpression : public Ela::Node {
  public:
-  virtual std::string toString() { return {"None"}; }
+  virtual std::string toString() const { return {"None"}; }
   virtual bool operator!=(const TypeExpression &other) const { return true; }
   virtual bool operator==(const TypeExpression &other) const { return true; }
 };
@@ -56,12 +70,28 @@ class SimpleType : public TypeExpression {
       : type{name} {};
   std::variant<const std::string, BaseType> type;
 
-  std::string toString() override {
+  std::string toString() const override {
     if (std::holds_alternative<const std::string>(type)) {
       return get<const std::string>(type);
     } else {
       return TypeExpressions::to_string(get<BaseType>(type));
     }
+  }
+};
+
+class TupleTypeExpression : public TypeExpression {
+ public:
+  vector<std::shared_ptr<TypeExpression>> types;
+  TupleTypeExpression(vector<std::shared_ptr<TypeExpression>> types)
+      : types(types) {}
+  std::string toString() const override {
+    std::string tuple_args;
+    for (const auto &item : types) {
+      std::string str;
+      str = item->toString();
+      tuple_args += str + ", ";
+    }
+    return "(" + tuple_args + ")";
   }
 };
 
@@ -72,15 +102,16 @@ class TypeTemplateExpression : public TypeExpression {
 
   TypeTemplateExpression(
       SimpleType baseType,
-      std::vector<std::variant<std::shared_ptr<TypeExpression>, int >> templateArguments)
+      std::vector<std::variant<std::shared_ptr<TypeExpression>, int>>
+          templateArguments)
       : templateArguments(std::move(templateArguments)),
         templatedType(std::move(baseType)) {}
 
-  std::string toString() override {
+  std::string toString() const override {
     std::string template_args;
     for (const auto &item : templateArguments) {
       std::string str;
-      if(std::holds_alternative<int>(item))
+      if (std::holds_alternative<int>(item))
         str = std::to_string(std::get<int>(item));
       else
         str = std::get<std::shared_ptr<TypeExpression>>(item)->toString();

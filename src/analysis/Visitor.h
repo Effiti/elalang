@@ -1,20 +1,25 @@
 #pragma once
 
+#include <iterator>
+
 #include "../parser/Statement.h"
 #include "./SymbolTable.h"
 
 namespace Ela::Analysis {
+class ProgramVisitor;
 
 class ExpressionVisitor {
  private:
   const VariableSymbolTable& variables;
+  TypeTable& types;
 
  public:
-  ExpressionVisitor(const VariableSymbolTable& variables_, TypeTable& types)
-      : variables(variables_){};
+  ExpressionVisitor(const VariableSymbolTable& variables, TypeTable& types)
+      : variables(variables), types(types){};
   void visitBinaryExpression(const Expressions::Binary& binary);
   void visitUnaryExpression(const Expressions::Unary& unary);
   std::size_t getVariableType(const std::string& name);
+  std::size_t getArrayType(const std::size_t baseType);
 };
 
 class TypeExpressionVisitor {
@@ -43,6 +48,10 @@ class StatementVisitor {
     std::cout << "---------" << std::endl << "vars:" << std::endl;
     variables.print();
   }
+
+  friend Analysis::ProgramVisitor;
+  friend Statements::ExpressionStatement;
+  friend Statements::IfStatement;
 };
 class ProgramVisitor {
  private:
