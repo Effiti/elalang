@@ -17,12 +17,13 @@ int main() {
       std::string_view(content),
   };
   auto tokens = l.parseSource();
-  for (auto tok : tokens) {
+  /* for (auto tok : tokens) {
     std::cout << Ela::colors["green"] << humanReadableTokenType(tok.type)
               << Ela::colors["end"] << " at " << tok.line << ":" << tok.col
               << " : ";
     std::cout << tok.value << "\n";
   }
+  */
   ParserOpts opts{10};
   Parser p{tokens, opts};
   // p.parse();

@@ -8,10 +8,10 @@ bool VariableSymbolTable::hasSymbol(std::string name) const {
 
 std::optional<VariableDefinitionSymbol> VariableSymbolTable::get(
     std::string name) const {
-    auto pos = std::find_if(std::begin(symbols), std::end(symbols),
+  auto pos = std::find_if(std::begin(symbols), std::end(symbols),
                           [&name](auto x) { return x.name == name; });
-    if(pos == std::end(symbols)) return std::nullopt;
-    return *pos;
+  if (pos == std::end(symbols)) return std::nullopt;
+  return *pos;
 }
 
 void VariableSymbolTable::add(const VariableDefinitionSymbol &symbol) {
@@ -20,6 +20,34 @@ void VariableSymbolTable::add(const VariableDefinitionSymbol &symbol) {
 
 void VariableSymbolTable::removeAllHigherThan(int nesting) {
   auto newSyms = std::vector<VariableDefinitionSymbol>();
+  for (const auto &sym : symbols) {
+    if (sym.nesting <= nesting) {
+      newSyms.emplace_back(std::move(sym));
+    }
+  }
+  symbols = newSyms;
+}
+
+bool FunctionSymbolTable::hasSymbol(std::string name) const {
+  auto pos = std::find_if(std::begin(symbols), std::end(symbols),
+                          [&name](auto x) { return x.name == name; });
+  return pos != std::end(symbols);
+}
+
+std::optional<FunctionDefinitionSymbol> FunctionSymbolTable::get(
+    std::string name) const {
+  auto pos = std::find_if(std::begin(symbols), std::end(symbols),
+                          [&name](auto x) { return x.name == name; });
+  if (pos == std::end(symbols)) return std::nullopt;
+  return *pos;
+}
+
+void FunctionSymbolTable::add(const FunctionDefinitionSymbol &symbol) {
+  symbols.emplace_back(symbol);
+}
+
+void FunctionSymbolTable::removeAllHigherThan(int nesting) {
+  auto newSyms = std::vector<FunctionDefinitionSymbol>();
   for (const auto &sym : symbols) {
     if (sym.nesting <= nesting) {
       newSyms.emplace_back(std::move(sym));
@@ -62,7 +90,6 @@ TypeTable::TypeTable() {
   addBaseType(TypeExpressions::Pointer);
   addBaseType(TypeExpressions::Infer);
   addBaseType(TypeExpressions::Function);
-
 }
 
 std::size_t TypeTable::getBaseTypeId(TypeExpressions::BaseType type) {

@@ -61,24 +61,33 @@ void StatementVisitor::visitBlock(const Statements::BlockStatement& block) {
 void ProgramVisitor::check() {
   for (const auto& function : program.functionDefinitions) {
     std::vector<std::shared_ptr<TypeExpressions::TypeExpression>> paramTypes;
+
+    
     for (const auto& param : function.parameters) {
       paramTypes.push_back(param.parameterType);
     }
-    const auto type = std::make_shared<TypeExpressions::TypeTemplateExpression>(
-        TypeExpressions::SimpleType(TypeExpressions::Function),
-        vector<std::variant<std::shared_ptr<TypeExpressions::TypeExpression>,
-                            int>>{
-            function.returnType,
-            std::make_shared<TypeExpressions::TupleTypeExpression>(
-                TypeExpressions::TupleTypeExpression(paramTypes))});
-    auto typeId = v.typeTable.getType(type->toString());
+    auto typeId = v.typeTable.getType(function.returnType->toString());
     if (typeId == -1) {
-      v.typeTable.add(TypeEntry(type->toString(), type));
-      typeId = v.typeTable.getType(type->toString());
+      v.typeTable.add(TypeEntry(function.returnType->toString(), function.returnType));
+      typeId = v.typeTable.getType(function.returnType->toString());
     }
-    v.variables.add(VariableDefinitionSymbol(
-        0, function.functionName, typeId,
-        std::make_shared<Expressions::NullExpression>()));
+    std::vector<size_t> paramTypeIds;
+
+    for (const auto& paramType : paramTypes) {
+      std::size_t id = v.typeTable.getType(paramType->toString());
+      if(id == -1) {
+        v.typeTable.add(TypeEntry(paramType->toString(), paramType));
+        id = v.typeTable.getType(paramType->toString());
+      }
+      paramTypeIds.push_back(id);
+    }
+    v.functions.add(
+        FunctionDefinitionSymbol(
+          (unsigned int)0,
+          function.functionName,
+          typeId,
+          paramTypeIds
+          ));
     v.visitBlock(*std::move(function.statements));
   }
 }
@@ -181,5 +190,23 @@ std::size_t Expressions::ArrayLiteral::getType(
   }
   return c.getArrayType(firstType);
 }
+std::size_t Expressions::FunctionCall::getType(
+    Analysis::ExpressionVisitor& c) const {
+  const auto& fnopt = c.functions.get(functionName);
+  if (!fnopt) {
+    throw std::runtime_error("unknown function");
+  }
+  Analysis::FunctionDefinitionSymbol fn = *fnopt;
+  const std::size_t& returnType = fn.type;
 
+  const std::vector<size_t>& argTypes = fn.argTypes;
+  std::size_t i = 0;
+  for (const auto& argType : argTypes) {
+    if (argType != callParams[i]->getType(c)) {
+      throw std::runtime_error("argument type mismatch");
+    }
+    i++;
+  }
+  return returnType;
+}
 }  // namespace Ela

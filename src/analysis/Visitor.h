@@ -10,12 +10,14 @@ class ProgramVisitor;
 
 class ExpressionVisitor {
  private:
-  const VariableSymbolTable& variables;
-  TypeTable& types;
+
 
  public:
-  ExpressionVisitor(const VariableSymbolTable& variables, TypeTable& types)
-      : variables(variables), types(types){};
+  const VariableSymbolTable& variables;
+  const FunctionSymbolTable& functions;
+  TypeTable& types;
+  ExpressionVisitor(const VariableSymbolTable& variables, const FunctionSymbolTable& functions, TypeTable& types)
+      : variables(variables),  functions{functions}, types(types){};
   void visitBinaryExpression(const Expressions::Binary& binary);
   void visitUnaryExpression(const Expressions::Unary& unary);
   std::size_t getVariableType(const std::string& name);
@@ -30,6 +32,7 @@ class StatementVisitor {
   unsigned int nesting;
 
   VariableSymbolTable variables;
+  FunctionSymbolTable functions;
   ExpressionVisitor expressionVisitor;
   TypeTable typeTable;
 
@@ -38,7 +41,8 @@ class StatementVisitor {
       : nesting{0},
         variables{},
         typeTable{},
-        expressionVisitor(variables, typeTable) {}
+        functions{},
+        expressionVisitor(variables, functions, typeTable) {}
   void visitBlock(Ela::Statements::BlockStatement const& s);
   void visitVariableDefinition(
       const Ela::Statements::VariableDefinitionStatement& s);

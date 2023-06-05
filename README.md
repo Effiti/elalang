@@ -5,10 +5,10 @@ to build, you need
 alternatively, you could just use the already generate [gnu](https://www.gnu.org)-[make](https://www.gnu.org/software/make/)-[Makefile](https://www.gnu.org/software/make/manual/make.html) which is published in this repo. 
 # Design.
 ## TODO.
-- [ ] Type Inference for Variable Definitions
-- [ ] Array Literals -> check types
+- [x] Type Inference for Variable Definitions
+- [x] Array Literals -> check types
 - [x] Static Array type: `var x : [int,4];` (shorthand form for `var x : array[int,4];`)
-- [ ] become more functional, by adding a `function[tuple[x, x1, x2, x3], y]`-type with a possible shorthand form of `func()->array[func(int, float)->[int, 12], 12]` or `(int,int)->(int,int)->(int,int)->int` (a first step towards lambda functions)
+- [x] become more functional, by adding a `Function` type
 
 ## Import-statements.
 import-statements currently have to appear in the beginning of the file.

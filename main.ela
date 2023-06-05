@@ -1,7 +1,8 @@
-fn test2(x:int, y:s) -> int {
-
+fn test2(x:int) -> int {
   var a: [int] = [1,2,4,];
 }
-fn test3(x:int, y:s) -> int {
+
+fn test3(x:int) -> int {
   var a: [int] = [1,2,4,];
+  var x := test2(1);
 }
