@@ -90,6 +90,7 @@ TypeTable::TypeTable() {
   addBaseType(TypeExpressions::Pointer);
   addBaseType(TypeExpressions::Infer);
   addBaseType(TypeExpressions::Function);
+  addBaseType(TypeExpressions::Null);
 }
 
 std::size_t TypeTable::getBaseTypeId(TypeExpressions::BaseType type) {
@@ -116,6 +117,8 @@ std::size_t TypeTable::getBaseTypeId(TypeExpressions::BaseType type) {
       return 10;
     case TypeExpressions::Void:
       return 0;
+    case TypeExpressions::Null:
+      return 11;
   }
 }
 

@@ -31,7 +31,7 @@ void StatementVisitor::visitVariableDefinition(
           "type of variable " + s.name +
           " not equal to rhs of assignment (comparing types " +
           s.type->toString() + ":" + std::to_string(typeId) + " (of lhs) and " +
-          s.type->toString() + ":" + std::to_string(exprTypeId) +
+          typeTable.getType((int)exprTypeId).type->toString() + ":" + std::to_string(exprTypeId) +
           " (of rhs) )");
     }
   }
