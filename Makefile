@@ -17,9 +17,6 @@ endif
 ifeq ($(config),testela)
   elalang_config = testela
 endif
-ifeq ($(config),scan)
-  elalang_config = scan
-endif
 
 PROJECTS := elalang
 
@@ -43,7 +40,6 @@ help:
 	@echo "  debug"
 	@echo "  release"
 	@echo "  testela"
-	@echo "  scan"
 	@echo ""
 	@echo "TARGETS:"
 	@echo "   all (default)"

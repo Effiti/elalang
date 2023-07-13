@@ -28,9 +28,11 @@ enum class UnaryOperatorType {
   PreDecrement,
   PostDecrement,
 };
-
 namespace Ela::Analysis {
 class ExpressionVisitor;
+}
+namespace Ela::Emitter {
+  class Emitter;
 }
 namespace Ela::Expressions {
 class Expression : public Node {
@@ -38,7 +40,7 @@ class Expression : public Node {
   virtual std::size_t getType(Analysis::ExpressionVisitor& c) const {
     return -1;
   };
-  //virtual llvm::Value *codegen() = 0;
+  virtual llvm::Value *codegen(Emitter::Emitter& e) {return nullptr;}
   virtual std::string toString();
 };
 
@@ -87,7 +89,8 @@ class IntegerLiteral : public Primary {
 
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
-  //llvm::Value *codegen() override;
+
+  llvm::Value *codegen(Emitter::Emitter&) override;
 };
 
 class NullExpression : public Primary {
@@ -123,6 +126,7 @@ class VariableReference : public Primary {
 
   string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+  llvm::Value *codegen(Emitter::Emitter&e ) override;
 };
 
 class StringLiteral : public Primary {

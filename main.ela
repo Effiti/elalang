@@ -5,5 +5,5 @@ fn test2(x: int) -> string {
 fn test3(x: int) -> int {
   var a: [int] = [1,2,4,];
   var x := test2(2);
-  var t: int;
+  var t:int = a.b.c;
 }

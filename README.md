@@ -3,13 +3,13 @@
 to build, you need
 - [premake](https://premake.github.io/) to generate project files
 alternatively, you could just use the already generate [gnu](https://www.gnu.org)-[make](https://www.gnu.org/software/make/)-[Makefile](https://www.gnu.org/software/make/manual/make.html) which is published in this repo. 
-# Design.
-## TODO.
+# TODO.
 - [x] Type Inference for Variable Definitions
 - [x] Array Literals -> check types
 - [x] Static Array type: `var x : [int,4];` (shorthand form for `var x : array[int,4];`)
 - [x] become more functional, by adding a `Function` type
 
+# Design.
 ## Import-statements.
 import-statements currently have to appear in the beginning of the file.
 This makes the program easier to read, and also avoids
