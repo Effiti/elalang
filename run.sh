@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
 make -k all
-./bin/elalang
+./bin/elalang ${@}
