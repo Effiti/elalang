@@ -9,7 +9,7 @@
 #include "parser/Parser.h"
 
 namespace Ela::App {
-const static auto optstring = "lpa";
+const static auto optstring = "lpaf";
 enum class RunConf { LEXER, PARSER, FULL, ANALYSIS };
 const RunConf getConf(int argc, char *const argv[]) {
   // supplying more than one option does not make sense. We will ignore any option that comes after the first one.
@@ -20,6 +20,7 @@ const RunConf getConf(int argc, char *const argv[]) {
       return RunConf::PARSER;
     case 'a':
       return RunConf::ANALYSIS;
+    case 'f':
     default:
       return RunConf::FULL;
   }
