@@ -31,3 +31,6 @@ using std::string;
 using std::vector;
 extern std::map<std::string, std::string> colors;
 } // namespace Ela
+namespace Ela::Emitter{
+  class Emitter;
+};

@@ -235,11 +235,11 @@ Statements::FunctionDefinition Parser::mFunctionDefinition() {
   }
   consumeOrError(TokenType::RParen);
   shared_ptr<TypeExpressions::TypeExpression> returnType;
-  if (!consume(TokenType::HyphenArrow)) {
+  if (consume(TokenType::HyphenArrow)) {
+    returnType = mTypeExpression();
+  } else {
     returnType =
         make_unique<TypeExpressions::SimpleType>(TypeExpressions::Void);
-  } else {
-    returnType = mTypeExpression();
   }
   auto block = *std::move(mBlockStatement());
 
@@ -432,6 +432,7 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
           consumeOrError(TokenType::Identifier).value);
       expr = std::move(var);
     }
+    // TODO
     while (consume(TokenType::Period)) {
       if (next().type == TokenType::LParen) {
         auto call = mFunctionCall();
@@ -495,8 +496,8 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
   if (consume(TokenType::Increment)) {
     return make_unique<Expressions::Unary>(mPrimaryExpression(),
                                            UnaryOperatorType::PreIncrement);
-  } else
-    mParserError(NonTerminalType::Expression, mCurrentToken());
+  }
+  mParserError(NonTerminalType::Expression, mCurrentToken());
 }
 
 shared_ptr<Expressions::Expression> Parser::mSecondaryExpression() {

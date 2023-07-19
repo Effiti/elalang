@@ -4,7 +4,6 @@
 #include <variant>
 
 #include "../Ela.hpp"
-#include "Expression.h"
 #include "Node.h"
 
 namespace Ela::TypeExpressions {
@@ -57,11 +56,15 @@ static std::string to_string(BaseType type) {
   }
 }
 
+
+
 class TypeExpression : public Ela::Node {
  public:
   virtual std::string toString() const { return {"None"}; }
   virtual bool operator!=(const TypeExpression &other) const { return true; }
   virtual bool operator==(const TypeExpression &other) const { return true; }
+  // TODO search some sort of typedef-Table for defined classes.
+  virtual llvm::Type *getIRType(Emitter::Emitter&) { return nullptr; };
 };
 
 class SimpleType : public TypeExpression {
@@ -77,6 +80,7 @@ class SimpleType : public TypeExpression {
       return TypeExpressions::to_string(get<BaseType>(type));
     }
   }
+  llvm::Type* getIRType(Emitter::Emitter&) override;
 };
 
 class TupleTypeExpression : public TypeExpression {

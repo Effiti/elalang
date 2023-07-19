@@ -1,4 +1,5 @@
 #include "TypeExpression.h"
+#include <variant>
 
-namespace TypeExpressions {
+namespace Ela::TypeExpressions {
 } // TypeExpressions

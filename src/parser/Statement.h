@@ -95,8 +95,6 @@ class VariableDefinitionStatement : public Statement {
 };
 
 class Parameter : public Node {
-  ;
-
  public:
   std::string parameterName;
   std::shared_ptr<TypeExpressions::TypeExpression> parameterType;
@@ -126,7 +124,6 @@ class FunctionDefinition : public Statement {
 class Program : public Node {
  public:
   Program() = default;
-  ;
   Program(vector<ImportStatement> iS, vector<FunctionDefinition> fD)
       : importStatements{std::move(iS)}, functionDefinitions{std::move(fD)} {}
   vector<ImportStatement> importStatements;

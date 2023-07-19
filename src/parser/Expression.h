@@ -53,6 +53,7 @@ class Unary : public Expression {
 
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+  llvm::Value *codegen(Emitter::Emitter&) override;
 };
 
 class Binary : public Expression {
@@ -67,6 +68,7 @@ class Binary : public Expression {
 
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 class Primary : public Expression {};
@@ -109,6 +111,7 @@ class FunctionCall : public Primary {
 
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
   string toString() override;
+  llvm::Value* codegen(Emitter::Emitter &e) override;
 };
 class ArrayLiteral : public Primary {
  public:
