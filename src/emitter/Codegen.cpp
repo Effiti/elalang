@@ -46,10 +46,10 @@ llvm::Value* Emitter::ret(const Statements::ReturnStatement& s) {
 llvm::Value* Emitter::integerLiteralValue(int v) {
   // HACK Bit width and unsigned integers -> enum "IntegerType", later
   // autodetection
-  return llvm::ConstantInt::get(*TheContext, llvm::APInt(64, v, true));
+  return llvm::ConstantInt::get(*llvmContext, llvm::APInt(64, v, true));
 }
 llvm::Value* Emitter::varRef(const std::string& name) {
-  llvm::Value* V = NamedValues[name];
+  llvm::Value* V = namedValues[name];
   if (!V) emitterError("Unknown variable name");
   return V;
 }
@@ -57,7 +57,7 @@ llvm::Value* Emitter::unary(Expressions::Unary& expr) {
   // TODO
   switch (expr.op) {
     case UnaryOperatorType::Minus:
-      return Builder->CreateUnOp(llvm::Instruction::UnaryOps::FNeg,
+      return irBuilder->CreateUnOp(llvm::Instruction::UnaryOps::FNeg,
                                  expr.expression->codegen(*this));
     default:
       return emitterError("unsupported Unary Operator type");
@@ -68,28 +68,30 @@ llvm::Value* Emitter::binary(Expressions::Binary& expr) {
   llvm::Value *lhs, *rhs;
   lhs = expr.lhs->codegen(*this);
   rhs = expr.rhs->codegen(*this);
+  lhs->print(llvm::errs());
+  rhs->print(llvm::errs());
 
   switch (expr.op) {
     case BinaryOperatorType::Plus:
-      return Builder->CreateFAdd(lhs, rhs, "addtmp");
+      return irBuilder->CreateFAdd(lhs, rhs, "addtmp");
     case BinaryOperatorType::Division:
-      return Builder->CreateFDiv(lhs, rhs, "divtmp");
+      return irBuilder->CreateFDiv(lhs, rhs, "divtmp");
     case BinaryOperatorType::Minus:
-      return Builder->CreateFSub(lhs, rhs, "subtmp");
+      return irBuilder->CreateFSub(lhs, rhs, "subtmp");
     case BinaryOperatorType::Multiplication:
-      return Builder->CreateFMul(lhs, rhs, "multmp");
+      return irBuilder->CreateFMul(lhs, rhs, "multmp");
     case BinaryOperatorType::Equal:
-      return Builder->CreateFCmpUEQ(lhs, rhs, "equtmp");
+      return irBuilder->CreateFCmpUEQ(lhs, rhs, "equtmp");
     case BinaryOperatorType::UnEqual:
-      return Builder->CreateFCmpUNE(lhs, rhs, "neqtmp");
+      return irBuilder->CreateFCmpUNE(lhs, rhs, "neqtmp");
     case BinaryOperatorType::Greater:
-      return Builder->CreateFCmpUGT(lhs, rhs, "gttmp");
+      return irBuilder->CreateFCmpUGT(lhs, rhs, "gttmp");
     case BinaryOperatorType::Less:
-      return Builder->CreateFCmpULT(lhs, rhs, "lttmp");
+      return irBuilder->CreateFCmpULT(lhs, rhs, "lttmp");
     case BinaryOperatorType::LessEqual:
-      return Builder->CreateFCmpULE(lhs, rhs, "letmp");
+      return irBuilder->CreateFCmpULE(lhs, rhs, "letmp");
     case BinaryOperatorType::GreaterEqual:
-      return Builder->CreateFCmpUGE(lhs, rhs, "getmp");
+      return irBuilder->CreateFCmpUGE(lhs, rhs, "getmp");
 
     case BinaryOperatorType::RightShift:
     case BinaryOperatorType::LeftShift:
@@ -98,7 +100,7 @@ llvm::Value* Emitter::binary(Expressions::Binary& expr) {
   }
 }
 llvm::Value* Emitter::functionCall(Expressions::FunctionCall& call) {
-  llvm::Function* callee = TheModule->getFunction(call.functionName);
+  llvm::Function* callee = irModule->getFunction(call.functionName);
   if (!callee) return emitterError("unknown function");
 
   if (callee->arg_size() != call.callParams.size())
@@ -107,7 +109,7 @@ llvm::Value* Emitter::functionCall(Expressions::FunctionCall& call) {
   for (std::size_t i = 0; i < call.callParams.size(); ++i) {
     args.push_back(call.callParams[i]->codegen(*this));
   }
-  return Builder->CreateCall(callee, args, "calltmp");
+  return irBuilder->CreateCall(callee, args, "calltmp");
 }
 
 llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
@@ -119,20 +121,20 @@ llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
                                               parameterTypes, false);
   llvm::Function* function =
       llvm::Function::Create(functionType, llvm::Function::ExternalLinkage,
-                             def.functionName, TheModule.get());
+                             def.functionName, irModule.get());
   std::size_t i = 0;
   for (auto& Arg : function->args())
     Arg.setName(def.parameters[i++].parameterName);
 
   llvm::BasicBlock* BB =
-      llvm::BasicBlock::Create(*TheContext, "entry", function);
-  Builder->SetInsertPoint(BB);
+      llvm::BasicBlock::Create(*llvmContext, "entry", function);
+  irBuilder->SetInsertPoint(BB);
 
   for (auto& arg : function->args())
-    NamedValues[std::string(arg.getName())] = &arg;
+    namedValues[std::string(arg.getName())] = &arg;
 
   if (llvm::Value* retVal = def.statements->codegen(*this)) {
-    Builder->CreateRet(retVal);
+    irBuilder->CreateRet(retVal);
     verifyFunction(*function);
     return function;
   }
@@ -147,18 +149,18 @@ llvm::Type* Emitter::simpleType(TypeExpressions::SimpleType& type) {
     return emitterError("custom types unsupported");
   switch (std::get<TypeExpressions::BaseType>(type.type)) {
     case TypeExpressions::Boolean:
-      return llvm::Type::getInt1Ty(*TheContext);
+      return llvm::Type::getInt1Ty(*llvmContext);
     case TypeExpressions::Integer:
-      return llvm::Type::getInt32Ty(*TheContext);
+      return llvm::Type::getInt32Ty(*llvmContext);
     case TypeExpressions::Null:
     case TypeExpressions::Void:
-      return llvm::Type::getVoidTy(*TheContext);
+      return llvm::Type::getVoidTy(*llvmContext);
     case TypeExpressions::Double:
-      return llvm::Type::getDoubleTy(*TheContext);
+      return llvm::Type::getDoubleTy(*llvmContext);
     case TypeExpressions::Char:
-      return llvm::Type::getInt8Ty(*TheContext);
+      return llvm::Type::getInt8Ty(*llvmContext);
     case TypeExpressions::Float:
-      return llvm::Type::getFloatTy(*TheContext);
+      return llvm::Type::getFloatTy(*llvmContext);
     default:
       return emitterError("unimplemented IR Type");
   }
@@ -167,6 +169,6 @@ void Emitter::codegen(const Statements::Program& program) {
   for (const auto& def : program.functionDefinitions) {
     this->function(def);
   }
-  TheModule->print(llvm::errs(), nullptr);
+  irModule->print(llvm::errs(), nullptr);
 }
 }  // namespace Ela::Emitter

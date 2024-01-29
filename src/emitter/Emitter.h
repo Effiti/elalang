@@ -8,10 +8,10 @@
 
 namespace Ela::Emitter {
 class Emitter {
-  const std::unique_ptr<llvm::LLVMContext> TheContext;
-  const std::unique_ptr<llvm::IRBuilder<>> Builder = std::make_unique<llvm::IRBuilder<>>(*TheContext);
-  std::unique_ptr<llvm::Module> TheModule;
-  std::map<std::string, llvm::Value *> NamedValues;
+  const std::unique_ptr<llvm::LLVMContext> llvmContext;
+  const std::unique_ptr<llvm::IRBuilder<>> irBuilder = std::make_unique<llvm::IRBuilder<>>(*llvmContext);
+  std::unique_ptr<llvm::Module> irModule;
+  std::map<std::string, llvm::Value *> namedValues;
 
  public:
   std::nullptr_t emitterError(std::string str) {
@@ -19,8 +19,8 @@ class Emitter {
     return nullptr;
   }
   Emitter() : 
-     TheContext(std::make_unique<llvm::LLVMContext>()),
-     TheModule(std::make_unique<llvm::Module>("my cool JIT", *TheContext)), Builder(std::make_unique<llvm::IRBuilder<>>(*TheContext)){
+     llvmContext(std::make_unique<llvm::LLVMContext>()),
+     irModule(std::make_unique<llvm::Module>("my cool JIT", *llvmContext)), irBuilder(std::make_unique<llvm::IRBuilder<>>(*llvmContext)){
       
     }; 
   llvm::Value *integerLiteralValue(int v);
