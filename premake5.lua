@@ -1,11 +1,11 @@
 workspace "elalang"
-project "elalang"
   configurations {"Debug", "Release", "lexer"}
+project "elalang"
   kind "ConsoleApp"
   language "C++"
   cppdialect "C++20"
   targetdir "./bin/"
-  links {"LLVM-15"}
+  links {"LLVM-16"}
   files {"**.hpp", "**.cpp"}
 
   filter "configurations:Debug"

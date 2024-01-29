@@ -1,5 +1,5 @@
 #include "Token.h"
-namespace Ela::Lexer {
+namespace Ela::Lexing {
     std::string humanReadableTokenType(TokenType type) {
         using
         enum TokenType;

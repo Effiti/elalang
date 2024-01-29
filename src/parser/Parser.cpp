@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "Expression.h"
 #include "Statement.h"
 #include "TypeExpression.h"
 namespace Ela {
@@ -177,6 +178,16 @@ BinaryOperatorType Parser::getBinaryOperatorType(const Token &t) {
       return BinaryOperatorType::Multiplication;
     case TokenType::EqualsOperator:
       return BinaryOperatorType::Equal;
+    case TokenType::BangEqualsOperator:
+      return BinaryOperatorType::UnEqual;
+    case TokenType::GreaterThanOperator:
+      return BinaryOperatorType::Greater;
+    case TokenType::LessThanOperator:
+      return BinaryOperatorType::Less;
+    case TokenType::EqualOrGreaterThanOperator:
+      return BinaryOperatorType::GreaterEqual;
+    case TokenType::EqualOrLessThanOperator:
+      return BinaryOperatorType::LessEqual;
     default:
       return BinaryOperatorType::None;
   }
@@ -248,19 +259,19 @@ Statements::FunctionDefinition Parser::mFunctionDefinition() {
 }
 
 shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
-  if (consume(Lexer::TokenType::LParen)) {
+  if (consume(Lexing::TokenType::LParen)) {
     vector<std::shared_ptr<TypeExpressions::TypeExpression>> types;
     do {
       types.push_back(mTypeExpression());
-    } while (consume(Lexer::TokenType::Comma));
+    } while (consume(Lexing::TokenType::Comma));
     return std::make_shared<TypeExpressions::TypeExpression>(
         TypeExpressions::TupleTypeExpression(types));
   }
-  if (!match(Lexer::TokenType::Identifier) &&
-      !match(Lexer::TokenType::LBracket))
-    mParserError(Lexer::TokenType::Identifier, mCurrentToken());
+  if (!match(Lexing::TokenType::Identifier) &&
+      !match(Lexing::TokenType::LBracket))
+    mParserError(Lexing::TokenType::Identifier, mCurrentToken());
   const std::string baseTypeName =
-      match(Lexer::TokenType::Identifier)
+      match(Lexing::TokenType::Identifier)
           ? consumeOrError(TokenType::Identifier).value
           : "array";
 
@@ -279,9 +290,9 @@ shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
   }
   vector<std::variant<shared_ptr<TypeExpressions::TypeExpression>, int>> args;
   do {
-    if (match(Lexer::TokenType::NumberLiteral))
+    if (match(Lexing::TokenType::NumberLiteral))
       args.push_back(
-          std::stoi(consumeOrError(Lexer::TokenType::NumberLiteral).value));
+          std::stoi(consumeOrError(Lexing::TokenType::NumberLiteral).value));
     else
       args.push_back(mTypeExpression());
   } while (consume(TokenType::Comma));
@@ -406,15 +417,15 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
     return make_unique<Expressions::IntegerLiteral>(
         std::stoi(consumeOrError(TokenType::NumberLiteral).value));
   }
-  if (consume(Lexer::TokenType::LBracket)) {
+  if (consume(Lexing::TokenType::LBracket)) {
     vector<shared_ptr<Expressions::Expression>> exprs;
-    if (consume(Lexer::TokenType::RBracket))
+    if (consume(Lexing::TokenType::RBracket))
       return make_shared<Expressions::ArrayLiteral>(
           std::vector<std::shared_ptr<Expressions::Expression>>{});
     while (!consume(TokenType::RBracket)) {
       exprs.push_back(mExpression());
-      if (!match(Lexer::TokenType::RBracket))
-        consumeOrError(Lexer::TokenType::Comma);
+      if (!match(Lexing::TokenType::RBracket))
+        consumeOrError(Lexing::TokenType::Comma);
       else
         // allow trailing comma
         consume(TokenType::Comma);

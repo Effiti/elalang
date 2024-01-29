@@ -22,7 +22,7 @@ ifeq ($(config),debug)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g ${llvm-config --cxxflags --ldflags --system-libs --libs core}
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -std=c++20 ${llvm-config --cxxflags --ldflags --system-libs --libs core}
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += -lLLVM-15
+  LIBS += -lLLVM-16
   LDDEPS +=
   ALL_LDFLAGS += $(LDFLAGS)
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
@@ -49,7 +49,7 @@ ifeq ($(config),release)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -std=c++20
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += -lLLVM-15
+  LIBS += -lLLVM-16
   LDDEPS +=
   ALL_LDFLAGS += $(LDFLAGS) -s
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
@@ -64,19 +64,19 @@ all: prebuild prelink $(TARGET)
 
 endif
 
-ifeq ($(config),testela)
+ifeq ($(config),lexer)
   RESCOMP = windres
   TARGETDIR = bin
-  TARGET = $(TARGETDIR)/test
-  OBJDIR = obj/Testela
-  DEFINES += -DDEBUG_BUILD
+  TARGET = $(TARGETDIR)/elalang
+  OBJDIR = obj/lexer
+  DEFINES +=
   INCLUDES +=
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS)
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -std=c++20
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += -lLLVM-15 -lgtest
+  LIBS += -lLLVM-16
   LDDEPS +=
   ALL_LDFLAGS += $(LDFLAGS) -s
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
@@ -95,9 +95,10 @@ OBJECTS := \
 	$(OBJDIR)/Ela.o \
 	$(OBJDIR)/SymbolTable.o \
 	$(OBJDIR)/Visitor.o \
-	$(OBJDIR)/Emitter.o \
+	$(OBJDIR)/Codegen.o \
 	$(OBJDIR)/Lexer.o \
 	$(OBJDIR)/Token.o \
+	$(OBJDIR)/main.o \
 	$(OBJDIR)/Expression.o \
 	$(OBJDIR)/Node.o \
 	$(OBJDIR)/Parser.o \
@@ -107,18 +108,6 @@ OBJECTS := \
 RESOURCES := \
 
 CUSTOMFILES := \
-
-ifeq ($(config),debug)
-  OBJECTS += \
-	$(OBJDIR)/main.o \
-
-endif
-
-ifeq ($(config),release)
-  OBJECTS += \
-	$(OBJDIR)/main.o \
-
-endif
 
 SHELLTYPE := posix
 ifeq (.exe,$(findstring .exe,$(ComSpec)))
@@ -182,7 +171,7 @@ $(OBJDIR)/SymbolTable.o: src/analysis/SymbolTable.cpp
 $(OBJDIR)/Visitor.o: src/analysis/Visitor.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Emitter.o: src/emitter/Emitter.cpp
+$(OBJDIR)/Codegen.o: src/emitter/Codegen.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Lexer.o: src/lexer/Lexer.cpp

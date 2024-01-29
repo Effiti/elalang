@@ -2,7 +2,7 @@
 #include "../Ela.hpp"
 #define NULLTOK Token{0,0,TokenType::None, ""};
 
-namespace Ela::Lexer {
+namespace Ela::Lexing {
     using std::string;
     enum class TokenType {
         None,

@@ -9,6 +9,9 @@
 namespace Ela::Analysis {
 class StatementVisitor;
 };
+namespace Ela::Emitter {
+class Emitter;
+}
 
 namespace Ela::Statements {
 using namespace Ela::Analysis;
@@ -23,6 +26,8 @@ class Statement : public Node {
  public:
   virtual void accept(Analysis::StatementVisitor* visitor){};
   virtual const std::string toString() const;
+  virtual llvm::Value* codegen(Emitter::Emitter& e) { return nullptr; }
+  virtual const bool is_return() const { return false; }
 };
 
 class IfStatement : public Statement {
@@ -65,6 +70,7 @@ class BlockStatement : public Statement {
 
   void accept(StatementVisitor* visitor) override;
   const string toString() const override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 class ReturnStatement : public Statement {
@@ -73,7 +79,9 @@ class ReturnStatement : public Statement {
       : expression{std::move(expr)} {};
   std::shared_ptr<Expressions::Expression> expression;
 
+  const bool is_return() const override { return true; }
   const string toString() const override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 class VariableDefinitionStatement : public Statement {

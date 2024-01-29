@@ -14,7 +14,13 @@ enum class BinaryOperatorType {
   Division,
   RightShift,
   LeftShift,
+
   Equal,
+  Greater,
+  Less,
+  GreaterEqual,
+  LessEqual,
+  UnEqual,
 
   MemberAccess,
 };
@@ -23,6 +29,7 @@ enum class UnaryOperatorType {
   None,
   Plus,
   Minus,
+  Not,
   PreIncrement,
   PostIncrement,
   PreDecrement,

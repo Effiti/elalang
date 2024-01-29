@@ -31,8 +31,8 @@ void StatementVisitor::visitVariableDefinition(
           "type of variable " + s.name +
           " not equal to rhs of assignment (comparing types " +
           s.type->toString() + ":" + std::to_string(typeId) + " (of lhs) and " +
-          typeTable.getType((int)exprTypeId).type->toString() + ":" + std::to_string(exprTypeId) +
-          " (of rhs) )");
+          typeTable.getType((int)exprTypeId).type->toString() + ":" +
+          std::to_string(exprTypeId) + " (of rhs) )");
     }
   }
 
@@ -62,32 +62,29 @@ void ProgramVisitor::check() {
   for (const auto& function : program.functionDefinitions) {
     std::vector<std::shared_ptr<TypeExpressions::TypeExpression>> paramTypes;
 
-    
     for (const auto& param : function.parameters) {
       paramTypes.push_back(param.parameterType);
     }
     auto typeId = v.typeTable.getType(function.returnType->toString());
     if (typeId == -1) {
-      v.typeTable.add(TypeEntry(function.returnType->toString(), function.returnType));
+      v.typeTable.add(
+          TypeEntry(function.returnType->toString(), function.returnType));
       typeId = v.typeTable.getType(function.returnType->toString());
     }
     std::vector<size_t> paramTypeIds;
 
     for (const auto& paramType : paramTypes) {
       std::size_t id = v.typeTable.getType(paramType->toString());
-      if(id == -1) {
+      if (id == -1) {
         v.typeTable.add(TypeEntry(paramType->toString(), paramType));
         id = v.typeTable.getType(paramType->toString());
       }
       paramTypeIds.push_back(id);
     }
-    v.functions.add(
-        FunctionDefinitionSymbol(
-          (unsigned int)0,
-          function.functionName,
-          typeId,
-          paramTypeIds
-          ));
+    v.functions.add(FunctionDefinitionSymbol(
+        (unsigned int)0, function.functionName, typeId, paramTypeIds));
+  }
+  for (const auto& function : program.functionDefinitions) {
     v.visitBlock(*std::move(function.statements));
   }
 }
@@ -200,6 +197,10 @@ std::size_t Expressions::FunctionCall::getType(
   const std::size_t& returnType = fn.type;
 
   const std::vector<size_t>& argTypes = fn.argTypes;
+
+  if(argTypes.size() != callParams.size()) 
+    throw std::runtime_error("argument mismatch");
+
   std::size_t i = 0;
   for (const auto& argType : argTypes) {
     if (argType != callParams[i]->getType(c)) {

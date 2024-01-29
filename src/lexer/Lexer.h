@@ -2,7 +2,7 @@
 
 #include "../Ela.hpp"
 #include "Token.h"
-namespace Ela::Lexer {
+namespace Ela::Lexing {
     class Lexer {
     public:
         explicit Lexer(std::string_view source) : mStrSource{source} {}

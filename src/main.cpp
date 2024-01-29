@@ -7,6 +7,7 @@
 #include "analysis/Visitor.h"
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
+#include "emitter/Emitter.h"
 
 namespace Ela::App {
 const static auto optstring = "lpaf";
@@ -36,7 +37,7 @@ int main(int argc, char *const argv[]) {
   std::ifstream ifs("main.ela");
   std::string content((std::istreambuf_iterator<char>(ifs)),
                       (std::istreambuf_iterator<char>()));
-  Ela::Lexer::Lexer l{
+  Ela::Lexing::Lexer l{
       std::string_view(content),
   };
   auto tokens = l.parseSource();
@@ -78,6 +79,10 @@ int main(int argc, char *const argv[]) {
 
   Analysis::ProgramVisitor v = Analysis::ProgramVisitor{*program};
   v.check();
+  if(conf == App::RunConf::ANALYSIS)
+    return EXIT_SUCCESS;
+  Emitter::Emitter emitter{};
+  emitter.codegen(*program);
 
   return EXIT_SUCCESS;
 }

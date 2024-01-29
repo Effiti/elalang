@@ -14,8 +14,8 @@ endif
 ifeq ($(config),release)
   elalang_config = release
 endif
-ifeq ($(config),testela)
-  elalang_config = testela
+ifeq ($(config),lexer)
+  elalang_config = lexer
 endif
 
 PROJECTS := elalang
@@ -39,7 +39,7 @@ help:
 	@echo "CONFIGURATIONS:"
 	@echo "  debug"
 	@echo "  release"
-	@echo "  testela"
+	@echo "  lexer"
 	@echo ""
 	@echo "TARGETS:"
 	@echo "   all (default)"

@@ -3,7 +3,7 @@
 #include "Token.h"
 #include <cctype>
 #include <string>
-namespace Ela::Lexer {
+namespace Ela::Lexing {
 // NOTE: CLEAN
     void Lexer::logLexerError(std::string errorMessage) {
         std::cerr << colors["red"] << "Error in Lexer: " <<errorMessage << " on line: " << mCurrentLine;
