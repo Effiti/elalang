@@ -96,6 +96,7 @@ OBJECTS := \
 	$(OBJDIR)/SymbolTable.o \
 	$(OBJDIR)/Visitor.o \
 	$(OBJDIR)/Codegen.o \
+	$(OBJDIR)/Emitter.o \
 	$(OBJDIR)/Lexer.o \
 	$(OBJDIR)/Token.o \
 	$(OBJDIR)/main.o \
@@ -172,6 +173,9 @@ $(OBJDIR)/Visitor.o: src/analysis/Visitor.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Codegen.o: src/emitter/Codegen.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Emitter.o: src/emitter/Emitter.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Lexer.o: src/lexer/Lexer.cpp

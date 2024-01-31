@@ -81,6 +81,7 @@ int main(int argc, char *const argv[]) {
   v.check();
   if(conf == App::RunConf::ANALYSIS)
     return EXIT_SUCCESS;
+  std::cout << "================================" << std::endl;
   Emitter::Emitter emitter{};
   emitter.codegen(*program);
 

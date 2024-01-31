@@ -25,7 +25,7 @@ class Emitter {
     }; 
   llvm::Value *integerLiteralValue(int v);
   llvm::Value *varRef(const std::string& str);
-  llvm::Value *binary(Expressions::Binary& bin);
+  llvm::Value *binary(const Expressions::Binary& bin);
   llvm::Value *functionCall(Expressions::FunctionCall& call);
   llvm::Value *unary(Expressions::Unary &);
 

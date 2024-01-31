@@ -13,6 +13,7 @@ project "elalang"
     symbols "On"
     removefiles {"**test*.cpp", "./tests/**"}
     buildoptions {"${llvm-config --cxxflags --ldflags --system-libs --libs core}"}
+    debugger "GDB"
 
   filter "configurations:Release"
     defines { "RELEASE_BUILD" }

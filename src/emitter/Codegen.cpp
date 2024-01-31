@@ -12,7 +12,10 @@ llvm::Value* IntegerLiteral::codegen(Emitter::Emitter& e) {
 llvm::Value* VariableReference::codegen(Emitter::Emitter& e) {
   return e.varRef(variableName);
 }
-llvm::Value* Binary::codegen(Emitter::Emitter& e) { return e.binary(*this); }
+llvm::Value* Binary::codegen(Emitter::Emitter& e) { 
+    auto v = e.binary(*this);
+    return v;
+}
 llvm::Value* FunctionCall::codegen(Emitter::Emitter& e) {
   return e.functionCall(*this);
 }
@@ -47,6 +50,7 @@ llvm::Value* Emitter::integerLiteralValue(int v) {
   // HACK Bit width and unsigned integers -> enum "IntegerType", later
   // autodetection
   return llvm::ConstantInt::get(*llvmContext, llvm::APInt(64, v, true));
+  //return llvm::ConstantFP::get(*llvmContext, llvm::APFloat((float)v));
 }
 llvm::Value* Emitter::varRef(const std::string& name) {
   llvm::Value* V = namedValues[name];
@@ -64,16 +68,26 @@ llvm::Value* Emitter::unary(Expressions::Unary& expr) {
   }
   return nullptr;
 }
-llvm::Value* Emitter::binary(Expressions::Binary& expr) {
+llvm::Value* Emitter::binary(const Expressions::Binary& expr) {
+  std::cout << "stuff" << std::endl;
   llvm::Value *lhs, *rhs;
   lhs = expr.lhs->codegen(*this);
   rhs = expr.rhs->codegen(*this);
   lhs->print(llvm::errs());
+  std::cout << std::endl;
   rhs->print(llvm::errs());
+  std::cout << std::endl;
+  if ( !lhs || !rhs) {
+    return nullptr;
+  }
+    //TODO when both sides are constants, we get, SEGFAULT?!??
 
   switch (expr.op) {
     case BinaryOperatorType::Plus:
-      return irBuilder->CreateFAdd(lhs, rhs, "addtmp");
+      {
+        llvm::Value* value = irBuilder->CreateFAdd(lhs, rhs, "addtmp");
+        return value;
+      }
     case BinaryOperatorType::Division:
       return irBuilder->CreateFDiv(lhs, rhs, "divtmp");
     case BinaryOperatorType::Minus:
@@ -151,7 +165,7 @@ llvm::Type* Emitter::simpleType(TypeExpressions::SimpleType& type) {
     case TypeExpressions::Boolean:
       return llvm::Type::getInt1Ty(*llvmContext);
     case TypeExpressions::Integer:
-      return llvm::Type::getInt32Ty(*llvmContext);
+      return llvm::Type::getInt64Ty(*llvmContext);
     case TypeExpressions::Null:
     case TypeExpressions::Void:
       return llvm::Type::getVoidTy(*llvmContext);
