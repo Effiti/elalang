@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <stdexcept>
 
 #include "Expression.h"
 #include "Statement.h"
@@ -388,27 +389,40 @@ Parser::mVariableDefinition() {
 }
 
 shared_ptr<Expressions::Expression> Parser::mExpression() {
+  // TODO Refactor
   shared_ptr<Expressions::Expression> expr = mPrimaryExpression();
-  while (getBinaryOperatorType(mCurrentToken()) != BinaryOperatorType::None) {
-    if (match(TokenType::Asterisk)) {
-      consume();
-      expr = make_unique<Expressions::Binary>(
-          std::move(expr), BinaryOperatorType::Multiplication,
-          mPrimaryExpression());
-    } else if (match(TokenType::Plus)) {
-      consume();
-      expr = make_unique<Expressions::Binary>(
-          std::move(expr), BinaryOperatorType::Plus, mSecondaryExpression());
-    } else if (match(TokenType::EqualsOperator)) {
-      consume();
-      expr = make_unique<Expressions::Binary>(
-          std::move(expr), BinaryOperatorType::Equal, mExpression());
-    } else if (consume(TokenType::Hyphen)) {
-      expr = make_unique<Expressions::Binary>(
-          std::move(expr), BinaryOperatorType::Minus, mSecondaryExpression());
+  BinaryOperatorType type = BinaryOperatorType::None;
+  using enum BinaryOperatorType;
+  while ((type = getBinaryOperatorType(mCurrentToken())) !=
+         BinaryOperatorType::None) {
+    consume();
+    switch (type) {
+      case Multiplication:
+      case Division:
+        expr = make_unique<Expressions::Binary>(std::move(expr), type,
+                                                mPrimaryExpression());
+        break;
+      case Plus:
+      case Minus:
+        expr = make_unique<Expressions::Binary>(std::move(expr), type,
+                                                mSecondaryExpression());
+        break;
+      case RightShift:
+      case LeftShift:
+      case Equal:
+      case UnEqual:
+      case Greater:
+      case Less:
+      case GreaterEqual:
+      case LessEqual:
+        expr = make_unique<Expressions::Binary>(std::move(expr), type,
+                                                mExpression());
+        break;
+      case None:
+      case MemberAccess:
+        throw std::runtime_error("parser error");
     }
   }
-
   return expr;
 }
 

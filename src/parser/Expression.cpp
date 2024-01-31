@@ -24,6 +24,16 @@ std::string humanReadableBinaryOperatorType(BinaryOperatorType type) {
       return "Eq";
     case BinaryOperatorType::MemberAccess:
       return "Member";
+    case BinaryOperatorType::UnEqual:
+      return "Neq";
+    case BinaryOperatorType::Greater:
+      return "Greater";
+    case BinaryOperatorType::GreaterEqual:
+      return "GreaterEq";
+    case BinaryOperatorType::Less:
+      return "Less";
+    case BinaryOperatorType::LessEqual:
+      return "LessEq";
     default:
       return "";
   }
@@ -45,6 +55,8 @@ std::string humanReadableUnaryOperatorType(UnaryOperatorType type) {
       return "PreDecrement";
     case UnaryOperatorType::PostDecrement:
       return "PostDecrement";
+    case UnaryOperatorType::Not:
+      return "Not";
   }
 }
 
