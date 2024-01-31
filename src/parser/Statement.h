@@ -81,6 +81,7 @@ class ReturnStatement : public Statement {
 
   const bool is_return() const override { return true; }
   const string toString() const override;
+  void accept(Analysis::StatementVisitor* visitor) override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 

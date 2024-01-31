@@ -1,5 +1,5 @@
 fn test2(x: int) -> bool {
-return 112 > 0; 
+return true; 
 }
 
 fn test3(x: int) -> int {

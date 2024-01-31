@@ -24,6 +24,14 @@ class ExpressionVisitor {
   std::size_t getArrayType(const std::size_t baseType);
 };
 
+// TODO should contain argTypes for recursion
+class IncompleteFunction {
+  public:
+   std::size_t returnType;
+   std::string name;
+   IncompleteFunction(std::string name, std::size_t returnType) : name{name}, returnType{returnType} {};
+ };
+
 class TypeExpressionVisitor {
  public:
 };
@@ -35,13 +43,15 @@ class StatementVisitor {
   FunctionSymbolTable functions;
   ExpressionVisitor expressionVisitor;
   TypeTable typeTable;
-
+  IncompleteFunction contextFn;
  public:
   StatementVisitor()
       : nesting{0},
         variables{},
         typeTable{},
         functions{},
+        // very Hacky, but there are no top-level-statements, so return statements at the top level dont exist
+        contextFn{"", typeTable.getBaseTypeId(TypeExpressions::Void)},
         expressionVisitor(variables, functions, typeTable) {}
   void visitBlock(Ela::Statements::BlockStatement const& s);
   void visitVariableDefinition(
@@ -56,6 +66,7 @@ class StatementVisitor {
   friend Analysis::ProgramVisitor;
   friend Statements::ExpressionStatement;
   friend Statements::IfStatement;
+  friend Statements::ReturnStatement;
 };
 class ProgramVisitor {
  private:

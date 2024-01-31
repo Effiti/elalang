@@ -85,6 +85,7 @@ void ProgramVisitor::check() {
         (unsigned int)0, function.functionName, typeId, paramTypeIds));
   }
   for (const auto& function : program.functionDefinitions) {
+    v.contextFn =  IncompleteFunction(function.functionName, v.typeTable.getType(function.returnType->toString()));
     v.visitBlock(*std::move(function.statements));
   }
 }
@@ -126,6 +127,10 @@ void Statements::ExpressionStatement::accept(StatementVisitor* visitor) {
   const auto& type = expression->getType(visitor->expressionVisitor);
   if (visitor->typeTable.getBaseTypeId(TypeExpressions::Void) != type)
     throw std::runtime_error("unused Expression statement result");
+}
+void Statements::ReturnStatement::accept(StatementVisitor* visitor) {
+  if(expression->getType(visitor->expressionVisitor) != visitor->contextFn.returnType)
+    throw std::runtime_error("return statements must return the correct type in fn " + visitor->contextFn.name);
 }
 void Statements::VariableDefinitionStatement::accept(
     StatementVisitor* visitor) {
