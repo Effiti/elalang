@@ -23,13 +23,19 @@ class ExpressionVisitor {
   std::size_t getVariableType(const std::string& name);
   std::size_t getArrayType(const std::size_t baseType);
 };
-
-// TODO should contain argTypes for recursion
+class FunctionParameter {
+  public:
+   const std::string name;
+   const std::size_t type;
+   FunctionParameter(const std::string& name, const std::size_t& type) : name(std::move(name)), type(std::move(type)) {}
+};
+// TODO should contain argTypes and names for recursion => store args here and not in Vartable
 class IncompleteFunction {
   public:
    std::size_t returnType;
    std::string name;
-   IncompleteFunction(std::string name, std::size_t returnType) : name{name}, returnType{returnType} {};
+   std::vector<FunctionParameter> args;
+   IncompleteFunction(std::string name, std::size_t returnType, std::vector<FunctionParameter> args) : name{name}, returnType{returnType}, args{args} {};
  };
 
 class TypeExpressionVisitor {
@@ -51,9 +57,9 @@ class StatementVisitor {
         typeTable{},
         functions{},
         // very Hacky, but there are no top-level-statements, so return statements at the top level dont exist
-        contextFn{"", typeTable.getBaseTypeId(TypeExpressions::Void)},
+        contextFn{"", typeTable.getBaseTypeId(TypeExpressions::Void), std::vector<FunctionParameter>{}},
         expressionVisitor(variables, functions, typeTable) {}
-  void visitBlock(Ela::Statements::BlockStatement const& s);
+  void visitBlock(Ela::Statements::BlockStatement const& s, bool fnBlock);
   void visitVariableDefinition(
       const Ela::Statements::VariableDefinitionStatement& s);
   void print() {

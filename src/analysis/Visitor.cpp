@@ -43,8 +43,12 @@ void StatementVisitor::visitVariableDefinition(
   variables.add(symbol);
 }
 
-void StatementVisitor::visitBlock(const Statements::BlockStatement& block) {
+void StatementVisitor::visitBlock(const Statements::BlockStatement& block, bool fnBlock) {
   nesting++;
+  if(fnBlock) {
+    for(const auto & param : contextFn.args) 
+      variables.add(VariableDefinitionSymbol(nesting, param.name, param.type, std::make_shared<Expressions::Expression>(Expressions::NullExpression())));
+  }
   for (auto const& s : block.subNodes) {
     s.get()->accept(this);
   }
@@ -85,8 +89,11 @@ void ProgramVisitor::check() {
         (unsigned int)0, function.functionName, typeId, paramTypeIds));
   }
   for (const auto& function : program.functionDefinitions) {
-    v.contextFn =  IncompleteFunction(function.functionName, v.typeTable.getType(function.returnType->toString()));
-    v.visitBlock(*std::move(function.statements));
+    std::vector<FunctionParameter> args{};
+    for (const auto& arg : function.parameters) 
+      args.push_back(FunctionParameter(arg.parameterName, v.typeTable.getType(arg.parameterType->toString())));
+    v.contextFn = IncompleteFunction(function.functionName, v.typeTable.getType(function.returnType->toString()), args);
+    v.visitBlock(*std::move(function.statements), true);
   }
 }
 
@@ -114,7 +121,7 @@ std::size_t ExpressionVisitor::getArrayType(const std::size_t baseType) {
 
 }  // namespace Analysis
 void Statements::BlockStatement::accept(StatementVisitor* visitor) {
-  visitor->visitBlock(*this);
+  visitor->visitBlock(*this, false);
 }
 void Statements::IfStatement::accept(StatementVisitor* visitor) {
   if (condition->getType(visitor->expressionVisitor) !=
