@@ -136,7 +136,7 @@ class VariableReference : public Primary {
 
   string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
-  llvm::Value *codegen(Emitter::Emitter&e ) override;
+  llvm::Value *codegen(Emitter::Emitter& e) override;
 };
 
 class StringLiteral : public Primary {
@@ -157,6 +157,7 @@ class BooleanLiteral : public Primary {
 
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+  llvm::Value *codegen(Emitter::Emitter& e) override;
 };
 
 }  // namespace Ela::Expressions

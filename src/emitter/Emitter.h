@@ -28,6 +28,7 @@ class Emitter {
   llvm::Value *binary(const Expressions::Binary& bin);
   llvm::Value *functionCall(Expressions::FunctionCall& call);
   llvm::Value *unary(Expressions::Unary &);
+  llvm::Value *boolean(bool b);
 
   llvm::Value *block(const Statements::BlockStatement &s);
   llvm::Value *ret(const Statements::ReturnStatement &s);

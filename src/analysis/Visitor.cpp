@@ -152,8 +152,16 @@ std::size_t Expressions::Binary::getType(Analysis::ExpressionVisitor& c) const {
   }
   switch (op) {
     case BinaryOperatorType::Equal:
+    case BinaryOperatorType::GreaterEqual:
+    case BinaryOperatorType::Less:
+    case BinaryOperatorType::LessEqual:
+    case BinaryOperatorType::UnEqual:
       return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean);
     case BinaryOperatorType::Plus:
+    case BinaryOperatorType::Minus:
+    case BinaryOperatorType::Division:
+    case BinaryOperatorType::LeftShift:
+    case BinaryOperatorType::RightShift:
       return lhsType;
     default:
       return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Void);

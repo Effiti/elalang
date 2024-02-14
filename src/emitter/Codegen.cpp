@@ -9,6 +9,9 @@ namespace Ela::Expressions {
 llvm::Value* IntegerLiteral::codegen(Emitter::Emitter& e) {
   return e.integerLiteralValue(value);
 }
+llvm::Value* BooleanLiteral::codegen(Emitter::Emitter& e) {
+  return e.boolean(value);
+}
 llvm::Value* VariableReference::codegen(Emitter::Emitter& e) {
   return e.varRef(variableName);
 }
@@ -51,6 +54,9 @@ llvm::Value* Emitter::integerLiteralValue(int v) {
   // autodetection
   return llvm::ConstantInt::get(*llvmContext, llvm::APInt(64, v, true));
   //return llvm::ConstantFP::get(*llvmContext, llvm::APFloat((float)v));
+}
+llvm::Value* Emitter::boolean(bool b) {
+  return llvm::ConstantInt::getBool(llvm::Type::getInt1Ty(*llvmContext), b);
 }
 llvm::Value* Emitter::varRef(const std::string& name) {
   llvm::Value* V = namedValues[name];
