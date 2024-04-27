@@ -119,6 +119,8 @@ std::size_t TypeTable::getBaseTypeId(TypeExpressions::BaseType type) {
       return 0;
     case TypeExpressions::Null:
       return 11;
+    default:
+      return -1;
   }
 }
 

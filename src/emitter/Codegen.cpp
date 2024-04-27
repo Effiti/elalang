@@ -75,7 +75,6 @@ llvm::Value* Emitter::unary(Expressions::Unary& expr) {
   return nullptr;
 }
 llvm::Value* Emitter::binary(const Expressions::Binary& expr) {
-  std::cout << "stuff" << std::endl;
   llvm::Value *lhs, *rhs;
   lhs = expr.lhs->codegen(*this);
   rhs = expr.rhs->codegen(*this);
@@ -86,32 +85,34 @@ llvm::Value* Emitter::binary(const Expressions::Binary& expr) {
   if ( !lhs || !rhs) {
     return nullptr;
   }
-    //TODO when both sides are constants, we get, SEGFAULT?!??
+  //TODO when both sides are constants, we get, SEGFAULT?!??
+  // This is utter nonsense, but oh well, it seems to force us to const-optimize
 
   switch (expr.op) {
+      // ONLY i64 addition!
     case BinaryOperatorType::Plus:
       {
-        llvm::Value* value = irBuilder->CreateFAdd(lhs, rhs, "addtmp");
+        llvm::Value* value = irBuilder->CreateAdd(lhs, rhs, "addtmp");
         return value;
       }
     case BinaryOperatorType::Division:
       return irBuilder->CreateFDiv(lhs, rhs, "divtmp");
     case BinaryOperatorType::Minus:
-      return irBuilder->CreateFSub(lhs, rhs, "subtmp");
+      return irBuilder->CreateSub(lhs, rhs, "subtmp");
     case BinaryOperatorType::Multiplication:
-      return irBuilder->CreateFMul(lhs, rhs, "multmp");
+      return irBuilder->CreateMul(lhs, rhs, "multmp");
     case BinaryOperatorType::Equal:
-      return irBuilder->CreateFCmpUEQ(lhs, rhs, "equtmp");
+      return irBuilder->CreateICmpEQ(lhs, rhs, "equtmp");
     case BinaryOperatorType::UnEqual:
-      return irBuilder->CreateFCmpUNE(lhs, rhs, "neqtmp");
+      return irBuilder->CreateICmpEQ(lhs, rhs, "neqtmp");
     case BinaryOperatorType::Greater:
-      return irBuilder->CreateFCmpUGT(lhs, rhs, "gttmp");
+      return irBuilder->CreateICmpUGT(lhs, rhs, "gttmp");
     case BinaryOperatorType::Less:
-      return irBuilder->CreateFCmpULT(lhs, rhs, "lttmp");
+      return irBuilder->CreateICmpULT(lhs, rhs, "lttmp");
     case BinaryOperatorType::LessEqual:
-      return irBuilder->CreateFCmpULE(lhs, rhs, "letmp");
+      return irBuilder->CreateICmpULE(lhs, rhs, "letmp");
     case BinaryOperatorType::GreaterEqual:
-      return irBuilder->CreateFCmpUGE(lhs, rhs, "getmp");
+      return irBuilder->CreateICmpUGE(lhs, rhs, "getmp");
 
     case BinaryOperatorType::RightShift:
     case BinaryOperatorType::LeftShift:
@@ -141,7 +142,7 @@ llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
                                               parameterTypes, false);
   llvm::Function* function =
       llvm::Function::Create(functionType, llvm::Function::ExternalLinkage,
-                             def.functionName, irModule.get());
+                             def.functionName, irModule);
   std::size_t i = 0;
   for (auto& Arg : function->args())
     Arg.setName(def.parameters[i++].parameterName);

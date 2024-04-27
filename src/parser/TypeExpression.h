@@ -53,6 +53,8 @@ static std::string to_string(BaseType type) {
       return "Null";
     case Function:
       return "Function";
+    default:
+      return "Unimplemented";
   }
 }
 

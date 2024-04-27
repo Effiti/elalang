@@ -1,7 +1,3 @@
-fn test2(x: int) -> bool {
-	return true; 
-}
-
-fn test3(x: int) -> int {
-return 1 + x;
+fn test3() -> int {
+return 1;
 }

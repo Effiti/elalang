@@ -43,11 +43,15 @@ void StatementVisitor::visitVariableDefinition(
   variables.add(symbol);
 }
 
-void StatementVisitor::visitBlock(const Statements::BlockStatement& block, bool fnBlock) {
+void StatementVisitor::visitBlock(const Statements::BlockStatement& block,
+                                  bool fnBlock) {
   nesting++;
-  if(fnBlock) {
-    for(const auto & param : contextFn.args) 
-      variables.add(VariableDefinitionSymbol(nesting, param.name, param.type, std::make_shared<Expressions::Expression>(Expressions::NullExpression())));
+  if (fnBlock) {
+    for (const auto& param : contextFn.args)
+      variables.add(
+          VariableDefinitionSymbol(nesting, param.name, param.type,
+                                   std::make_shared<Expressions::Expression>(
+                                       Expressions::NullExpression())));
   }
   for (auto const& s : block.subNodes) {
     s.get()->accept(this);
@@ -90,9 +94,13 @@ void ProgramVisitor::check() {
   }
   for (const auto& function : program.functionDefinitions) {
     std::vector<FunctionParameter> args{};
-    for (const auto& arg : function.parameters) 
-      args.push_back(FunctionParameter(arg.parameterName, v.typeTable.getType(arg.parameterType->toString())));
-    v.contextFn = IncompleteFunction(function.functionName, v.typeTable.getType(function.returnType->toString()), args);
+    for (const auto& arg : function.parameters)
+      args.push_back(FunctionParameter(
+          arg.parameterName,
+          v.typeTable.getType(arg.parameterType->toString())));
+    v.contextFn = IncompleteFunction(
+        function.functionName,
+        v.typeTable.getType(function.returnType->toString()), args);
     v.visitBlock(*std::move(function.statements), true);
   }
 }
@@ -136,8 +144,11 @@ void Statements::ExpressionStatement::accept(StatementVisitor* visitor) {
     throw std::runtime_error("unused Expression statement result");
 }
 void Statements::ReturnStatement::accept(StatementVisitor* visitor) {
-  if(expression->getType(visitor->expressionVisitor) != visitor->contextFn.returnType)
-    throw std::runtime_error("return statements must return the correct type in fn " + visitor->contextFn.name);
+  if (expression->getType(visitor->expressionVisitor) !=
+      visitor->contextFn.returnType)
+    throw std::runtime_error(
+        "return statements must return the correct type in fn " +
+        visitor->contextFn.name + " expected "  + visitor->typeTable.getType(visitor->contextFn.returnType).typeStr + " but got " + " " + visitor->typeTable.getType(expression->getType(visitor->expressionVisitor)).typeStr);
 }
 void Statements::VariableDefinitionStatement::accept(
     StatementVisitor* visitor) {
@@ -166,6 +177,7 @@ std::size_t Expressions::Binary::getType(Analysis::ExpressionVisitor& c) const {
       return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean);
     case BinaryOperatorType::Plus:
     case BinaryOperatorType::Minus:
+    case BinaryOperatorType::Multiplication:
     case BinaryOperatorType::Division:
     case BinaryOperatorType::LeftShift:
     case BinaryOperatorType::RightShift:
@@ -218,7 +230,7 @@ std::size_t Expressions::FunctionCall::getType(
 
   const std::vector<size_t>& argTypes = fn.argTypes;
 
-  if(argTypes.size() != callParams.size()) 
+  if (argTypes.size() != callParams.size())
     throw std::runtime_error("argument mismatch");
 
   std::size_t i = 0;
@@ -229,5 +241,33 @@ std::size_t Expressions::FunctionCall::getType(
     i++;
   }
   return returnType;
+}
+
+bool Expressions::Unary::isComptime(Analysis::ExpressionVisitor& c) const {
+  return expression->isComptime(c);
+}
+bool Expressions::Binary::isComptime(Analysis::ExpressionVisitor& c) const {
+  return lhs->isComptime(c) && rhs->isComptime(c);
+}
+bool Expressions::Parenthed::isComptime(Analysis::ExpressionVisitor& c) const {
+  return subExpr->isComptime(c);
+}
+bool Expressions::IntegerLiteral::isComptime(
+    Analysis::ExpressionVisitor& c) const {
+  return true;
+}
+bool Expressions::ArrayLiteral::isComptime(
+    Analysis::ExpressionVisitor& c) const {
+  for (const auto& expr : elements)
+    if (!expr->isComptime(c)) return false;
+  return true;
+}
+bool Expressions::StringLiteral::isComptime(
+    Analysis::ExpressionVisitor& c) const {
+  return true;
+}
+bool Expressions::BooleanLiteral::isComptime(
+    Analysis::ExpressionVisitor& c) const {
+  return true;
 }
 }  // namespace Ela

@@ -5,7 +5,7 @@ project "elalang"
   language "C++"
   cppdialect "C++20"
   targetdir "./bin/"
-  links {"LLVM-16"}
+  links {"LLVM-17"}
   files {"**.hpp", "**.cpp"}
 
   filter "configurations:Debug"
