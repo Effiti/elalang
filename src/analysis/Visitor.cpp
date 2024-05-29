@@ -138,10 +138,27 @@ void Statements::IfStatement::accept(StatementVisitor* visitor) {
         "condition of if statement must be of boolean type to avoid confusion");
   statement->accept(visitor);
 }
+void Statements::WhileStatement::accept(Analysis::StatementVisitor* visitor) {
+  if (cond->getType(visitor->expressionVisitor) !=
+      Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean))
+    throw std::runtime_error(
+        "condition of while statement must be of boolean type to avoid confusion");
+  body->accept(visitor);
+}
+void Statements::ForStatement::accept(Analysis::StatementVisitor* visitor) {
+  init->accept(visitor);
+  if (check->getType(visitor->expressionVisitor) !=
+      Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean))
+    throw std::runtime_error(
+        "check-condition of for statement must be of boolean type to avoid confusion");
+  incr->accept(visitor);
+  body->accept(visitor);
+}
+
 void Statements::ExpressionStatement::accept(StatementVisitor* visitor) {
   const auto& type = expression->getType(visitor->expressionVisitor);
-  if (visitor->typeTable.getBaseTypeId(TypeExpressions::Void) != type)
-    throw std::runtime_error("unused Expression statement result");
+  //if (visitor->typeTable.getBaseTypeId(TypeExpressions::Void) != type)
+  //  throw std::runtime_error("unused Expression statement result");
 }
 void Statements::ReturnStatement::accept(StatementVisitor* visitor) {
   if (expression->getType(visitor->expressionVisitor) !=
@@ -158,6 +175,9 @@ std::size_t Expressions::Unary::getType(Analysis::ExpressionVisitor& c) const {
   // unary expressions, by default, do not change the type of an expression.
   // This can be overriden in special cases.
   return expression->getType(c);
+}
+std::size_t Expressions::Parenthed::getType(Analysis::ExpressionVisitor& c) const {
+  return subExpr->getType(c);
 }
 std::size_t Expressions::Binary::getType(Analysis::ExpressionVisitor& c) const {
   if (op == BinaryOperatorType::MemberAccess)
@@ -243,31 +263,4 @@ std::size_t Expressions::FunctionCall::getType(
   return returnType;
 }
 
-bool Expressions::Unary::isComptime(Analysis::ExpressionVisitor& c) const {
-  return expression->isComptime(c);
-}
-bool Expressions::Binary::isComptime(Analysis::ExpressionVisitor& c) const {
-  return lhs->isComptime(c) && rhs->isComptime(c);
-}
-bool Expressions::Parenthed::isComptime(Analysis::ExpressionVisitor& c) const {
-  return subExpr->isComptime(c);
-}
-bool Expressions::IntegerLiteral::isComptime(
-    Analysis::ExpressionVisitor& c) const {
-  return true;
-}
-bool Expressions::ArrayLiteral::isComptime(
-    Analysis::ExpressionVisitor& c) const {
-  for (const auto& expr : elements)
-    if (!expr->isComptime(c)) return false;
-  return true;
-}
-bool Expressions::StringLiteral::isComptime(
-    Analysis::ExpressionVisitor& c) const {
-  return true;
-}
-bool Expressions::BooleanLiteral::isComptime(
-    Analysis::ExpressionVisitor& c) const {
-  return true;
-}
 }  // namespace Ela

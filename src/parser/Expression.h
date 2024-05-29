@@ -86,6 +86,8 @@ class Parenthed : public Primary {
       : subExpr{std::move(pSubExpr)} {};
 
   std::string toString() override;
+  std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+  llvm::Value *codegen(Emitter::Emitter&) override;
 
   std::shared_ptr<Expression> subExpr;
 };

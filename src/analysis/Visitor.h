@@ -73,6 +73,8 @@ class StatementVisitor {
   friend Statements::ExpressionStatement;
   friend Statements::IfStatement;
   friend Statements::ReturnStatement;
+  friend Statements::WhileStatement;
+  friend Statements::ForStatement;
 };
 class ProgramVisitor {
  private:

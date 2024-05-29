@@ -24,12 +24,12 @@ using Symbol = std::variant<NonTerminalType, TokenType>;
 
 // do not try to format your macros correctly. It's painful to do. Let clang-fmt
 // do it ;-) i.e.: N(type, T() else T() else)
-#define T(type, varName, tokenAction) \
+#define Ela_T(type, varName, tokenAction) \
   if (match(type)) {                  \
     Token varName = mCurrentToken();  \
     { tokenAction }                   \
   }
-#define ERRORINLOOP(type)              \
+#define Ela_ERRORINLOOP(type)              \
   mParserError(type, mCurrentToken()); \
   return ParserLoopResult::ParserError;
 
@@ -106,6 +106,10 @@ class Parser {
 
   std::shared_ptr<Statements::IfStatement> mIfStatement();
 
+  std::shared_ptr<Statements::WhileStatement> mWhileStatement();
+
+  std::shared_ptr<Statements::ForStatement> mForStatement();
+
   std::shared_ptr<Statements::ExpressionStatement> mExpressionStatement();
 
   std::shared_ptr<Statements::ElseStatement> mElseStatement();
@@ -119,5 +123,7 @@ class Parser {
   std::shared_ptr<Expressions::Expression> mSecondaryExpression();
 
   std::shared_ptr<Statements::ReturnStatement> mReturnStatement();
+
+  std::vector<std::shared_ptr<Statements::IfStatement>> ifStatementStack;
 };
 };  // namespace Ela

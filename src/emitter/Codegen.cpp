@@ -1,6 +1,9 @@
 #include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/PassManager.h>
 #include <llvm/IR/Value.h>
+#include <llvm/Target/TargetMachine.h>
 
+#include <memory>
 #include <variant>
 #include <vector>
 
@@ -23,6 +26,7 @@ llvm::Value* FunctionCall::codegen(Emitter::Emitter& e) {
   return e.functionCall(*this);
 }
 llvm::Value* Unary::codegen(Emitter::Emitter& e) { return e.unary(*this); }
+llvm::Value* Parenthed::codegen(Emitter::Emitter& e) { return subExpr->codegen(e);}
 }  // namespace Ela::Expressions
 namespace Ela::Statements {
 llvm::Value* BlockStatement::codegen(Emitter::Emitter& e) {
@@ -157,6 +161,8 @@ llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
   if (llvm::Value* retVal = def.statements->codegen(*this)) {
     irBuilder->CreateRet(retVal);
     verifyFunction(*function);
+    fpm->run(*function, *fam);
+
     return function;
   }
   function->eraseFromParent();
@@ -187,9 +193,34 @@ llvm::Type* Emitter::simpleType(TypeExpressions::SimpleType& type) {
   }
 }
 void Emitter::codegen(const Statements::Program& program) {
+  // Create new pass and analysis managers.
+  auto lam = std::make_unique<llvm::LoopAnalysisManager>();
+  auto cgam = std::make_unique<llvm::CGSCCAnalysisManager>();
+  auto mam = std::make_unique<llvm::ModuleAnalysisManager>();
+  auto pic = std::make_unique<llvm::PassInstrumentationCallbacks>();
+  auto si = std::make_unique<llvm::StandardInstrumentations>(*llvmContext,
+                                                    /*DebugLogging*/ true);
+  si->registerCallbacks(*pic, mam.get());
+  // Add transform passes.
+  // Do simple "peephole" optimizations and bit-twiddling optzns.
+  fpm->addPass(llvm::InstCombinePass());
+  // Reassociate expressions.
+  fpm->addPass(llvm::ReassociatePass());
+  // Eliminate Common SubExpressions.
+  fpm->addPass(llvm::GVNPass());
+  // Simplify the control flow graph (deleting unreachable blocks, etc).
+  fpm->addPass(llvm::SimplifyCFGPass());
+
+  llvm::PassBuilder PB;
+  PB.registerModuleAnalyses(*mam);
+  PB.registerFunctionAnalyses(*fam);
+  PB.crossRegisterProxies(*lam, *fam, *cgam, *mam);
+  
   for (const auto& def : program.functionDefinitions) {
     this->function(def);
   }
   irModule->print(llvm::errs(), nullptr);
-}
+  
+ }
+
 }  // namespace Ela::Emitter

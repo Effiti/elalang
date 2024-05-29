@@ -30,18 +30,6 @@ class Statement : public Node {
   virtual const bool is_return() const { return false; }
 };
 
-class IfStatement : public Statement {
- public:
-  IfStatement(std::shared_ptr<Expressions::Expression> cond,
-              std::shared_ptr<Statement> stmt)
-      : condition{std::move(cond)}, statement{std::move(stmt)} {};
-  std::shared_ptr<Expressions::Expression> condition;
-  std::shared_ptr<Statement> statement;
-
-  void accept(Analysis::StatementVisitor* visitor) override;
-  const string toString() const override;
-};
-
 class ElseStatement : public Statement {
  public:
   ElseStatement(std::shared_ptr<Statement> stmt)
@@ -49,6 +37,19 @@ class ElseStatement : public Statement {
   std::shared_ptr<Statement> statement;
 
   const std::string toString() const override;
+};
+
+class IfStatement : public Statement {
+ public:
+  IfStatement(std::shared_ptr<Expressions::Expression> cond,
+              std::shared_ptr<Statement> stmt)
+      : condition{std::move(cond)}, statement{std::move(stmt)} {};
+  std::shared_ptr<Expressions::Expression> condition;
+  std::shared_ptr<Statement> statement;
+  std::optional<std::shared_ptr<ElseStatement>> elseStatement;
+
+  void accept(Analysis::StatementVisitor* visitor) override;
+  const string toString() const override;
 };
 
 class ExpressionStatement : public Statement {
@@ -98,6 +99,34 @@ class VariableDefinitionStatement : public Statement {
   const std::string name;
   std::shared_ptr<TypeExpressions::TypeExpression> type;
   std::shared_ptr<Expressions::Expression> value;
+
+  void accept(StatementVisitor* visitor) override;
+  const std::string toString() const override;
+};
+
+class ForStatement : public Statement {
+ public:
+  ForStatement(const std::shared_ptr<Statement> init,
+               const std::shared_ptr<Expressions::Expression> check,
+               const std::shared_ptr<Statement> incr,
+               const std::shared_ptr<Statement> body)
+      : init{init}, check{check}, incr{incr}, body{body} {};
+  const std::shared_ptr<Statement> init;
+  const std::shared_ptr<Expressions::Expression> check;
+  const std::shared_ptr<Statement> incr;
+  const std::shared_ptr<Statement> body;
+
+  void accept(StatementVisitor* visitor) override;
+  const std::string toString() const override;
+};
+
+class WhileStatement : public Statement {
+ public:
+  WhileStatement(const std::shared_ptr<Expressions::Expression> cond,
+                 const std::shared_ptr<Statement> body)
+      : body{body}, cond{cond} {};
+  const std::shared_ptr<Statement> body;
+  const std::shared_ptr<Expressions::Expression> cond;
 
   void accept(StatementVisitor* visitor) override;
   const std::string toString() const override;

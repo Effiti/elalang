@@ -135,6 +135,12 @@ namespace Ela::Lexing {
         if (lexeme == "return") {
             return Token{line, col, TokenType::ReturnKeyword, ""};
         }
+        if(lexeme == "for") {
+            return Token{line, col, TokenType::ForKeyword, ""};
+        }
+        if(lexeme == "while") {
+            return Token{line, col, TokenType::WhileKeyword, ""};
+        }
 
         return Token{line, col, TokenType::Identifier, lexeme};
     }

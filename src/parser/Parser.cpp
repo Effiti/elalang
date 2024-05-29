@@ -324,6 +324,12 @@ shared_ptr<Statements::Statement> Parser::mStatement() {
     return std::move(mVariableDefinition());
   else if (match(TokenType::IfKeyword))
     return std::move(mIfStatement());
+  else if(match(TokenType::WhileKeyword))
+    return std::move(mWhileStatement());
+  else if(match(TokenType::ForKeyword))
+    return std::move(mForStatement());
+  else if (match(TokenType::ElseKeyword)) 
+    return std::move(mElseStatement());
   else if (match(TokenType::LCurly))
     return std::move(mBlockStatement());
   else if (match(TokenType::ElseKeyword))
@@ -346,7 +352,9 @@ shared_ptr<Statements::ReturnStatement> Parser::mReturnStatement() {
 
 shared_ptr<Statements::ElseStatement> Parser::mElseStatement() {
   consumeOrError(TokenType::ElseKeyword);
-  return make_shared<Statements::ElseStatement>(std::move(mStatement()));
+  std::shared_ptr<Statements::ElseStatement> stmt = std::make_shared<Statements::ElseStatement>(std::move(mStatement()));
+  ifStatementStack.back()->elseStatement = stmt;
+  return stmt;
 }
 
 shared_ptr<Statements::ExpressionStatement> Parser::mExpressionStatement() {
@@ -364,6 +372,27 @@ shared_ptr<Statements::IfStatement> Parser::mIfStatement() {
   shared_ptr<Statements::Statement> statement = mStatement();
   return std::make_unique<Statements::IfStatement>(std::move(condition),
                                                    std::move(statement));
+}
+
+shared_ptr<Statements::WhileStatement> Parser::mWhileStatement() {
+  consumeOrError(TokenType::WhileKeyword);
+  consumeOrError(TokenType::LParen);
+  shared_ptr<Expressions::Expression> condition = mExpression();
+  consumeOrError(TokenType::RParen);
+  shared_ptr<Statements::Statement> statement = mStatement();
+  return std::make_shared<Statements::WhileStatement>(std::move(condition),
+                                                   std::move(statement));
+}
+
+shared_ptr<Statements::ForStatement> Parser::mForStatement() {
+  consumeOrError(TokenType::ForKeyword);
+  consumeOrError(TokenType::LParen);
+  shared_ptr<Statements::Statement> init = mStatement();
+  shared_ptr<Expressions::Expression> expr = mExpressionStatement()->expression;
+  shared_ptr<Statements::Statement> incr = mStatement();
+  consumeOrError(Lexing::TokenType::RParen);
+  shared_ptr<Statements::Statement> body = mStatement();
+  return std::make_shared<Statements::ForStatement>(std::move(init), std::move(expr), std::move(incr), std::move(body));
 }
 
 shared_ptr<Statements::VariableDefinitionStatement>

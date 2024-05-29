@@ -1,5 +1,5 @@
-#include <llvm/IR/IRBuilderFolder.h>
-#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/PassManager.h>
+#include "llvm-includes.h"
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
@@ -11,6 +11,8 @@ class Emitter {
   const std::unique_ptr<llvm::LLVMContext> llvmContext;
   llvm::IRBuilder<>* irBuilder = new llvm::IRBuilder<>(*llvmContext);
   llvm::Module* irModule;
+  std::unique_ptr<llvm::FunctionPassManager> fpm = std::make_unique<llvm::FunctionPassManager>();
+  std::unique_ptr<llvm::FunctionAnalysisManager> fam = std::make_unique<llvm::FunctionAnalysisManager>();
   std::map<std::string, llvm::Value *> namedValues;
 
  public:

@@ -84,6 +84,8 @@ namespace Ela::Lexing {
                 return "Colon";
             case None:
                 return "None";
+            case WhileKeyword:
+                return "While";
             case Unimplemented:
                 //default:
                 return "Unimplemented";

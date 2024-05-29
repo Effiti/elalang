@@ -48,6 +48,8 @@ namespace Ela::Lexing {
         TrueKeyword,
         FalseKeyword,
         ReturnKeyword,
+        ForKeyword,
+        WhileKeyword,
 
         Identifier,
 

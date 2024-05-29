@@ -35,4 +35,12 @@ const std::string Statements::ExpressionStatement::toString() const {
 const string Statements::ReturnStatement::toString() const {
   return "return " + expression->toString();
 }
+
+const string Statements::WhileStatement::toString() const {
+  return "while" + cond->toString() + " do\n\t" + body->toString();
+}
+
+const string Statements::ForStatement::toString() const {
+  return "for " + init->toString() + "; " + check->toString() + "; " + incr->toString() + "; do " + body->toString();
+}
 }  // namespace Ela::Statements
