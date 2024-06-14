@@ -4,6 +4,7 @@
 #include <llvm/Target/TargetMachine.h>
 
 #include <memory>
+#include <stdexcept>
 #include <variant>
 #include <vector>
 
@@ -29,10 +30,14 @@ llvm::Value* Unary::codegen(Emitter::Emitter& e) { return e.unary(*this); }
 llvm::Value* Parenthed::codegen(Emitter::Emitter& e) { return subExpr->codegen(e);}
 }  // namespace Ela::Expressions
 namespace Ela::Statements {
+llvm::Value* IfStatement::codegen(Emitter::Emitter &e) {
+  return e.ifStmt(*this);
+}
 llvm::Value* BlockStatement::codegen(Emitter::Emitter& e) {
   return e.block(*this);
 }
 llvm::Value* ReturnStatement::codegen(Emitter::Emitter& e) { return e.ret(*this); }
+llvm::Value* ExpressionStatement::codegen(Emitter::Emitter& e) { return expression->codegen(e); }
 
 }  // namespace Ela::Statements
 namespace Ela::TypeExpressions {
@@ -82,10 +87,6 @@ llvm::Value* Emitter::binary(const Expressions::Binary& expr) {
   llvm::Value *lhs, *rhs;
   lhs = expr.lhs->codegen(*this);
   rhs = expr.rhs->codegen(*this);
-  lhs->print(llvm::errs());
-  std::cout << std::endl;
-  rhs->print(llvm::errs());
-  std::cout << std::endl;
   if ( !lhs || !rhs) {
     return nullptr;
   }
@@ -136,6 +137,63 @@ llvm::Value* Emitter::functionCall(Expressions::FunctionCall& call) {
   }
   return irBuilder->CreateCall(callee, args, "calltmp");
 }
+llvm::Value* Emitter::ifStmt(const Statements::IfStatement& stmt) {
+  
+  llvm::Value *CondV = stmt.condition->codegen(*this);
+  if (!CondV)
+    return nullptr;
+
+  // Convert condition to a bool by comparing non-equal to 0.0.
+  CondV = irBuilder->CreateFCmpONE(
+      CondV, CondV, "ifcond");
+
+  llvm::Function* fn = irBuilder->GetInsertBlock()->getParent();
+
+  // Create blocks for the then and else cases.  Insert the 'then' block at the
+  // end of the function.
+  llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(*llvmContext, "then", fn);
+  llvm::BasicBlock* MergeBB = llvm::BasicBlock::Create(*llvmContext, "ifcont");
+  llvm::BasicBlock* ElseBB = stmt.elseStatement.has_value() ? llvm::BasicBlock::Create(*llvmContext, "else") : MergeBB;
+
+  // create br deciding between branches
+  irBuilder->CreateCondBr(CondV, ThenBB, ElseBB);
+
+  // Emit then label
+  irBuilder->SetInsertPoint(ThenBB);
+
+  //emit then block
+  llvm::Value* thenBranch = stmt.statement->codegen(*this);
+  //if (!thenBranch) return nullptr;
+
+  irBuilder->CreateBr(MergeBB);
+  // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
+  ThenBB = irBuilder->GetInsertBlock();
+  llvm::Value* elseBranch = nullptr;
+  if(stmt.elseStatement.has_value()) {
+    // Emit else block.
+    fn->insert(fn->end(), ElseBB);
+    irBuilder->SetInsertPoint(ElseBB);
+
+    elseBranch = stmt.elseStatement.value()->codegen(*this);
+    //if (!elseBranch) return nullptr;
+
+    irBuilder->CreateBr(MergeBB);
+    // codegen of 'Else' can change the current block, update ElseBB for the
+    // PHI.
+    ElseBB = irBuilder->GetInsertBlock();
+  }
+  // Emit merge block.
+  fn->insert(fn->end(), MergeBB);
+  irBuilder->SetInsertPoint(MergeBB);
+  /*llvm::PHINode* PN = irBuilder->CreatePHI(llvm::Type::getInt32Ty(*llvmContext), stmt.elseStatement.has_value() ? 2 : 1, "iftmp");
+
+  PN->addIncoming(thenBranch, ThenBB);
+  if(stmt.elseStatement.has_value())
+    PN->addIncoming(elseBranch, ElseBB);
+  return PN;
+  */
+  return nullptr;
+}
 
 llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
   std::vector<llvm::Type*> parameterTypes = std::vector<llvm::Type*>();
@@ -150,6 +208,8 @@ llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
   std::size_t i = 0;
   for (auto& Arg : function->args())
     Arg.setName(def.parameters[i++].parameterName);
+  if(def.isExtern)
+    return function;
 
   llvm::BasicBlock* BB =
       llvm::BasicBlock::Create(*llvmContext, "entry", function);
@@ -161,7 +221,7 @@ llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
   if (llvm::Value* retVal = def.statements->codegen(*this)) {
     irBuilder->CreateRet(retVal);
     verifyFunction(*function);
-    fpm->run(*function, *fam);
+    //fpm->run(*function, *fam);
 
     return function;
   }

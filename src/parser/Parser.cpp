@@ -80,7 +80,7 @@ ParserLoopResult Parser::mParserLoop() {
   if (is(top(), FunctionDefinitionList)) {
     pop();
     {
-      if (match(TokenType::FunctionKeyword)) {
+      if (match(TokenType::FunctionKeyword) || match(TokenType::ExternKeyword)) {
         push(FunctionDefinitionList);
         push(FunctionDefinition);
       } else if (match(TokenType::EndOfFile)) {
@@ -95,7 +95,7 @@ ParserLoopResult Parser::mParserLoop() {
   if (is(top(), FunctionDefinition)) {
     pop();
     {
-      if (match(TokenType::FunctionKeyword)) {
+      if (match(TokenType::FunctionKeyword) || match(TokenType::ExternKeyword)) {
         mP.functionDefinitions.push_back(mFunctionDefinition());
       } else {
         mParserError(TokenType::FunctionKeyword, mCurrentToken());
@@ -228,6 +228,9 @@ Statements::ImportStatement Parser::mImportStatement() {
 }
 
 Statements::FunctionDefinition Parser::mFunctionDefinition() {
+  bool isExtern = false;
+  if(consume(TokenType::ExternKeyword))
+    isExtern = true;
   consumeOrError(TokenType::FunctionKeyword);
   std::string name = consumeOrError(TokenType::Identifier).value;
   // parse parameterList
@@ -253,10 +256,16 @@ Statements::FunctionDefinition Parser::mFunctionDefinition() {
     returnType =
         make_unique<TypeExpressions::SimpleType>(TypeExpressions::Void);
   }
+  if(isExtern) {
+    consume(TokenType::Semicolon);
+    return Statements::FunctionDefinition{std::move(returnType), name,
+                                          std::move(params), std::move(Statements::emptyBlock()), true};
+  }
+  
   auto block = *std::move(mBlockStatement());
 
   return Statements::FunctionDefinition{std::move(returnType), name,
-                                        std::move(params), std::move(block)};
+                                        std::move(params), std::move(block), false};
 }
 
 shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
@@ -324,11 +333,11 @@ shared_ptr<Statements::Statement> Parser::mStatement() {
     return std::move(mVariableDefinition());
   else if (match(TokenType::IfKeyword))
     return std::move(mIfStatement());
-  else if(match(TokenType::WhileKeyword))
+  else if (match(TokenType::WhileKeyword))
     return std::move(mWhileStatement());
-  else if(match(TokenType::ForKeyword))
+  else if (match(TokenType::ForKeyword))
     return std::move(mForStatement());
-  else if (match(TokenType::ElseKeyword)) 
+  else if (match(TokenType::ElseKeyword))
     return std::move(mElseStatement());
   else if (match(TokenType::LCurly))
     return std::move(mBlockStatement());
@@ -352,8 +361,13 @@ shared_ptr<Statements::ReturnStatement> Parser::mReturnStatement() {
 
 shared_ptr<Statements::ElseStatement> Parser::mElseStatement() {
   consumeOrError(TokenType::ElseKeyword);
-  std::shared_ptr<Statements::ElseStatement> stmt = std::make_shared<Statements::ElseStatement>(std::move(mStatement()));
+  std::shared_ptr<Statements::ElseStatement> stmt =
+      std::make_shared<Statements::ElseStatement>(std::move(mStatement()));
+  if (ifStatementStack.empty()) {
+    throw std::runtime_error("'else', but no 'if' before that");
+  }
   ifStatementStack.back()->elseStatement = stmt;
+  ifStatementStack.pop_back();
   return stmt;
 }
 
@@ -366,12 +380,15 @@ shared_ptr<Statements::ExpressionStatement> Parser::mExpressionStatement() {
 
 shared_ptr<Statements::IfStatement> Parser::mIfStatement() {
   consumeOrError(TokenType::IfKeyword);
-  consumeOrError(TokenType::LParen);
+  // consumeOrError(TokenType::LParen);
   shared_ptr<Expressions::Expression> condition = mExpression();
-  consumeOrError(TokenType::RParen);
+  // consumeOrError(TokenType::RParen);
   shared_ptr<Statements::Statement> statement = mStatement();
-  return std::make_unique<Statements::IfStatement>(std::move(condition),
-                                                   std::move(statement));
+  std::shared_ptr<Statements::IfStatement> ifStatement =
+      std::make_shared<Statements::IfStatement>(std::move(condition),
+                                                std::move(statement));
+  ifStatementStack.push_back(ifStatement);
+  return ifStatement;
 }
 
 shared_ptr<Statements::WhileStatement> Parser::mWhileStatement() {
@@ -381,7 +398,7 @@ shared_ptr<Statements::WhileStatement> Parser::mWhileStatement() {
   consumeOrError(TokenType::RParen);
   shared_ptr<Statements::Statement> statement = mStatement();
   return std::make_shared<Statements::WhileStatement>(std::move(condition),
-                                                   std::move(statement));
+                                                      std::move(statement));
 }
 
 shared_ptr<Statements::ForStatement> Parser::mForStatement() {
@@ -392,7 +409,8 @@ shared_ptr<Statements::ForStatement> Parser::mForStatement() {
   shared_ptr<Statements::Statement> incr = mStatement();
   consumeOrError(Lexing::TokenType::RParen);
   shared_ptr<Statements::Statement> body = mStatement();
-  return std::make_shared<Statements::ForStatement>(std::move(init), std::move(expr), std::move(incr), std::move(body));
+  return std::make_shared<Statements::ForStatement>(
+      std::move(init), std::move(expr), std::move(incr), std::move(body));
 }
 
 shared_ptr<Statements::VariableDefinitionStatement>

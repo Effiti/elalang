@@ -39,7 +39,7 @@ void StatementVisitor::visitVariableDefinition(
   auto symbol =
       VariableDefinitionSymbol{nesting, s.name, (unsigned)typeId, s.value};
 
-  std::cout << "adding variable " << s.toString() << std::endl;
+  //std::cout << "adding variable " << s.toString() << std::endl;
   variables.add(symbol);
 }
 
@@ -56,13 +56,13 @@ void StatementVisitor::visitBlock(const Statements::BlockStatement& block,
   for (auto const& s : block.subNodes) {
     s.get()->accept(this);
   }
-  std::cout << "variables:" << std::endl;
-  variables.print();
-  std::cout << "types:" << std::endl;
-  typeTable.print();
+  //std::cout << "variables:" << std::endl;
+  //variables.print();
+  //std::cout << "types:" << std::endl;
+  //typeTable.print();
 
   nesting--;
-  std::cout << "removing" << std::endl;
+  //std::cout << "removing" << std::endl;
 
   variables.removeAllHigherThan(nesting);
 }

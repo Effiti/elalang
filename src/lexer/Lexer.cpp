@@ -141,6 +141,9 @@ namespace Ela::Lexing {
         if(lexeme == "while") {
             return Token{line, col, TokenType::WhileKeyword, ""};
         }
+        if(lexeme == "extern") {
+            return Token{line, col, TokenType::ExternKeyword, ""};
+        }
 
         return Token{line, col, TokenType::Identifier, lexeme};
     }

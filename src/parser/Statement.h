@@ -50,6 +50,7 @@ class IfStatement : public Statement {
 
   void accept(Analysis::StatementVisitor* visitor) override;
   const string toString() const override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 class ExpressionStatement : public Statement {
@@ -60,6 +61,7 @@ class ExpressionStatement : public Statement {
 
   void accept(Analysis::StatementVisitor* visitor) override;
   const std::string toString() const override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 class BlockStatement : public Statement {
@@ -73,7 +75,7 @@ class BlockStatement : public Statement {
   const string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
 };
-
+BlockStatement emptyBlock();
 class ReturnStatement : public Statement {
  public:
   ReturnStatement(std::shared_ptr<Expressions::Expression> expr)
@@ -148,15 +150,17 @@ class FunctionDefinition : public Statement {
  public:
   FunctionDefinition(std::shared_ptr<TypeExpressions::TypeExpression> ret,
                      std::string name, vector<Parameter> params,
-                     BlockStatement code)
+                     BlockStatement code, bool isExtern)
       : functionName{std::move(name)},
         parameters{std::move(params)},
         statements(std::make_shared<BlockStatement>(code)),
-        returnType{std::move(ret)} {};
+        returnType{std::move(ret)},
+        isExtern{isExtern} {};
   std::shared_ptr<TypeExpressions::TypeExpression> returnType;
   const std::string functionName;
   vector<Parameter> parameters;
   std::shared_ptr<BlockStatement> statements;
+  bool isExtern;
 };
 
 class Program : public Node {

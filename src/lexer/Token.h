@@ -50,6 +50,7 @@ namespace Ela::Lexing {
         ReturnKeyword,
         ForKeyword,
         WhileKeyword,
+        ExternKeyword,
 
         Identifier,
 

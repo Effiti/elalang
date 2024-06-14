@@ -1,4 +1,5 @@
 #include "Statement.h"
+#include <memory>
 namespace Ela::Statements {
 
 const std::string Statements::Statement::toString() const {
@@ -42,5 +43,8 @@ const string Statements::WhileStatement::toString() const {
 
 const string Statements::ForStatement::toString() const {
   return "for " + init->toString() + "; " + check->toString() + "; " + incr->toString() + "; do " + body->toString();
+}
+BlockStatement emptyBlock() {
+ return BlockStatement(std::vector<std::shared_ptr<Statement>>());
 }
 }  // namespace Ela::Statements

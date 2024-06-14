@@ -5,15 +5,16 @@
 
 #include "Ela.hpp"
 #include "analysis/Visitor.h"
+#include "emitter/Emitter.h"
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
-#include "emitter/Emitter.h"
 
 namespace Ela::App {
 const static auto optstring = "lpaf";
 enum class RunConf { LEXER, PARSER, FULL, ANALYSIS };
 const RunConf getConf(int argc, char *const argv[]) {
-  // supplying more than one option does not make sense. We will ignore any option that comes after the first one.
+  // supplying more than one option does not make sense. We will ignore any
+  // option that comes after the first one.
   switch (getopt(argc, argv, optstring)) {
     case 'l':
       return RunConf::LEXER;
@@ -57,31 +58,31 @@ int main(int argc, char *const argv[]) {
   if (!program) {
     return EXIT_FAILURE;
   }
-  for (const Statements::ImportStatement &imp : program->importStatements) {
-    std::cout << "importStatement: " << imp.mod << std::endl;
-  }
-  for (const auto &def : program->functionDefinitions) {
-    std::string params;
-    std::for_each(
-        begin(def.parameters), end(def.parameters), [&](const auto &p) {
-          params += " " + p.parameterName + " : " + p.parameterType->toString();
-          params += ",";
-        });
-    std::cout << "functionDefinition: " << def.functionName << "(" << params
-              << ") -> " << def.returnType->toString() << " {" << std::endl;
+  if (conf == App::RunConf::PARSER) {
+    for (const Statements::ImportStatement &imp : program->importStatements) {
+      std::cout << "importStatement: " << imp.mod << std::endl;
+    }
+    for (const auto &def : program->functionDefinitions) {
+      std::string params;
+      std::for_each(
+          begin(def.parameters), end(def.parameters), [&](const auto &p) {
+            params +=
+                " " + p.parameterName + " : " + p.parameterType->toString();
+            params += ",";
+          });
+      std::cout << "functionDefinition: " << def.functionName << "(" << params
+                << ") -> " << def.returnType->toString() << " {" << std::endl;
 
-    std::cout << def.statements->toString();
+      std::cout << def.statements->toString();
 
-    std::cout << "}" << std::endl;
-  }
-  if(conf == App::RunConf::PARSER)
+      std::cout << "}" << std::endl;
+    }
     return EXIT_SUCCESS;
+  }
 
   Analysis::ProgramVisitor v = Analysis::ProgramVisitor{*program};
   v.check();
-  if(conf == App::RunConf::ANALYSIS)
-    return EXIT_SUCCESS;
-  std::cout << "================================" << std::endl;
+  if (conf == App::RunConf::ANALYSIS) return EXIT_SUCCESS;
   Emitter::Emitter emitter{};
   emitter.codegen(*program);
 

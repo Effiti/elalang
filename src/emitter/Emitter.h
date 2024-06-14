@@ -31,6 +31,7 @@ class Emitter {
   llvm::Value *unary(Expressions::Unary &);
   llvm::Value *boolean(bool b);
 
+  llvm::Value *ifStmt(const Statements::IfStatement &s);
   llvm::Value *block(const Statements::BlockStatement &s);
   llvm::Value *ret(const Statements::ReturnStatement &s);
 

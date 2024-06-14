@@ -1,3 +1,19 @@
+extern fn putchar(c:int) -> int;
+
+fn a() -> int {
+	putchar(12);
+	return 1;
+}
+fn b() -> int { 
+	putchar(13);
+	return 2;
+}
+
 fn test3(x:int) -> int {
-return (1+2+x)*(x+(1+2));
+	if x==1 
+		putchar(12);
+	else
+		putchar(1);
+	
+	return (1+2+x)*(x+(1+2));
 }

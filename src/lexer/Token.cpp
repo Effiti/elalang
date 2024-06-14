@@ -86,6 +86,8 @@ namespace Ela::Lexing {
                 return "None";
             case WhileKeyword:
                 return "While";
+            case ExternKeyword:
+                return "Extern";
             case Unimplemented:
                 //default:
                 return "Unimplemented";
