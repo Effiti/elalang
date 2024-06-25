@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iterator>
+#include <memory>
 
 #include "../parser/Statement.h"
 #include "./SymbolTable.h"
@@ -35,7 +36,10 @@ class IncompleteFunction {
    std::size_t returnType;
    std::string name;
    std::vector<FunctionParameter> args;
-   IncompleteFunction(std::string name, std::size_t returnType, std::vector<FunctionParameter> args) : name{name}, returnType{returnType}, args{args} {};
+   std::vector<std::shared_ptr<VariableDefinitionSymbol>> vars{};
+   IncompleteFunction(std::string name, std::size_t returnType,
+                      std::vector<FunctionParameter> args)
+       : name{name}, returnType{returnType}, args{args} {};
  };
 
 class TypeExpressionVisitor {
@@ -61,7 +65,7 @@ class StatementVisitor {
         expressionVisitor(variables, functions, typeTable) {}
   void visitBlock(Ela::Statements::BlockStatement const& s, bool fnBlock);
   void visitVariableDefinition(
-      const Ela::Statements::VariableDefinitionStatement& s);
+      Ela::Statements::VariableDefinitionStatement& s);
   void print() {
     std::cout << "types:" << std::endl;
     typeTable.print();
@@ -78,13 +82,21 @@ class StatementVisitor {
 };
 class ProgramVisitor {
  private:
-  const Statements::Program program;
+  Statements::Program program;
   StatementVisitor v;
 
  public:
   ProgramVisitor(const Statements::Program& p) : program{p} {}
   void check();
   void compile();
+  void print() {
+   v.print();
+   for (const auto& def : program.functionDefinitions) {
+    for(const auto& v : def.decls)
+      std::cout << v->name << " : " << v->type << " = "
+                << v->initialValue->toString() << std::endl;
+   }
+  }
 };
 
 }  // namespace Ela::Analysis

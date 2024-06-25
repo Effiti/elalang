@@ -82,7 +82,10 @@ int main(int argc, char *const argv[]) {
 
   Analysis::ProgramVisitor v = Analysis::ProgramVisitor{*program};
   v.check();
-  if (conf == App::RunConf::ANALYSIS) return EXIT_SUCCESS;
+  if (conf == App::RunConf::ANALYSIS) {
+    v.print();
+    return EXIT_SUCCESS;
+  }
   Emitter::Emitter emitter{};
   emitter.codegen(*program);
 

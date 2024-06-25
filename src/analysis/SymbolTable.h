@@ -14,8 +14,8 @@ using std::unique_ptr;
 
 class TypeEntry {
  public:
-  const std::string typeStr;
-  const std::shared_ptr<TypeExpressions::TypeExpression> type;
+  std::string typeStr;
+  std::shared_ptr<TypeExpressions::TypeExpression> type;
   TypeEntry(string str, std::shared_ptr<TypeExpressions::TypeExpression> tp)
       : typeStr{str}, type{tp} {};
 };

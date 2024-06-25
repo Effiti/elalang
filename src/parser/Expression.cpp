@@ -119,4 +119,7 @@ std::string Unary::toString() {
   return "[" + humanReadableUnaryOperatorType(op) + " " +
          expression->toString() + "]";
 }
+std::string VariableAssign::toString() {
+  return "[" + name + " <- " + value->toString() + "]";
+}
 };  // namespace Ela::Expressions

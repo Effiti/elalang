@@ -1,8 +1,10 @@
+#include <llvm/IR/Instructions.h>
 #include <llvm/IR/PassManager.h>
 #include "llvm-includes.h"
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
+#include <strstream>
 #include "../parser/Expression.h"
 #include "../parser/Statement.h"
 
@@ -13,7 +15,8 @@ class Emitter {
   llvm::Module* irModule;
   std::unique_ptr<llvm::FunctionPassManager> fpm = std::make_unique<llvm::FunctionPassManager>();
   std::unique_ptr<llvm::FunctionAnalysisManager> fam = std::make_unique<llvm::FunctionAnalysisManager>();
-  std::map<std::string, llvm::Value *> namedValues;
+  std::map<std::string, llvm::AllocaInst*> namedValues;
+  Statements::Program program;
 
  public:
   std::nullptr_t emitterError(std::string str) {
@@ -30,13 +33,18 @@ class Emitter {
   llvm::Value *functionCall(Expressions::FunctionCall& call);
   llvm::Value *unary(Expressions::Unary &);
   llvm::Value *boolean(bool b);
+  llvm::Value *assign(const Expressions::VariableAssign &e);
 
   llvm::Value *ifStmt(const Statements::IfStatement &s);
   llvm::Value *block(const Statements::BlockStatement &s);
   llvm::Value *ret(const Statements::ReturnStatement &s);
+  llvm::Value *forLoop(const Statements::ForStatement &s);
+  llvm::Value *varDef(const Statements::VariableDefinitionStatement &s);
 
   llvm::Function* function(const Statements::FunctionDefinition& def);
 
+
+  llvm::AllocaInst* createEntryBlockAlloca(llvm::Function *function, const string &name, llvm::Type* type);
   llvm::Type *simpleType(TypeExpressions::SimpleType& type);
   void codegen(const Statements::Program& program);
 };

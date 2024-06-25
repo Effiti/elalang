@@ -10,10 +10,9 @@ fn b() -> int {
 }
 
 fn test3(x:int) -> int {
-	if x==1 
-		putchar(12);
-	else
-		putchar(1);
-	
-	return (1+2+x)*(x+(1+2));
+	var a := 0;
+	if x == 12
+		a = 15;
+	return a;
 }
+

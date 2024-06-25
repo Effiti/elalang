@@ -39,7 +39,7 @@ namespace Ela::Analysis {
 class ExpressionVisitor;
 }
 namespace Ela::Emitter {
-  class Emitter;
+class Emitter;
 }
 namespace Ela::Expressions {
 class Expression : public Node {
@@ -47,7 +47,7 @@ class Expression : public Node {
   virtual std::size_t getType(Analysis::ExpressionVisitor& c) const {
     return -1;
   };
-  virtual llvm::Value *codegen(Emitter::Emitter& e) {return nullptr;}
+  virtual llvm::Value* codegen(Emitter::Emitter& e) { return nullptr; }
   virtual std::string toString();
 };
 
@@ -60,7 +60,7 @@ class Unary : public Expression {
 
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
-  llvm::Value *codegen(Emitter::Emitter&) override;
+  llvm::Value* codegen(Emitter::Emitter&) override;
 };
 
 class Binary : public Expression {
@@ -87,7 +87,7 @@ class Parenthed : public Primary {
 
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
-  llvm::Value *codegen(Emitter::Emitter&) override;
+  llvm::Value* codegen(Emitter::Emitter&) override;
 
   std::shared_ptr<Expression> subExpr;
 };
@@ -101,7 +101,7 @@ class IntegerLiteral : public Primary {
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
 
-  llvm::Value *codegen(Emitter::Emitter&) override;
+  llvm::Value* codegen(Emitter::Emitter&) override;
 };
 
 class NullExpression : public Primary {
@@ -120,7 +120,7 @@ class FunctionCall : public Primary {
 
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
   string toString() override;
-  llvm::Value* codegen(Emitter::Emitter &e) override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 class ArrayLiteral : public Primary {
  public:
@@ -138,7 +138,18 @@ class VariableReference : public Primary {
 
   string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
-  llvm::Value *codegen(Emitter::Emitter& e) override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
+};
+
+class VariableAssign : public Primary {
+ public:
+  VariableAssign(std::string name, std::shared_ptr<Expression> value)
+      : name{name}, value{value} {};
+  std::string name;
+  std::shared_ptr<Expression> value;
+  string toString() override;
+  std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 class StringLiteral : public Primary {
@@ -159,7 +170,7 @@ class BooleanLiteral : public Primary {
 
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
-  llvm::Value *codegen(Emitter::Emitter& e) override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 }  // namespace Ela::Expressions

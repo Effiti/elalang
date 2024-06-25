@@ -2,6 +2,7 @@
 
 #include "../Ela.hpp"
 #include "../lexer/Token.h"
+#include "Expression.h"
 #include "Statement.h"
 
 namespace Ela {
@@ -123,6 +124,8 @@ class Parser {
   std::shared_ptr<Expressions::Expression> mSecondaryExpression();
 
   std::shared_ptr<Statements::ReturnStatement> mReturnStatement();
+
+  std::shared_ptr<Expressions::VariableAssign> mAssignment();
 
   std::vector<std::shared_ptr<Statements::IfStatement>> ifStatementStack;
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <llvm/IR/Value.h>
 #include <memory>
 #include <utility>
 
@@ -8,6 +9,8 @@
 
 namespace Ela::Analysis {
 class StatementVisitor;
+class VariableDefinitionSymbol;
+class TypeTable;
 };
 namespace Ela::Emitter {
 class Emitter;
@@ -104,6 +107,7 @@ class VariableDefinitionStatement : public Statement {
 
   void accept(StatementVisitor* visitor) override;
   const std::string toString() const override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 class ForStatement : public Statement {
@@ -120,6 +124,7 @@ class ForStatement : public Statement {
 
   void accept(StatementVisitor* visitor) override;
   const std::string toString() const override;
+  llvm::Value* codegen(Emitter::Emitter& e) override;
 };
 
 class WhileStatement : public Statement {
@@ -161,6 +166,11 @@ class FunctionDefinition : public Statement {
   vector<Parameter> parameters;
   std::shared_ptr<BlockStatement> statements;
   bool isExtern;
+  vector<std::shared_ptr<Analysis::VariableDefinitionSymbol>> decls;
+  void addDecls(
+      std::vector<std::shared_ptr<Analysis::VariableDefinitionSymbol>> vars) {
+    for (auto& v : vars) decls.push_back(v);
+  }
 };
 
 class Program : public Node {
@@ -170,5 +180,6 @@ class Program : public Node {
       : importStatements{std::move(iS)}, functionDefinitions{std::move(fD)} {}
   vector<ImportStatement> importStatements;
   vector<FunctionDefinition> functionDefinitions;
+  std::shared_ptr<Analysis::TypeTable> typeTable;
 };
 }  // namespace Ela::Statements

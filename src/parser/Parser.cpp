@@ -403,11 +403,9 @@ shared_ptr<Statements::WhileStatement> Parser::mWhileStatement() {
 
 shared_ptr<Statements::ForStatement> Parser::mForStatement() {
   consumeOrError(TokenType::ForKeyword);
-  consumeOrError(TokenType::LParen);
   shared_ptr<Statements::Statement> init = mStatement();
   shared_ptr<Expressions::Expression> expr = mExpressionStatement()->expression;
   shared_ptr<Statements::Statement> incr = mStatement();
-  consumeOrError(Lexing::TokenType::RParen);
   shared_ptr<Statements::Statement> body = mStatement();
   return std::make_shared<Statements::ForStatement>(
       std::move(init), std::move(expr), std::move(incr), std::move(body));
@@ -499,7 +497,11 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
     if (next().type == TokenType::LParen) {
       auto call = mFunctionCall();
       expr = std::move(call);
-    } else {
+    } else if (next().type == TokenType::AssignmentOperator) {
+      auto assign = mAssignment();
+      expr = std::move(assign);
+    }
+    else {
       auto var = make_unique<Expressions::VariableReference>(
           consumeOrError(TokenType::Identifier).value);
       expr = std::move(var);
@@ -585,6 +587,13 @@ shared_ptr<Expressions::Expression> Parser::mSecondaryExpression() {
   } while (getBinaryOperatorType(mCurrentToken()) ==
            BinaryOperatorType::Multiplication);
   return expr;
+}
+
+shared_ptr<Expressions::VariableAssign> Parser::mAssignment() {
+  string name = consumeOrError(TokenType::Identifier).value;
+  consumeOrError(TokenType::AssignmentOperator);
+  auto expr = mExpression();
+  return std::make_shared<Expressions::VariableAssign>(name, expr);
 }
 
 shared_ptr<Expressions::FunctionCall> Parser::mFunctionCall() {
