@@ -91,6 +91,10 @@ namespace Ela::Lexing {
             case Unimplemented:
                 //default:
                 return "Unimplemented";
+            case Ampersand:
+                return "Ampersand";
+            case LogicalAndOperator:
+                return "LogicalAndOperator";
         }
     }
 };

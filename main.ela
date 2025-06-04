@@ -9,10 +9,8 @@ fn b() -> int {
 	return 2;
 }
 
-fn test3(x:int) -> int {
+fn test3(x:int) -> &int {
 	var a := 0;
-	if x == 12
-		a = 15;
-	return a;
+	return &a;
 }
 

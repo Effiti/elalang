@@ -58,15 +58,24 @@ static std::string to_string(BaseType type) {
   }
 }
 
-
-
 class TypeExpression : public Ela::Node {
  public:
   virtual std::string toString() const { return {"None"}; }
   virtual bool operator!=(const TypeExpression &other) const { return true; }
   virtual bool operator==(const TypeExpression &other) const { return true; }
   // TODO search some sort of typedef-Table for defined classes.
-  virtual llvm::Type *getIRType(Emitter::Emitter&) { return nullptr; };
+  virtual llvm::Type *getIRType(Emitter::Emitter &) { return nullptr; };
+};
+
+class PointerType : public TypeExpression {
+ public:
+  std::shared_ptr<TypeExpression> base_type;
+  PointerType(std::shared_ptr<TypeExpression> base_type)
+      : base_type{base_type} {};
+  std::string toString() const override {
+    return "Ptr[" + base_type->toString() + "]";
+  }
+  llvm::Type *getIRType(Emitter::Emitter &) override;
 };
 
 class SimpleType : public TypeExpression {
@@ -82,8 +91,8 @@ class SimpleType : public TypeExpression {
       return TypeExpressions::to_string(get<BaseType>(type));
     }
   }
-  llvm::Type* getIRType(Emitter::Emitter&) override;
-};
+  llvm::Type *getIRType(Emitter::Emitter &) override;
+// };
 
 class TupleTypeExpression : public TypeExpression {
  public:
@@ -132,7 +141,6 @@ static std::optional<BaseType> getBaseType(const std::string &type) {
   // void-type functions do not have an explicitly annotated return type.
   if (type == "int") return Integer;
   if (type == "string") return String;
-  if (type == "pointer") return Pointer;
   if (type == "char") return Char;
   if (type == "float") return Float;
   if (type == "double") return Double;

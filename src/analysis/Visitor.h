@@ -23,6 +23,7 @@ class ExpressionVisitor {
   void visitUnaryExpression(const Expressions::Unary& unary);
   std::size_t getVariableType(const std::string& name);
   std::size_t getArrayType(const std::size_t baseType);
+  std::size_t getPointerType(const std::size_t baseType);
 };
 class FunctionParameter {
   public:

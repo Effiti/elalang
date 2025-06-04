@@ -1,4 +1,5 @@
 #include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/PassManager.h>
 #include <llvm/IR/Value.h>
 #include <llvm/Target/TargetMachine.h>
@@ -56,6 +57,9 @@ llvm::Value* VariableDefinitionStatement::codegen(Emitter::Emitter& e) {
 
 }  // namespace Ela::Statements
 namespace Ela::TypeExpressions {
+llvm::Type* PointerType::getIRType(Emitter::Emitter& e) {
+  return e.pointerType(*this);
+}
 llvm::Type* SimpleType::getIRType(Emitter::Emitter& e) {
   return e.simpleType(*this);
 }
@@ -334,6 +338,13 @@ llvm::Type* Emitter::simpleType(TypeExpressions::SimpleType& type) {
       return emitterError("unimplemented IR Type: " + type.toString());
   }
 }
+
+llvm::Type* Emitter::pointerType(TypeExpressions::PointerType& type) {
+  llvm::Type* base_type = type.base_type->getIRType(*this);
+  const unsigned addspace = base_type->getPointerAddressSpace();
+  return llvm::PointerType::get(base_type, addspace);
+}
+
 void Emitter::codegen(const Statements::Program& program) {
   // Create new pass and analysis managers.
   auto lam = std::make_unique<llvm::LoopAnalysisManager>();
@@ -362,6 +373,6 @@ void Emitter::codegen(const Statements::Program& program) {
   for (const auto& def : program.functionDefinitions) {
     this->function(def);
   }
-  irModule->print(llvm::errs(), nullptr);
+  irModule->print(llvm::dbgs(), nullptr);
 }
 }  // namespace Ela::Emitter

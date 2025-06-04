@@ -23,12 +23,13 @@ void StatementVisitor::visitVariableDefinition(
     // if the type is supposed to be inferred, *only* the lhs type is Infer.
     if (typeId == typeTable.getBaseTypeId(TypeExpressions::Infer)) {
       typeId = exprTypeId;
-      s.type = typeTable.getType(typeId).type;;
+      s.type = typeTable.getType(typeId).type;
+      ;
     }
     // if the expressionType is void, the lhs type can not be null, this case is
     // caught above. if both types are defined but different, error
     else if (exprTypeId != typeTable.getBaseTypeId(TypeExpressions::Null)) {
-      //typeTable.print();
+      // typeTable.print();
       throw std::runtime_error(
           "type of variable " + s.name +
           " not equal to rhs of assignment (comparing types " +
@@ -38,8 +39,8 @@ void StatementVisitor::visitVariableDefinition(
     }
   }
 
-  auto symbol =
-      std::make_shared<VariableDefinitionSymbol>(nesting, s.name, (unsigned)typeId, s.value);
+  auto symbol = std::make_shared<VariableDefinitionSymbol>(
+      nesting, s.name, (unsigned)typeId, s.value);
 
   // std::cout << "adding variable " << s.toString() << std::endl;
   variables.add(*symbol);
@@ -133,6 +134,16 @@ std::size_t ExpressionVisitor::getArrayType(const std::size_t baseType) {
   return types.getType("Array[" + tr.typeStr + ", ]");
 }
 
+std::size_t ExpressionVisitor::getPointerType(const std::size_t baseType) {
+  const auto& tr = types.getType(baseType);
+  const auto& t = types.getType("Ptr[" + tr.typeStr + " ]");
+  if (t != -1) return t;
+  types.add(TypeEntry("Ptr[" + tr.typeStr + " ]",
+                      std::make_shared<TypeExpressions::TypeExpression>(
+                          TypeExpressions::PointerType(tr.type))));
+  return types.getType("Ptr[ " + tr.typeStr + " ]");
+  return 0;
+}
 }  // namespace Analysis
 void Statements::BlockStatement::accept(StatementVisitor* visitor) {
   visitor->visitBlock(*this, false);
@@ -187,6 +198,8 @@ void Statements::VariableDefinitionStatement::accept(
 std::size_t Expressions::Unary::getType(Analysis::ExpressionVisitor& c) const {
   // unary expressions, by default, do not change the type of an expression.
   // This can be overriden in special cases.
+  if (op == UnaryOperatorType::Address)
+    return c.getPointerType(expression->getType(c));
   return expression->getType(c);
 }
 std::size_t Expressions::Parenthed::getType(

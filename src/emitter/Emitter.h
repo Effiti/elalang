@@ -46,6 +46,7 @@ class Emitter {
 
   llvm::AllocaInst* createEntryBlockAlloca(llvm::Function *function, const string &name, llvm::Type* type);
   llvm::Type *simpleType(TypeExpressions::SimpleType& type);
+  llvm::Type *pointerType(TypeExpressions::PointerType& type);
   void codegen(const Statements::Program& program);
 };
 }  // namespace Ela::Emitter

@@ -80,7 +80,8 @@ ParserLoopResult Parser::mParserLoop() {
   if (is(top(), FunctionDefinitionList)) {
     pop();
     {
-      if (match(TokenType::FunctionKeyword) || match(TokenType::ExternKeyword)) {
+      if (match(TokenType::FunctionKeyword) ||
+          match(TokenType::ExternKeyword)) {
         push(FunctionDefinitionList);
         push(FunctionDefinition);
       } else if (match(TokenType::EndOfFile)) {
@@ -95,7 +96,8 @@ ParserLoopResult Parser::mParserLoop() {
   if (is(top(), FunctionDefinition)) {
     pop();
     {
-      if (match(TokenType::FunctionKeyword) || match(TokenType::ExternKeyword)) {
+      if (match(TokenType::FunctionKeyword) ||
+          match(TokenType::ExternKeyword)) {
         mP.functionDefinitions.push_back(mFunctionDefinition());
       } else {
         mParserError(TokenType::FunctionKeyword, mCurrentToken());
@@ -229,8 +231,7 @@ Statements::ImportStatement Parser::mImportStatement() {
 
 Statements::FunctionDefinition Parser::mFunctionDefinition() {
   bool isExtern = false;
-  if(consume(TokenType::ExternKeyword))
-    isExtern = true;
+  if (consume(TokenType::ExternKeyword)) isExtern = true;
   consumeOrError(TokenType::FunctionKeyword);
   std::string name = consumeOrError(TokenType::Identifier).value;
   // parse parameterList
@@ -256,16 +257,17 @@ Statements::FunctionDefinition Parser::mFunctionDefinition() {
     returnType =
         make_unique<TypeExpressions::SimpleType>(TypeExpressions::Void);
   }
-  if(isExtern) {
+  if (isExtern) {
     consume(TokenType::Semicolon);
-    return Statements::FunctionDefinition{std::move(returnType), name,
-                                          std::move(params), std::move(Statements::emptyBlock()), true};
+    return Statements::FunctionDefinition{
+        std::move(returnType), name, std::move(params),
+        std::move(Statements::emptyBlock()), true};
   }
-  
+
   auto block = *std::move(mBlockStatement());
 
-  return Statements::FunctionDefinition{std::move(returnType), name,
-                                        std::move(params), std::move(block), false};
+  return Statements::FunctionDefinition{
+      std::move(returnType), name, std::move(params), std::move(block), false};
 }
 
 shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
@@ -276,6 +278,12 @@ shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
     } while (consume(Lexing::TokenType::Comma));
     return std::make_shared<TypeExpressions::TypeExpression>(
         TypeExpressions::TupleTypeExpression(types));
+  }
+  if (consume(Lexing::TokenType::Ampersand)) {
+    std::cout << "found pointer type" << "\n";
+    auto ptr = std::make_shared<TypeExpressions::TypeExpression>(
+        TypeExpressions::PointerType(mTypeExpression()));
+    return ptr;
   }
   if (!match(Lexing::TokenType::Identifier) &&
       !match(Lexing::TokenType::LBracket))
@@ -491,6 +499,14 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
     }
     return make_shared<Expressions::ArrayLiteral>(exprs);
   }
+  if (consume(TokenType::Ampersand)) {
+    shared_ptr<Expressions::Expression> expr;
+    auto var = make_shared<Expressions::VariableReference>(
+        consumeOrError(TokenType::Identifier).value);
+    expr = make_shared<Expressions::Unary>(std::move(var),
+                                           UnaryOperatorType::Address);
+    return expr;
+  }
   if (match(TokenType::Identifier)) {
     shared_ptr<Expressions::Expression> expr;
 
@@ -500,8 +516,7 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
     } else if (next().type == TokenType::AssignmentOperator) {
       auto assign = mAssignment();
       expr = std::move(assign);
-    }
-    else {
+    } else {
       auto var = make_unique<Expressions::VariableReference>(
           consumeOrError(TokenType::Identifier).value);
       expr = std::move(var);

@@ -38,6 +38,9 @@ namespace Ela::Lexing {
         Comma,
         Colon,
 
+        Ampersand,
+        LogicalAndOperator,
+
 
         Semicolon,
         VariableKeyword,

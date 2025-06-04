@@ -284,6 +284,12 @@ namespace Ela::Lexing {
             } else if (consume(':')) {
                 mAddToken({line, col, TokenType::Colon, ""});
             }
+            else if (consume('&')) {
+                if(consume('&')) 
+                    mAddToken({line, col, TokenType::LogicalAndOperator, ""});
+                else
+                    mAddToken({line, col, TokenType::Ampersand, ""});
+            }
         }
         mAddToken(Token{mCurrentLine, mCurrentCol, TokenType::EndOfFile, ""});
 

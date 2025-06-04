@@ -1,3 +1,12 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+set -xe
 
-make -k all && ./bin/elalang ${@}
+compile () {
+  make -k all 
+}
+run() {
+  ELA_TMP="$(mktemp)"
+  ./bin/elalang 2> "$ELA_TMP"
+  bat "$ELA_TMP" --language=LLVM
+}
+compile && run

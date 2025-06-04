@@ -34,6 +34,7 @@ enum class UnaryOperatorType {
   PostIncrement,
   PreDecrement,
   PostDecrement,
+  Address
 };
 namespace Ela::Analysis {
 class ExpressionVisitor;

@@ -57,6 +57,8 @@ std::string humanReadableUnaryOperatorType(UnaryOperatorType type) {
       return "PostDecrement";
     case UnaryOperatorType::Not:
       return "Not";
+    case UnaryOperatorType::Address:
+      return "Addr";
   }
 }
 
