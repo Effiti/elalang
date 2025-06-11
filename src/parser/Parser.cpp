@@ -281,9 +281,8 @@ shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
   }
   if (consume(Lexing::TokenType::Ampersand)) {
     std::cout << "found pointer type" << "\n";
-    auto ptr = std::make_shared<TypeExpressions::TypeExpression>(
-        TypeExpressions::PointerType(mTypeExpression()));
-    return ptr;
+    return std::make_shared<TypeExpressions::PointerType>(
+        TypeExpressions::PointerType(std::move(mTypeExpression())));
   }
   if (!match(Lexing::TokenType::Identifier) &&
       !match(Lexing::TokenType::LBracket))
@@ -388,9 +387,9 @@ shared_ptr<Statements::ExpressionStatement> Parser::mExpressionStatement() {
 
 shared_ptr<Statements::IfStatement> Parser::mIfStatement() {
   consumeOrError(TokenType::IfKeyword);
-  // consumeOrError(TokenType::LParen);
+  consumeOrError(TokenType::LParen);
   shared_ptr<Expressions::Expression> condition = mExpression();
-  // consumeOrError(TokenType::RParen);
+  consumeOrError(TokenType::RParen);
   shared_ptr<Statements::Statement> statement = mStatement();
   std::shared_ptr<Statements::IfStatement> ifStatement =
       std::make_shared<Statements::IfStatement>(std::move(condition),
@@ -411,9 +410,11 @@ shared_ptr<Statements::WhileStatement> Parser::mWhileStatement() {
 
 shared_ptr<Statements::ForStatement> Parser::mForStatement() {
   consumeOrError(TokenType::ForKeyword);
+  consumeOrError(Lexing::TokenType::LParen);
   shared_ptr<Statements::Statement> init = mStatement();
   shared_ptr<Expressions::Expression> expr = mExpressionStatement()->expression;
   shared_ptr<Statements::Statement> incr = mStatement();
+  consumeOrError(Lexing::TokenType::RParen);
   shared_ptr<Statements::Statement> body = mStatement();
   return std::make_shared<Statements::ForStatement>(
       std::move(init), std::move(expr), std::move(incr), std::move(body));

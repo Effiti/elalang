@@ -73,7 +73,7 @@ class PointerType : public TypeExpression {
   PointerType(std::shared_ptr<TypeExpression> base_type)
       : base_type{base_type} {};
   std::string toString() const override {
-    return "Ptr[" + base_type->toString() + "]";
+    return "Ptr[ " + base_type->toString() + " ]";
   }
   llvm::Type *getIRType(Emitter::Emitter &) override;
 };
@@ -92,7 +92,7 @@ class SimpleType : public TypeExpression {
     }
   }
   llvm::Type *getIRType(Emitter::Emitter &) override;
-// };
+};
 
 class TupleTypeExpression : public TypeExpression {
  public:

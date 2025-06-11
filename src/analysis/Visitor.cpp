@@ -136,9 +136,9 @@ std::size_t ExpressionVisitor::getArrayType(const std::size_t baseType) {
 
 std::size_t ExpressionVisitor::getPointerType(const std::size_t baseType) {
   const auto& tr = types.getType(baseType);
-  const auto& t = types.getType("Ptr[" + tr.typeStr + " ]");
+  const auto& t = types.getType("Ptr[ " + tr.typeStr + " ]");
   if (t != -1) return t;
-  types.add(TypeEntry("Ptr[" + tr.typeStr + " ]",
+  types.add(TypeEntry("Ptr[ " + tr.typeStr + " ]",
                       std::make_shared<TypeExpressions::TypeExpression>(
                           TypeExpressions::PointerType(tr.type))));
   return types.getType("Ptr[ " + tr.typeStr + " ]");
@@ -198,8 +198,9 @@ void Statements::VariableDefinitionStatement::accept(
 std::size_t Expressions::Unary::getType(Analysis::ExpressionVisitor& c) const {
   // unary expressions, by default, do not change the type of an expression.
   // This can be overriden in special cases.
-  if (op == UnaryOperatorType::Address)
+  if (op == UnaryOperatorType::Address) {
     return c.getPointerType(expression->getType(c));
+  }
   return expression->getType(c);
 }
 std::size_t Expressions::Parenthed::getType(

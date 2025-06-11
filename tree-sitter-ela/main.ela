@@ -1,0 +1,16 @@
+extern fn putchar(c:int) -> int;
+
+fn a() -> int {
+	putchar(12);
+	return 1;
+}
+fn b() -> int { 
+	putchar(13);
+	return 2;
+}
+
+fn test3(x:int) -> &int {
+	var a := 0;
+	return &a;
+}
+
