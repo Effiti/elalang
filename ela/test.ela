@@ -1,7 +1,0 @@
-// Pointer Types
-fn a() {
-// we take the adress of a value by &, so we take the address of a type by &
-var x : int  = 12;
-var a : &int = &x;
-
-}

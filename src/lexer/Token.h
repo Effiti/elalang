@@ -1,81 +1,81 @@
 #pragma once
 #include "../Ela.hpp"
-#define NULLTOK Token{0,0,TokenType::None, ""};
+#define NULLTOK Token{0, 0, TokenType::None, ""};
 
 namespace Ela::Lexing {
-    using std::string;
-    enum class TokenType {
-        None,
-        NumberLiteral,
-        StringLiteral,
+using std::string;
+enum class TokenType {
+  None,
+  NumberLiteral,
+  CharLiteral,
+  StringLiteral,
 
-        LCurly, // done
-        RCurly,   // done
+  LCurly,  // done
+  RCurly,  // done
 
-        ExplicitConstQualifier,
+  ExplicitConstQualifier,
 
-        Plus,
-        Hyphen,
-        Caret,
-        Asterisk,
-        DivisionOperator,
-        LParen,
-        RParen,
-        LBracket,
-        RBracket,
-        GreaterThanOperator,
-        LessThanOperator,
-        EqualsOperator,
-        BangEqualsOperator,
-        ExclamationMark,
-        EqualOrGreaterThanOperator,
-        EqualOrLessThanOperator,
-        Increment,
-        Decrement,
-        HyphenArrow,
-        AssignmentOperator,
-        Period,
-        Comma,
-        Colon,
+  Plus,
+  Hyphen,
+  Caret,
+  Asterisk,
+  DivisionOperator,
+  LParen,
+  RParen,
+  LBracket,
+  RBracket,
+  GreaterThanOperator,
+  LessThanOperator,
+  EqualsOperator,
+  BangEqualsOperator,
+  ExclamationMark,
+  EqualOrGreaterThanOperator,
+  EqualOrLessThanOperator,
+  Increment,
+  Decrement,
+  HyphenArrow,
+  AssignmentOperator,
+  Period,
+  Comma,
+  Colon,
 
-        Ampersand,
-        LogicalAndOperator,
+  Ampersand,
+  LogicalAndOperator,
 
+  Semicolon,
+  VariableKeyword,
+  ImportKeyword,
+  FunctionKeyword,
+  IfKeyword,
+  ElseKeyword,
+  TrueKeyword,
+  FalseKeyword,
+  ReturnKeyword,
+  ForKeyword,
+  WhileKeyword,
+  ExternKeyword,
 
-        Semicolon,
-        VariableKeyword,
-        ImportKeyword,
-        FunctionKeyword,
-        IfKeyword,
-        ElseKeyword,
-        TrueKeyword,
-        FalseKeyword,
-        ReturnKeyword,
-        ForKeyword,
-        WhileKeyword,
-        ExternKeyword,
+  Identifier,
 
-        Identifier,
+  Unimplemented,
 
-        Unimplemented,
-
-        EndOfFile
-
-    };
-
-    std::string humanReadableTokenType(TokenType type);
-
-    class Token {
-    public:
-        Token(std::size_t l, std::size_t c, TokenType t, std::string_view v)
-                : line{l}, col{c}, type{t}, value{v}, file{"main.ela"} {};
-        std::size_t line;
-        std::size_t col;
-        TokenType type;
-        // TODO: change value's type to std::string_view, imlement "file" field in
-        // other files
-        std::string value;
-        std::string_view file;
-    };
+  EndOfFile
 
 };
+
+std::string humanReadableTokenType(TokenType type);
+
+class Token {
+ public:
+  Token(std::size_t l, std::size_t c, TokenType t, std::string_view v)
+      : line{l}, col{c}, type{t}, value{v}, file{"main.ela"} {};
+  std::size_t line;
+  std::size_t col;
+  TokenType type;
+  // TODO: change value's type to std::string_view, imlement "file" field in
+  // other files
+  std::string value;
+  std::string_view file;
+};
+
+};  // namespace Ela::Lexing

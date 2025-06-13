@@ -14,6 +14,9 @@ namespace Ela::Expressions {
 llvm::Value* IntegerLiteral::codegen(Emitter::Emitter& e) {
   return e.integerLiteralValue(value);
 }
+llvm::Value* CharacterLiteral::codegen(Emitter::Emitter& e) {
+  return e.characterLiteralValue(value);
+}
 llvm::Value* BooleanLiteral::codegen(Emitter::Emitter& e) {
   return e.boolean(value);
 }
@@ -90,6 +93,12 @@ llvm::Value* Emitter::integerLiteralValue(int v) {
   return llvm::ConstantInt::get(*llvmContext, llvm::APInt(64, v, true));
   // return llvm::ConstantFP::get(*llvmContext, llvm::APFloat((float)v));
 }
+llvm::Value* Emitter::characterLiteralValue(char v) {
+  // HACK Bit width and unsigned integers -> enum "IntegerType", later
+  // autodetection
+  return llvm::ConstantInt::get(*llvmContext, llvm::APInt(8, v, true));
+  // return llvm::ConstantFP::get(*llvmContext, llvm::APFloat((float)v));
+}
 llvm::Value* Emitter::boolean(bool b) {
   return llvm::ConstantInt::getBool(llvm::Type::getInt1Ty(*llvmContext), b);
 }
@@ -104,6 +113,8 @@ llvm::Value* Emitter::unary(Expressions::Unary& expr) {
     case UnaryOperatorType::Minus:
       return irBuilder->CreateUnOp(llvm::Instruction::UnaryOps::FNeg,
                                    expr.expression->codegen(*this));
+    case UnaryOperatorType::Address:
+      return namedValues[expr.expression->varName()];
     default:
       return emitterError("unsupported Unary Operator type");
   }
@@ -341,8 +352,8 @@ llvm::Type* Emitter::simpleType(TypeExpressions::SimpleType& type) {
 
 llvm::Type* Emitter::pointerType(TypeExpressions::PointerType& type) {
   llvm::Type* base_type = type.base_type->getIRType(*this);
-  const unsigned addspace = base_type->getPointerAddressSpace();
-  return llvm::PointerType::get(base_type, addspace);
+  //const unsigned addspace = base_type->getPointerAddressSpace();
+  return llvm::PointerType::get(base_type, 0);
 }
 
 void Emitter::codegen(const Statements::Program& program) {

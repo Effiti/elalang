@@ -71,6 +71,8 @@ std::string Expression::toString() { return {}; }
 
 std::string IntegerLiteral::toString() { return std::to_string(value); }
 
+std::string CharacterLiteral::toString() { return std::to_string(value); }
+
 std::string Parenthed::toString() { return subExpr->toString(); }
 
 std::string NullExpression::toString() { return "null"; }
@@ -85,6 +87,9 @@ std::string ArrayLiteral::toString() {
 std::string VariableReference::toString() {
   return "var(" + variableName + ")";
 }
+std::string VariableReference::varName() {
+  return variableName;
+}
 
 std::string FunctionCall::toString() {
   std::string params;
@@ -96,24 +101,6 @@ std::string FunctionCall::toString() {
 }
 
 std::string StringLiteral::toString() { return "\"" + value + "\""; }
-
-std::string StringLiteral::unescaped() {
-  std::string newValue = value;
-  for (int i = 0; i < value.length(); ++i) {
-    if (value[i] == '\\') {
-      if (++i >= value.length()) {
-        // the case in which the last character of a string is a single '\'
-        // should be stopped by the lexer!
-        throw std::runtime_error("impossible state!");
-      }
-      if (value[i] == 'n') {
-        newValue = newValue.substr(0, i - 1) + '\n' +
-                   value.substr(i + 1, value.length());
-      }
-    }
-  }
-  return newValue;
-}
 
 std::string BooleanLiteral::toString() { return value ? "true" : "false"; }
 

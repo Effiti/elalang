@@ -1,11 +1,11 @@
-extern fn putchar(c:int) -> int;
+extern fn putchar(c:char) -> int;
 
 fn a() -> int {
-	putchar(12);
+	//putchar(12);
 	return 1;
 }
 fn b() -> int { 
-	putchar(13);
+	putchar('a');
 	return 2;
 }
 

@@ -50,6 +50,7 @@ class Expression : public Node {
   };
   virtual llvm::Value* codegen(Emitter::Emitter& e) { return nullptr; }
   virtual std::string toString();
+  virtual std::string varName() { return ""; };
 };
 
 class Unary : public Expression {
@@ -105,6 +106,18 @@ class IntegerLiteral : public Primary {
   llvm::Value* codegen(Emitter::Emitter&) override;
 };
 
+class CharacterLiteral : public Primary {
+ public:
+  CharacterLiteral(char v) : value{v} {};
+
+  const char value;
+
+  std::string toString() override;
+  std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+
+  llvm::Value* codegen(Emitter::Emitter&) override;
+};
+
 class NullExpression : public Primary {
  public:
   std::string toString() override;
@@ -140,6 +153,7 @@ class VariableReference : public Primary {
   string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  string varName() override;
 };
 
 class VariableAssign : public Primary {
@@ -160,7 +174,6 @@ class StringLiteral : public Primary {
 
   std::string toString() override;
 
-  std::string unescaped();
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
 };
 

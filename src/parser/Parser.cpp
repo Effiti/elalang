@@ -10,7 +10,7 @@
 namespace Ela {
 
 using enum NonTerminalType;
-using std::unique_ptr, std::make_unique, std::shared_ptr, std::make_shared;
+using std::make_unique, std::shared_ptr, std::make_shared;
 std::string humanReadableNonTerminalType(NonTerminalType type) {
   switch (type) {
     case NonTerminalType::Block:
@@ -484,6 +484,11 @@ shared_ptr<Expressions::Expression> Parser::mPrimaryExpression() {
   if (match(TokenType::NumberLiteral)) {
     return make_unique<Expressions::IntegerLiteral>(
         std::stoi(consumeOrError(TokenType::NumberLiteral).value));
+  }
+  if (match(TokenType::CharLiteral)) {
+    return make_unique<Expressions::CharacterLiteral>(
+        // we know it can only be 1 char long
+        consumeOrError(TokenType::CharLiteral).value.at(0));
   }
   if (consume(Lexing::TokenType::LBracket)) {
     vector<shared_ptr<Expressions::Expression>> exprs;

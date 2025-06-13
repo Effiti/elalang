@@ -93,6 +93,7 @@ module.exports = grammar({
     _primary: $ => choice(
       $.number,
       $.string,
+      $.character,
       $.ident,
       'true',
       'false',
@@ -108,6 +109,8 @@ module.exports = grammar({
     number: _$ => /\d+(\.\d+)?/,
 
     string: _$ => /"(?:[^"\\]|\\.)*"/,
+
+    character: $ => /'(?:[^'\\]|\\.)'/,
 
     comment: _$ => token(choice(
       seq('//', /.*/),

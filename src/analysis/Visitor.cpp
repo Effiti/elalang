@@ -243,6 +243,10 @@ std::size_t Expressions::IntegerLiteral::getType(
     Analysis::ExpressionVisitor& c) const {
   return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Integer);
 }
+std::size_t Expressions::CharacterLiteral::getType(
+    Analysis::ExpressionVisitor& c) const {
+  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Char);
+}
 std::size_t Expressions::StringLiteral::getType(
     Analysis::ExpressionVisitor& c) const {
   return Analysis::TypeTable::getBaseTypeId(TypeExpressions::String);

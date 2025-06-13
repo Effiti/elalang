@@ -34,6 +34,7 @@
 (type) @type
 (number) @number
 (string) @string
+(character) @string
 (functionHeader
   name: (ident) @function
 )

@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
-#include <strstream>
 #include "../parser/Expression.h"
 #include "../parser/Statement.h"
 
@@ -28,6 +27,7 @@ class Emitter {
      irModule(new llvm::Module("my cool JIT", *llvmContext)), irBuilder(new llvm::IRBuilder<>(*llvmContext)){
     }; 
   llvm::Value *integerLiteralValue(int v);
+  llvm::Value *characterLiteralValue(char v);
   llvm::Value *varRef(const std::string& str);
   llvm::Value *binary(const Expressions::Binary& bin);
   llvm::Value *functionCall(Expressions::FunctionCall& call);
@@ -47,6 +47,8 @@ class Emitter {
   llvm::AllocaInst* createEntryBlockAlloca(llvm::Function *function, const string &name, llvm::Type* type);
   llvm::Type *simpleType(TypeExpressions::SimpleType& type);
   llvm::Type *pointerType(TypeExpressions::PointerType& type);
+
   void codegen(const Statements::Program& program);
+  void compile(const Statements::Program& program, const std::string &outputFile);
 };
 }  // namespace Ela::Emitter
