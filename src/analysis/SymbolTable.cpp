@@ -75,7 +75,7 @@ int TypeTable::getType(std::string typeStr) {
   return -1;
 }
 void TypeTable::addBaseType(TypeExpressions::BaseType type) {
-  add(TypeEntry(TypeExpressions::to_string(type),
+  add(TypeEntry(Ela::to_string(type),
                 std::make_shared<TypeExpressions::SimpleType>(type)));
 }
 TypeTable::TypeTable() {
@@ -84,7 +84,7 @@ TypeTable::TypeTable() {
   addBaseType(TypeExpressions::Double);
   addBaseType(TypeExpressions::Array);
   addBaseType(TypeExpressions::Boolean);
-  addBaseType(TypeExpressions::String);
+  addBaseType(TypeExpressions::CString);
   addBaseType(TypeExpressions::Char);
   addBaseType(TypeExpressions::Float);
   addBaseType(TypeExpressions::Pointer);
@@ -101,7 +101,7 @@ std::size_t TypeTable::getBaseTypeId(TypeExpressions::BaseType type) {
       return 1;
     case TypeExpressions::Boolean:
       return 4;
-    case TypeExpressions::String:
+    case TypeExpressions::CString:
       return 5;
     case TypeExpressions::Char:
       return 6;

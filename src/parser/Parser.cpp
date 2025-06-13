@@ -293,7 +293,7 @@ shared_ptr<TypeExpressions::TypeExpression> Parser::mTypeExpression() {
           : "array";
 
   const std::optional<TypeExpressions::BaseType> base =
-      TypeExpressions::getBaseType(baseTypeName);
+      getBaseType(baseTypeName);
   std::variant<const std::string, TypeExpressions::BaseType> baseVar =
       baseTypeName;
   if (base.has_value()) {

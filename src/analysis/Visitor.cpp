@@ -249,7 +249,7 @@ std::size_t Expressions::CharacterLiteral::getType(
 }
 std::size_t Expressions::StringLiteral::getType(
     Analysis::ExpressionVisitor& c) const {
-  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::String);
+  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::CString);
 }
 std::size_t Expressions::NullExpression::getType(
     Analysis::ExpressionVisitor& c) const {

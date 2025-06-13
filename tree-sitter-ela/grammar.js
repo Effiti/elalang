@@ -17,7 +17,7 @@ module.exports = grammar({
     _def: $ => choice($.function,
       $.externFn),
     function: $ => seq($.functionHeader, $.block),
-    functionHeader: $ => seq('fn', field('name', $.ident), '(', optional(field('params', $._args)), ')', '->', field('type', $.type)),
+    functionHeader: $ => seq('fn', field('name', $.ident), '(', optional(field('params', $._args)), ')', optional(seq('->', field('type', $.type)))),
     externFn: $ => seq('extern', $.functionHeader, ';'),
     ident: _$ => /[A-z][A-z0-9_]*/,
     type: $ => seq(optional('&'), $.ident, optional(seq('[', $.type, ']'))),

@@ -1,6 +1,6 @@
 extern fn putchar(c:char) -> int;
 
-fn a() -> int {
+fn a() {
 	//putchar(12);
 	return 1;
 }

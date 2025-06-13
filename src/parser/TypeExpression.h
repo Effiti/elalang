@@ -3,60 +3,13 @@
 #include <utility>
 #include <variant>
 
+#include "../BaseType.h"
 #include "../Ela.hpp"
 #include "Node.h"
 
 namespace Ela::TypeExpressions {
-enum BaseType {
-  Integer,
-  String,
-  Char,
-  Float,
-  Double,
-  Pointer,
-  Boolean,
-  Array,
-  Function,
-  //"Special" Types
-  // Type of functions with no return value
-  Void,
-  // Type of defined variables wihout type specification (can also be used for
-  // other things)
-  Infer,
-  // Type of the "null" literal
-  Null
-};
-
-static std::string to_string(BaseType type) {
-  switch (type) {
-    case Integer:
-      return "Integer";
-    case String:
-      return "String";
-    case Char:
-      return "Char";
-    case Float:
-      return "Float";
-    case Double:
-      return "Double";
-    case Pointer:
-      return "Pointer";
-    case Boolean:
-      return "Boolean";
-    case Void:
-      return "Void";
-    case Array:
-      return "Array";
-    case Infer:
-      return "Infer";
-    case Null:
-      return "Null";
-    case Function:
-      return "Function";
-    default:
-      return "Unimplemented";
-  }
-}
+using Ela::BaseType;
+using enum Ela::BaseType;
 
 class TypeExpression : public Ela::Node {
  public:
@@ -88,7 +41,7 @@ class SimpleType : public TypeExpression {
     if (std::holds_alternative<const std::string>(type)) {
       return get<const std::string>(type);
     } else {
-      return TypeExpressions::to_string(get<BaseType>(type));
+      return to_string(get<BaseType>(type));
     }
   }
   llvm::Type *getIRType(Emitter::Emitter &) override;
@@ -135,20 +88,5 @@ class TypeTemplateExpression : public TypeExpression {
     return templatedType.toString() + "[" + template_args + "]";
   }
 };
-
-static std::optional<BaseType> getBaseType(const std::string &type) {
-  // we do not check for the void-type as it does not occur in identifiers:
-  // void-type functions do not have an explicitly annotated return type.
-  if (type == "int") return Integer;
-  if (type == "string") return String;
-  if (type == "char") return Char;
-  if (type == "float") return Float;
-  if (type == "double") return Double;
-  if (type == "bool") return Boolean;
-  if (type == "array")
-    return Array;
-  else
-    return std::nullopt;
-}
 
 }  // namespace Ela::TypeExpressions
