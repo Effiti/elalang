@@ -8,6 +8,7 @@
 #include "../parser/Node.h"
 #include "../parser/Statement.h"
 #include "../parser/TypeExpression.h"
+#include "Type.h"
 
 namespace Ela::Analysis {
 using std::unique_ptr;
@@ -21,22 +22,23 @@ class TypeEntry {
 };
 
 class TypeTable {
-  std::vector<TypeEntry> types;
+  std::vector<Type> types;
   void addBaseType(TypeExpressions::BaseType type);
 
  public:
-  std::optional<TypeEntry> get(std::string name);
-  int add(const TypeEntry& type);
-  bool hasType(std::string str);
-  TypeEntry getType(int id);
-  int getType(std::string str);
-  static std::size_t getBaseTypeId(TypeExpressions::BaseType b);
+  // std::optional<TypeEntry> get(std::string name);
+  int add(const Type& type);
+  // bool hasType(std::string str);
+  Type getType(int id);
+  int getTypeId(const Type &type);
+  // int getType(std::string str);
+  std::size_t getBaseTypeId(TypeExpressions::BaseType b);
   void print() {
     int i = 0;
-    for (const auto& entry : types) {
-      std::cout << i << " |\t" << entry.typeStr << std::endl;
+    // for (const auto& entry : types) {
+      // std::cout << i << " |\t" << entry.<< std::endl;
       i++;
-    }
+    // }
   };
   TypeTable();
 };

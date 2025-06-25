@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "Emitter.h"
+
 namespace Ela::Expressions {
 llvm::Value* IntegerLiteral::codegen(Emitter::Emitter& e) {
   return e.integerLiteralValue(value);
@@ -60,12 +61,12 @@ llvm::Value* VariableDefinitionStatement::codegen(Emitter::Emitter& e) {
 
 }  // namespace Ela::Statements
 namespace Ela::TypeExpressions {
-llvm::Type* PointerType::getIRType(Emitter::Emitter& e) {
-  return e.pointerType(*this);
-}
-llvm::Type* SimpleType::getIRType(Emitter::Emitter& e) {
-  return e.simpleType(*this);
-}
+// llvm::Type* PointerType::getIRType(Emitter::Emitter& e) {
+//   return e.pointerType(*this);
+// }
+// llvm::Type* SimpleType::getIRType(Emitter::Emitter& e) {
+//   return e.simpleType(*this);
+// }
 }  //  namespace Ela::TypeExpressions
 namespace Ela::Emitter {
 llvm::AllocaInst* Emitter::createEntryBlockAlloca(llvm::Function* TheFunction,
@@ -268,8 +269,8 @@ llvm::Value* Emitter::varDef(
   llvm::Function* function = irBuilder->GetInsertBlock()->getParent();
   // an ALlocaInst basically returns the llvm::Value of the Pointer returned by
   // allocation
-  llvm::AllocaInst* allocaInstance =
-      createEntryBlockAlloca(function, def.name, def.type->getIRType(*this));
+  llvm::AllocaInst* allocaInstance = createEntryBlockAlloca(
+      function, def.name, def.analysedType->get()->getIRType(*this));
   llvm::Value* initial = def.value->codegen(*this);
 
   irBuilder->CreateStore(initial, allocaInstance);
@@ -286,10 +287,11 @@ llvm::Value* Emitter::assign(const Expressions::VariableAssign& e) {
 llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
   std::vector<llvm::Type*> parameterTypes = std::vector<llvm::Type*>();
   for (const auto& param : def.parameters) {
-    parameterTypes.push_back(param.parameterType->getIRType(*this));
+    parameterTypes.push_back(
+        param.parameterType->toAnalysisType().getIRType(*this));
   }
-  auto functionType = llvm::FunctionType::get(def.returnType->getIRType(*this),
-                                              parameterTypes, false);
+  auto functionType = llvm::FunctionType::get(
+      def.returnType->toAnalysisType().getIRType(*this), parameterTypes, false);
   llvm::Function* function =
       llvm::Function::Create(functionType, llvm::Function::ExternalLinkage,
                              def.functionName, irModule);
@@ -323,15 +325,14 @@ llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
     return function;
   }
   function->eraseFromParent();
-  emitterError("Failure generating IR code for function " + def.functionName + ". No return statement?");
+  emitterError("Failure generating IR code for function " + def.functionName +
+               ". No return statement?");
 
   return nullptr;
 }
 
-llvm::Type* Emitter::simpleType(TypeExpressions::SimpleType& type) {
-  if (std::holds_alternative<const std::string>(type.type))
-    return emitterError("custom types unsupported");
-  switch (std::get<TypeExpressions::BaseType>(type.type)) {
+llvm::Type* Emitter::simpleType(FundamentalType& type) {
+  switch (type) {
     case TypeExpressions::Boolean:
       return llvm::Type::getInt1Ty(*llvmContext);
     case TypeExpressions::Integer:
@@ -346,13 +347,13 @@ llvm::Type* Emitter::simpleType(TypeExpressions::SimpleType& type) {
     case TypeExpressions::Float:
       return llvm::Type::getFloatTy(*llvmContext);
     default:
-      return emitterError("unimplemented IR Type: " + type.toString());
+      return emitterError("unimplemented IR Type");
   }
 }
 
-llvm::Type* Emitter::pointerType(TypeExpressions::PointerType& type) {
-  llvm::Type* base_type = type.base_type->getIRType(*this);
-  //const unsigned addspace = base_type->getPointerAddressSpace();
+llvm::Type* Emitter::pointerTypeTo(Analysis::Type& type) {
+  llvm::Type* base_type = type.getIRType(*this);
+  // const unsigned addspace = base_type->getPointerAddressSpace();
   return llvm::PointerType::get(base_type, 0);
 }
 

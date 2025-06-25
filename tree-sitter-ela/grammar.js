@@ -13,7 +13,8 @@ module.exports = grammar({
 
   rules: {
     // TODO: add the actual grammar rules
-    source_file: $ => repeat($._def),
+    source_file: $ => seq(repeat($.importStmt), repeat($._def)),
+    importStmt: $ => seq("import", $.string, ";"),
     _def: $ => choice($.function,
       $.externFn),
     function: $ => seq($.functionHeader, $.block),
@@ -26,7 +27,8 @@ module.exports = grammar({
     block: $ => seq('{', repeat($.statement), '}'),
     statement: $ => choice($.vardef, $._ifStmt, $._whileStmt, $._forStmt, $._returnStmt, $._exprStmt, $.block),
     vardef: $ => seq('var', field('name', $.ident), ':', optional(field('type', $.type)), optional(seq('=', $.expression)), ';'),
-    _ifStmt: $ => seq('if', '(', $.expression, ')', $.statement),
+    _ifStmt: $ => prec.right(seq('if', '(', $.expression, ')', $.statement, optional($._elseStmt))),
+    _elseStmt: $ => seq("else", $.statement),
     _whileStmt: $ => seq('while', '(', $.expression, ')', $.statement), 
     _forStmt: $ => seq('for', '(', $.statement, $.statement, $.statement, ')', ),
     _returnStmt: $ => seq('return', $.expression, ';'),

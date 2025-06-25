@@ -1,59 +1,79 @@
 #include "Emitter.h"
+
 #include <llvm/IR/Module.h>
 
 namespace Ela::Emitter {
-  void Emitter::compile(const Statements::Program& program, const std::string &outputFile) {
-    using namespace llvm;
-    codegen(program);
-    
-    auto TargetTriple = sys::getDefaultTargetTriple();
+void Emitter::compile(const Statements::Program& program,
+                      const std::string& outputFile) {
+  using namespace llvm;
+  codegen(program);
 
-    InitializeAllTargetInfos();
-    InitializeAllTargets();
-    InitializeAllTargetMCs();
-    InitializeAllAsmParsers();
-    InitializeAllAsmPrinters();
+  auto TargetTriple = sys::getDefaultTargetTriple();
 
+  InitializeAllTargetInfos();
+  InitializeAllTargets();
+  InitializeAllTargetMCs();
+  InitializeAllAsmParsers();
+  InitializeAllAsmPrinters();
 
-    std::string Error;
-    auto Target = TargetRegistry::lookupTarget(TargetTriple, Error);
+  std::string Error;
+  auto Target = TargetRegistry::lookupTarget(TargetTriple, Error);
 
-    // Print an error and exit if we couldn't find the requested target.
-    // This generally occurs if we've forgotten to initialise the
-    // TargetRegistry or we have a bogus target triple.
-    if (!Target) {
-      errs() << Error;
-      throw;
-    }
+  // Print an error and exit if we couldn't find the requested target.
+  // This generally occurs if we've forgotten to initialise the
+  // TargetRegistry or we have a bogus target triple.
+  if (!Target) {
+    errs() << Error;
+    throw;
+  }
 
-    auto CPU = "generic";
-    auto Features = "";
+  auto CPU = "generic";
+  auto Features = "";
 
-    TargetOptions opt;
-    auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, Reloc::PIC_);
+  TargetOptions opt;
+  auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features,
+                                                   opt, Reloc::PIC_);
 
-    irModule->setDataLayout(TargetMachine->createDataLayout());
-    irModule->setTargetTriple(TargetTriple);
+  irModule->setDataLayout(TargetMachine->createDataLayout());
+  irModule->setTargetTriple(TargetTriple);
 
-    
-    std::error_code EC;
-    raw_fd_ostream dest(outputFile, EC, sys::fs::OF_None);
+  std::error_code EC;
+  raw_fd_ostream dest(outputFile, EC, sys::fs::OF_None);
 
-    if (EC) {
-      errs() << "Could not open file: " << EC.message();
-      throw;
-    }
+  if (EC) {
+    errs() << "Could not open file: " << EC.message();
+    throw;
+  }
 
-    
-    legacy::PassManager pass;
-    auto FileType = CodeGenFileType::ObjectFile;
+  legacy::PassManager pass;
+  auto FileType = CodeGenFileType::ObjectFile;
 
-    if (TargetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
-      errs() << "TargetMachine can't emit a file of this type";
-      throw;
-    }
+  if (TargetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
+    errs() << "TargetMachine can't emit a file of this type";
+    throw;
+  }
 
-    pass.run(*irModule);
-    dest.flush();
-   }
+  pass.run(*irModule);
+  dest.flush();
 }
+}  // namespace Ela::Emitter
+namespace Ela::Analysis {
+
+llvm::Type* Type::getIRType(Emitter::Emitter& e) const {
+  return data | match{[&e](PointerType t) { return e.pointerTypeTo(*t.base); },
+                      [&e](ArrayType t) { return t.base->getIRType(e); },
+                      [&e](ClassType t) {
+                        throw std::runtime_error("cant do class codegen yet");
+                        // return nullptr;
+                        FundamentalType f = FundamentalType(BaseType::Integer);
+                        return e.simpleType(f);
+                      },
+                      [&e](TupleType t) {
+                        throw std::runtime_error("cant do Tuple Types yet");
+                        // return nullptr;
+                        FundamentalType f = FundamentalType(BaseType::Integer);
+                        return e.simpleType(f);
+                      },
+                      [&e](FundamentalType t) { return e.simpleType(t); }};
+}
+}  // namespace Ela::Analysis

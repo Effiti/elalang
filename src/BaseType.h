@@ -25,7 +25,7 @@ enum BaseType {
 };
 
 constexpr BaseType FundamentalTypes[] = {
-    Integer, CString, Char, Float, Double, Boolean,
+    Integer, CString, Char, Float, Double, Boolean, Void
 };
 
 inline bool isFundamental(BaseType type) {
@@ -43,10 +43,10 @@ struct FundamentalType {
   }
 
   operator BaseType() { return bt; }
+  bool operator==(const FundamentalType& other) const { return bt == other.bt; }
 };
 
-static std::string
-to_string(BaseType type) {
+static std::string to_string(BaseType type) {
   switch (type) {
     case Integer:
       return "Integer";
@@ -77,7 +77,7 @@ to_string(BaseType type) {
   }
 }
 
-static std::optional<BaseType> getBaseType(const std::string &type) {
+static std::optional<BaseType> getBaseType(const std::string& type) {
   // we do not check for the void-type as it does not occur in identifiers:
   // void-type functions do not have an explicitly annotated return type.
   if (type == "int") return Integer;

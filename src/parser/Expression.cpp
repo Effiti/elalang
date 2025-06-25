@@ -71,7 +71,7 @@ std::string Expression::toString() { return {}; }
 
 std::string IntegerLiteral::toString() { return std::to_string(value); }
 
-std::string CharacterLiteral::toString() { return std::to_string(value); }
+std::string CharacterLiteral::toString() { return std::string(1, value); }
 
 std::string Parenthed::toString() { return subExpr->toString(); }
 
@@ -96,7 +96,7 @@ std::string FunctionCall::toString() {
   for (const std::shared_ptr<Expression>& param : callParams) {
     params += param->toString();
   }
-  if (params.length() != 0) params = params.substr(0, params.length() - 2);
+  // if (params.length() != 0) params = params.substr(0, params.length() - 2);
   return "[" + functionName + "(" + params + "))" + "]";
 }
 

@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "../parser/Expression.h"
 #include "../parser/Statement.h"
+#include "../analysis/Type.h"
 
 namespace Ela::Emitter {
 class Emitter {
@@ -45,8 +46,8 @@ class Emitter {
 
 
   llvm::AllocaInst* createEntryBlockAlloca(llvm::Function *function, const string &name, llvm::Type* type);
-  llvm::Type *simpleType(TypeExpressions::SimpleType& type);
-  llvm::Type *pointerType(TypeExpressions::PointerType& type);
+  llvm::Type *simpleType(FundamentalType& type);
+  llvm::Type *pointerTypeTo(Analysis::Type& type);
 
   void codegen(const Statements::Program& program);
   void compile(const Statements::Program& program, const std::string &outputFile);

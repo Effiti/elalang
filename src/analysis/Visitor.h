@@ -5,6 +5,7 @@
 
 #include "../parser/Statement.h"
 #include "./SymbolTable.h"
+#include "Type.h"
 
 namespace Ela::Analysis {
 class ProgramVisitor;
@@ -19,8 +20,13 @@ class ExpressionVisitor {
   TypeTable& types;
   ExpressionVisitor(const VariableSymbolTable& variables, const FunctionSymbolTable& functions, TypeTable& types)
       : variables(variables),  functions{functions}, types(types){};
-  void visitBinaryExpression(const Expressions::Binary& binary);
-  void visitUnaryExpression(const Expressions::Unary& unary);
+  // void visitBinaryExpression(const Expressions::Binary& binary);
+  // void visitUnaryExpression(const Expressions::Unary& unary);
+  Type getArrayLiteralType(const Expressions::ArrayLiteral);
+  std::shared_ptr<Type> getVariableTypeAn(const std::string& name) const;
+  std::shared_ptr<Type> getBinaryType(const Type &lhs, const Type &rhs, const BinaryOperatorType &op) const;
+  std::shared_ptr<Type> getUnaryType(const Type &base, const UnaryOperatorType &op) const;
+  Type getFunctionCallType(const Expressions::FunctionCall);
   std::size_t getVariableType(const std::string& name);
   std::size_t getArrayType(const std::size_t baseType);
   std::size_t getPointerType(const std::size_t baseType);
@@ -47,7 +53,7 @@ class TypeExpressionVisitor {
  public:
 };
 class StatementVisitor {
- private:
+ public:
   unsigned int nesting;
 
   VariableSymbolTable variables;
@@ -55,7 +61,6 @@ class StatementVisitor {
   ExpressionVisitor expressionVisitor;
   TypeTable typeTable;
   IncompleteFunction contextFn;
- public:
   StatementVisitor()
       : nesting{0},
         variables{},
@@ -74,12 +79,6 @@ class StatementVisitor {
     variables.print();
   }
 
-  friend Analysis::ProgramVisitor;
-  friend Statements::ExpressionStatement;
-  friend Statements::IfStatement;
-  friend Statements::ReturnStatement;
-  friend Statements::WhileStatement;
-  friend Statements::ForStatement;
 };
 class ProgramVisitor {
  private:

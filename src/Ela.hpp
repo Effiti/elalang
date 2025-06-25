@@ -25,8 +25,34 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+#include <concepts>
+#include <format>
+#include <source_location>
+#include <string_view>
+#include <type_traits>
 
 namespace Ela {
+
+
+template <typename... Fs>
+struct match : Fs... {
+    using Fs::operator()...;
+
+    // constexpr match(Fs &&... fs) : Fs{fs}... {}
+};
+template<class... Ts> match(Ts...) -> match<Ts...>;
+
+template <typename... Ts, typename... Fs>
+constexpr decltype(auto) operator| (std::variant<Ts...> const& v, match<Fs...> const& match) {
+    return std::visit(match, v);
+}
+
+template <typename... Ts, typename... Fs>
+constexpr decltype(auto) operator| (std::variant<Ts...> & v, match<Fs...> const& match) {
+    return std::visit(match, v);
+}
+
+  
 using std::string;
 using std::vector;
 extern std::map<std::string, std::string> colors;

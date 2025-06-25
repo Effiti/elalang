@@ -8,146 +8,117 @@ ifndef verbose
   SILENT = @
 endif
 
-.PHONY: clean prebuild prelink
-
-ifeq ($(config),debug)
-  ifeq ($(origin CC), default)
-    CC = gcc
-  endif
-  ifeq ($(origin CXX), default)
-    CXX = g++
-  endif
-  ifeq ($(origin AR), default)
-    AR = ar
-  endif
-  RESCOMP = windres
-  TARGETDIR = bin
-  TARGET = $(TARGETDIR)/elalang
-  OBJDIR = obj/Debug
-  DEFINES += -DDEBUG_BUILD
-  INCLUDES +=
-  FORCE_INCLUDE +=
-  ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g ${llvm-config --cxxflags --ldflags --system-libs --libs core}
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -std=c++20 ${llvm-config --cxxflags --ldflags --system-libs --libs core}
-  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += -lLLVM-19
-  LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS)
-  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
-  define PREBUILDCMDS
-  endef
-  define PRELINKCMDS
-  endef
-  define POSTBUILDCMDS
-  endef
-all: prebuild prelink $(TARGET)
-	@:
-
-endif
-
-ifeq ($(config),release)
-  ifeq ($(origin CC), default)
-    CC = gcc
-  endif
-  ifeq ($(origin CXX), default)
-    CXX = g++
-  endif
-  ifeq ($(origin AR), default)
-    AR = ar
-  endif
-  RESCOMP = windres
-  TARGETDIR = bin
-  TARGET = $(TARGETDIR)/elalang
-  OBJDIR = obj/Release
-  DEFINES += -DRELEASE_BUILD
-  INCLUDES +=
-  FORCE_INCLUDE +=
-  ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -std=c++20
-  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += -lLLVM-19
-  LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -s
-  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
-  define PREBUILDCMDS
-  endef
-  define PRELINKCMDS
-  endef
-  define POSTBUILDCMDS
-  endef
-all: prebuild prelink $(TARGET)
-	@:
-
-endif
-
-ifeq ($(config),lexer)
-  ifeq ($(origin CC), default)
-    CC = gcc
-  endif
-  ifeq ($(origin CXX), default)
-    CXX = g++
-  endif
-  ifeq ($(origin AR), default)
-    AR = ar
-  endif
-  RESCOMP = windres
-  TARGETDIR = bin
-  TARGET = $(TARGETDIR)/elalang
-  OBJDIR = obj/lexer
-  DEFINES +=
-  INCLUDES +=
-  FORCE_INCLUDE +=
-  ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS)
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -std=c++20
-  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += -lLLVM-19
-  LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -s
-  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
-  define PREBUILDCMDS
-  endef
-  define PRELINKCMDS
-  endef
-  define POSTBUILDCMDS
-  endef
-all: prebuild prelink $(TARGET)
-	@:
-
-endif
-
-OBJECTS := \
-	$(OBJDIR)/Ela.o \
-	$(OBJDIR)/SymbolTable.o \
-	$(OBJDIR)/Visitor.o \
-	$(OBJDIR)/Codegen.o \
-	$(OBJDIR)/Emitter.o \
-	$(OBJDIR)/Lexer.o \
-	$(OBJDIR)/Token.o \
-	$(OBJDIR)/main.o \
-	$(OBJDIR)/Expression.o \
-	$(OBJDIR)/Node.o \
-	$(OBJDIR)/Parser.o \
-	$(OBJDIR)/Statement.o \
-	$(OBJDIR)/TypeExpression.o \
-
-RESOURCES := \
-
-CUSTOMFILES := \
+.PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
-$(TARGET): $(GCH) ${CUSTOMFILES} $(OBJECTS) $(LDDEPS) $(RESOURCES) | $(TARGETDIR)
+# Configurations
+# #############################################
+
+ifeq ($(origin CC), default)
+  CC = gcc
+endif
+ifeq ($(origin CXX), default)
+  CXX = g++
+endif
+ifeq ($(origin AR), default)
+  AR = ar
+endif
+RESCOMP = windres
+TARGETDIR = bin
+TARGET = $(TARGETDIR)/elalang
+INCLUDES +=
+FORCE_INCLUDE +=
+ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
+ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+LIBS += -lLLVM-20
+LDDEPS +=
+LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+define PREBUILDCMDS
+endef
+define PRELINKCMDS
+endef
+define POSTBUILDCMDS
+endef
+
+ifeq ($(config),debug)
+OBJDIR = obj/Debug
+DEFINES += -DDEBUG_BUILD
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g ${llvm-config --cxxflags --ldflags --system-libs --libs core}
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -std=c++20 ${llvm-config --cxxflags --ldflags --system-libs --libs core}
+ALL_LDFLAGS += $(LDFLAGS)
+
+else ifeq ($(config),release)
+OBJDIR = obj/Release
+DEFINES += -DRELEASE_BUILD
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -std=c++20
+ALL_LDFLAGS += $(LDFLAGS) -s
+
+else ifeq ($(config),lexer)
+OBJDIR = obj/lexer
+DEFINES +=
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS)
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -std=c++20
+ALL_LDFLAGS += $(LDFLAGS) -s
+
+endif
+
+# Per File Configurations
+# #############################################
+
+
+# File sets
+# #############################################
+
+GENERATED :=
+OBJECTS :=
+
+GENERATED += $(OBJDIR)/AnalyzedAst.o
+GENERATED += $(OBJDIR)/Codegen.o
+GENERATED += $(OBJDIR)/Ela.o
+GENERATED += $(OBJDIR)/Emitter.o
+GENERATED += $(OBJDIR)/Expression.o
+GENERATED += $(OBJDIR)/Lexer.o
+GENERATED += $(OBJDIR)/Node.o
+GENERATED += $(OBJDIR)/Parser.o
+GENERATED += $(OBJDIR)/Statement.o
+GENERATED += $(OBJDIR)/SymbolTable.o
+GENERATED += $(OBJDIR)/Token.o
+GENERATED += $(OBJDIR)/Type.o
+GENERATED += $(OBJDIR)/TypeExpression.o
+GENERATED += $(OBJDIR)/Visitor.o
+GENERATED += $(OBJDIR)/main.o
+OBJECTS += $(OBJDIR)/AnalyzedAst.o
+OBJECTS += $(OBJDIR)/Codegen.o
+OBJECTS += $(OBJDIR)/Ela.o
+OBJECTS += $(OBJDIR)/Emitter.o
+OBJECTS += $(OBJDIR)/Expression.o
+OBJECTS += $(OBJDIR)/Lexer.o
+OBJECTS += $(OBJDIR)/Node.o
+OBJECTS += $(OBJDIR)/Parser.o
+OBJECTS += $(OBJDIR)/Statement.o
+OBJECTS += $(OBJDIR)/SymbolTable.o
+OBJECTS += $(OBJDIR)/Token.o
+OBJECTS += $(OBJDIR)/Type.o
+OBJECTS += $(OBJDIR)/TypeExpression.o
+OBJECTS += $(OBJDIR)/Visitor.o
+OBJECTS += $(OBJDIR)/main.o
+
+# Rules
+# #############################################
+
+all: $(TARGET)
+	@:
+
+$(TARGET): $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
+	$(PRELINKCMDS)
 	@echo Linking elalang
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
-
-$(CUSTOMFILES): | $(OBJDIR)
 
 $(TARGETDIR):
 	@echo Creating $(TARGETDIR)
@@ -169,68 +140,83 @@ clean:
 	@echo Cleaning elalang
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
+	$(SILENT) rm -rf $(GENERATED)
 	$(SILENT) rm -rf $(OBJDIR)
 else
 	$(SILENT) if exist $(subst /,\\,$(TARGET)) del $(subst /,\\,$(TARGET))
+	$(SILENT) if exist $(subst /,\\,$(GENERATED)) del /s /q $(subst /,\\,$(GENERATED))
 	$(SILENT) if exist $(subst /,\\,$(OBJDIR)) rmdir /s /q $(subst /,\\,$(OBJDIR))
 endif
 
-prebuild:
+prebuild: | $(OBJDIR)
 	$(PREBUILDCMDS)
 
-prelink: $(OBJECTS)
-	$(PRELINKCMDS)
-
 ifneq (,$(PCH))
-$(OBJECTS): $(GCH) $(PCH) | $(OBJDIR)
-$(GCH): $(PCH) | $(OBJDIR)
+$(OBJECTS): $(GCH) | $(PCH_PLACEHOLDER)
+$(GCH): $(PCH) | prebuild
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) -x c++-header $(ALL_CXXFLAGS) -o "$@" -MF "$(@:%.gch=%.d)" -c "$<"
+$(PCH_PLACEHOLDER): $(GCH) | $(OBJDIR)
+ifeq (posix,$(SHELLTYPE))
+	$(SILENT) touch "$@"
 else
-$(OBJECTS): | $(OBJDIR)
+	$(SILENT) echo $null >> "$@"
+endif
+else
+$(OBJECTS): | prebuild
 endif
 
+
+# File Rules
+# #############################################
+
 $(OBJDIR)/Ela.o: src/Ela.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/SymbolTable.o: src/analysis/SymbolTable.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Type.o: src/analysis/Type.cpp
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Visitor.o: src/analysis/Visitor.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/AnalyzedAst.o: src/analysis/analyzedAst/AnalyzedAst.cpp
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Codegen.o: src/emitter/Codegen.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Emitter.o: src/emitter/Emitter.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Lexer.o: src/lexer/Lexer.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Token.o: src/lexer/Token.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Expression.o: src/parser/Expression.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Node.o: src/parser/Node.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Parser.o: src/parser/Parser.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Statement.o: src/parser/Statement.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/TypeExpression.o: src/parser/TypeExpression.cpp
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)
 ifneq (,$(PCH))
-  -include $(OBJDIR)/$(notdir $(PCH)).d
+  -include $(PCH_PLACEHOLDER).d
 endif

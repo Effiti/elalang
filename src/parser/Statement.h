@@ -1,6 +1,7 @@
 #pragma once
 
 #include <llvm/IR/Value.h>
+
 #include <memory>
 #include <utility>
 
@@ -11,7 +12,10 @@ namespace Ela::Analysis {
 class StatementVisitor;
 class VariableDefinitionSymbol;
 class TypeTable;
-};
+class AnalyzedStatement;
+class AProgram;
+class AFunctionDefinition;
+};  // namespace Ela::Analysis
 namespace Ela::Emitter {
 class Emitter;
 }
@@ -27,10 +31,11 @@ class ImportStatement : public Node {
 
 class Statement : public Node {
  public:
-  virtual void accept(Analysis::StatementVisitor* visitor){};
+  virtual void accept(Analysis::StatementVisitor* visitor) {};
   virtual const std::string toString() const;
   virtual llvm::Value* codegen(Emitter::Emitter& e) { return nullptr; }
   virtual const bool is_return() const { return false; }
+  virtual Analysis::AnalyzedStatement toAnalyzed(StatementVisitor&) const;
 };
 
 class ElseStatement : public Statement {
@@ -40,6 +45,7 @@ class ElseStatement : public Statement {
   std::shared_ptr<Statement> statement;
 
   const std::string toString() const override;
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
 };
 
 class IfStatement : public Statement {
@@ -54,6 +60,7 @@ class IfStatement : public Statement {
   void accept(Analysis::StatementVisitor* visitor) override;
   const string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
 };
 
 class ExpressionStatement : public Statement {
@@ -65,6 +72,7 @@ class ExpressionStatement : public Statement {
   void accept(Analysis::StatementVisitor* visitor) override;
   const std::string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
 };
 
 class BlockStatement : public Statement {
@@ -77,6 +85,7 @@ class BlockStatement : public Statement {
   void accept(StatementVisitor* visitor) override;
   const string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
 };
 BlockStatement emptyBlock();
 class ReturnStatement : public Statement {
@@ -89,6 +98,7 @@ class ReturnStatement : public Statement {
   const string toString() const override;
   void accept(Analysis::StatementVisitor* visitor) override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
 };
 
 class VariableDefinitionStatement : public Statement {
@@ -99,15 +109,17 @@ class VariableDefinitionStatement : public Statement {
       std::shared_ptr<Expressions::Expression> varValue)
       : name(std::move(varName)),
         type(std::move(varType)),
-        value(std::move(varValue)){};
+        value(std::move(varValue)) {};
 
   const std::string name;
   std::shared_ptr<TypeExpressions::TypeExpression> type;
   std::shared_ptr<Expressions::Expression> value;
+  std::optional<std::shared_ptr<Analysis::Type>> analysedType;
 
   void accept(StatementVisitor* visitor) override;
   const std::string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
 };
 
 class ForStatement : public Statement {
@@ -125,6 +137,7 @@ class ForStatement : public Statement {
   void accept(StatementVisitor* visitor) override;
   const std::string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
 };
 
 class WhileStatement : public Statement {
@@ -137,6 +150,7 @@ class WhileStatement : public Statement {
 
   void accept(StatementVisitor* visitor) override;
   const std::string toString() const override;
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
 };
 
 class Parameter : public Node {
@@ -171,6 +185,8 @@ class FunctionDefinition : public Statement {
       std::vector<std::shared_ptr<Analysis::VariableDefinitionSymbol>> vars) {
     for (auto& v : vars) decls.push_back(v);
   }
+  AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
+  // AFunctionDefinition toAnalyzedFunction(StatementVisitor&) const;
 };
 
 class Program : public Node {
@@ -181,5 +197,6 @@ class Program : public Node {
   vector<ImportStatement> importStatements;
   vector<FunctionDefinition> functionDefinitions;
   std::shared_ptr<Analysis::TypeTable> typeTable;
+  Analysis::AProgram toAnalyzed(Analysis::StatementVisitor&);
 };
 }  // namespace Ela::Statements

@@ -38,6 +38,7 @@ enum class UnaryOperatorType {
 };
 namespace Ela::Analysis {
 class ExpressionVisitor;
+class AnalyzedExpression;
 }
 namespace Ela::Emitter {
 class Emitter;
@@ -51,6 +52,8 @@ class Expression : public Node {
   virtual llvm::Value* codegen(Emitter::Emitter& e) { return nullptr; }
   virtual std::string toString();
   virtual std::string varName() { return ""; };
+  // TODO implement in AnalyzedAst.h/cpp and move codegen() to AnalyzedExpression and subclasses
+  virtual Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e);
 };
 
 class Unary : public Expression {
@@ -63,6 +66,7 @@ class Unary : public Expression {
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
   llvm::Value* codegen(Emitter::Emitter&) override;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 
 class Binary : public Expression {
@@ -78,6 +82,7 @@ class Binary : public Expression {
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 
 class Primary : public Expression {};
@@ -92,6 +97,7 @@ class Parenthed : public Primary {
   llvm::Value* codegen(Emitter::Emitter&) override;
 
   std::shared_ptr<Expression> subExpr;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 
 class IntegerLiteral : public Primary {
@@ -104,6 +110,7 @@ class IntegerLiteral : public Primary {
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
 
   llvm::Value* codegen(Emitter::Emitter&) override;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 
 class CharacterLiteral : public Primary {
@@ -116,8 +123,10 @@ class CharacterLiteral : public Primary {
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
 
   llvm::Value* codegen(Emitter::Emitter&) override;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 
+// TODO remove, i don't want Null anymore
 class NullExpression : public Primary {
  public:
   std::string toString() override;
@@ -135,6 +144,7 @@ class FunctionCall : public Primary {
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
   string toString() override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 class ArrayLiteral : public Primary {
  public:
@@ -143,6 +153,7 @@ class ArrayLiteral : public Primary {
   const vector<std::shared_ptr<Expression>> elements;
   string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 
 class VariableReference : public Primary {
@@ -175,6 +186,7 @@ class StringLiteral : public Primary {
   std::string toString() override;
 
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 
 class BooleanLiteral : public Primary {
@@ -185,6 +197,7 @@ class BooleanLiteral : public Primary {
   std::string toString() override;
   std::size_t getType(Analysis::ExpressionVisitor& c) const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
+  Analysis::AnalyzedExpression toAnalyzed(Analysis::ExpressionVisitor &e) override;
 };
 
 }  // namespace Ela::Expressions

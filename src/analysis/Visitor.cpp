@@ -13,31 +13,27 @@ void StatementVisitor::visitVariableDefinition(
     std::cerr << colors["yellow"] << "WARN: overriding local variable"
               << colors["end"] << std::endl;
 
-  int typeId = typeTable.getType(s.type->toString());
-  if (typeId == -1) {
-    typeId = typeTable.add(TypeEntry(s.type->toString(), s.type));
-  }
+  int typeId = 0;
   int exprTypeId = s.value->getType(expressionVisitor);
-  // if the types are not equal, there are two possibilities
-  if (exprTypeId != typeId) {
-    // if the type is supposed to be inferred, *only* the lhs type is Infer.
-    if (typeId == typeTable.getBaseTypeId(TypeExpressions::Infer)) {
-      typeId = exprTypeId;
-      s.type = typeTable.getType(typeId).type;
-      ;
-    }
-    // if the expressionType is void, the lhs type can not be null, this case is
-    // caught above. if both types are defined but different, error
-    else if (exprTypeId != typeTable.getBaseTypeId(TypeExpressions::Null)) {
-      // typeTable.print();
-      throw std::runtime_error(
-          "type of variable " + s.name +
-          " not equal to rhs of assignment (comparing types " +
-          s.type->toString() + ":" + std::to_string(typeId) + " (of lhs) and " +
-          typeTable.getType((int)exprTypeId).type->toString() + ":" +
-          std::to_string(exprTypeId) + " (of rhs) )");
-    }
+  bool infer = s.type->isInfer();
+  if (infer) {
+    typeId = exprTypeId;
+  } else {
+    typeId = typeTable.getTypeId(s.type->toAnalysisType());
   }
+  // if the expressionType is void, the lhs type can not be null, this case is
+  // caught above. if both types are defined but different, error
+  if (!infer && exprTypeId != typeTable.getBaseTypeId(TypeExpressions::Null)) {
+    // typeTable.print();
+    throw std::runtime_error(
+        "type of variable " + s.name +
+        " not equal to rhs of assignment (comparing types " +
+        s.type->toString() + ":" + std::to_string(typeId) + " (of lhs) and " +
+        typeTable.getType((int)exprTypeId).toString() + ":" +
+        std::to_string(exprTypeId) + " (of rhs) )");
+  }
+  s.analysedType = std::optional(std::make_shared<Type>(expressionVisitor.types.getType(typeId)));
+  
 
   auto symbol = std::make_shared<VariableDefinitionSymbol>(
       nesting, s.name, (unsigned)typeId, s.value);
@@ -77,20 +73,13 @@ void ProgramVisitor::check() {
     for (const auto& param : function.parameters) {
       paramTypes.push_back(param.parameterType);
     }
-    auto typeId = v.typeTable.getType(function.returnType->toString());
-    if (typeId == -1) {
-      v.typeTable.add(
-          TypeEntry(function.returnType->toString(), function.returnType));
-      typeId = v.typeTable.getType(function.returnType->toString());
-    }
+    const auto type = function.returnType->toAnalysisType();
+    auto typeId = v.typeTable.getTypeId(type);
     std::vector<size_t> paramTypeIds;
 
     for (const auto& paramType : paramTypes) {
-      std::size_t id = v.typeTable.getType(paramType->toString());
-      if (id == -1) {
-        v.typeTable.add(TypeEntry(paramType->toString(), paramType));
-        id = v.typeTable.getType(paramType->toString());
-      }
+      const auto type = paramType->toAnalysisType();
+      std::size_t id = v.typeTable.getTypeId(type);
       paramTypeIds.push_back(id);
     }
     v.functions.add(FunctionDefinitionSymbol(
@@ -98,13 +87,14 @@ void ProgramVisitor::check() {
   }
   for (Statements::FunctionDefinition& function : program.functionDefinitions) {
     std::vector<FunctionParameter> args{};
-    for (const auto& arg : function.parameters)
-      args.push_back(FunctionParameter(
-          arg.parameterName,
-          v.typeTable.getType(arg.parameterType->toString())));
-    v.contextFn = IncompleteFunction(
-        function.functionName,
-        v.typeTable.getType(function.returnType->toString()), args);
+    const auto returnType = function.returnType->toAnalysisType();
+    for (const auto& arg : function.parameters) {
+      const auto argType = arg.parameterType->toAnalysisType();
+      args.push_back(
+          FunctionParameter(arg.parameterName, v.typeTable.getTypeId(argType)));
+    }
+    v.contextFn = IncompleteFunction(function.functionName,
+                                     v.typeTable.getTypeId(returnType), args);
     v.visitBlock(*std::move(function.statements), true);
     function.addDecls(v.contextFn.vars);
   }
@@ -119,30 +109,14 @@ std::size_t ExpressionVisitor::getVariableType(const std::string& name) {
   throw std::runtime_error("unknown variable " + name);
 }
 
-std::size_t ExpressionVisitor::getArrayType(const std::size_t baseType) {
-  const auto& tr = types.getType(baseType);
-  const auto& t = types.getType("Array[" + tr.typeStr + ", ]");
-  if (t != -1) return t;
-  types.add(TypeEntry(
-      "Array[" + tr.typeStr + ", ]",
-      std::make_shared<TypeExpressions::TypeExpression>(
-          TypeExpressions::TypeTemplateExpression(
-              TypeExpressions::SimpleType(TypeExpressions::Array),
-              std::vector<std::variant<
-                  std::shared_ptr<TypeExpressions::TypeExpression>, int>>{
-                  tr.type}))));
-  return types.getType("Array[" + tr.typeStr + ", ]");
+std::size_t ExpressionVisitor::getArrayType(const std::size_t baseTypeId) {
+  const auto& baseType = types.getType(baseTypeId);
+  return types.getTypeId(Type(ArrayType(std::make_shared<Type>(baseType))));
 }
 
-std::size_t ExpressionVisitor::getPointerType(const std::size_t baseType) {
-  const auto& tr = types.getType(baseType);
-  const auto& t = types.getType("Ptr[ " + tr.typeStr + " ]");
-  if (t != -1) return t;
-  types.add(TypeEntry("Ptr[ " + tr.typeStr + " ]",
-                      std::make_shared<TypeExpressions::TypeExpression>(
-                          TypeExpressions::PointerType(tr.type))));
-  return types.getType("Ptr[ " + tr.typeStr + " ]");
-  return 0;
+std::size_t ExpressionVisitor::getPointerType(const std::size_t baseTypeId) {
+  const auto& baseType = types.getType(baseTypeId);
+  return types.getTypeId(Type(PointerType(std::make_shared<Type>(baseType))));
 }
 }  // namespace Analysis
 void Statements::BlockStatement::accept(StatementVisitor* visitor) {
@@ -150,14 +124,14 @@ void Statements::BlockStatement::accept(StatementVisitor* visitor) {
 }
 void Statements::IfStatement::accept(StatementVisitor* visitor) {
   if (condition->getType(visitor->expressionVisitor) !=
-      Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean))
+      visitor->expressionVisitor.types.getBaseTypeId(TypeExpressions::Boolean))
     throw std::runtime_error(
         "condition of if statement must be of boolean type to avoid confusion");
   statement->accept(visitor);
 }
 void Statements::WhileStatement::accept(Analysis::StatementVisitor* visitor) {
   if (cond->getType(visitor->expressionVisitor) !=
-      Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean))
+      visitor->expressionVisitor.types.getBaseTypeId(TypeExpressions::Boolean))
     throw std::runtime_error(
         "condition of while statement must be of boolean type to avoid "
         "confusion");
@@ -166,7 +140,7 @@ void Statements::WhileStatement::accept(Analysis::StatementVisitor* visitor) {
 void Statements::ForStatement::accept(Analysis::StatementVisitor* visitor) {
   init->accept(visitor);
   if (check->getType(visitor->expressionVisitor) !=
-      Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean))
+      visitor->expressionVisitor.types.getBaseTypeId(TypeExpressions::Boolean))
     throw std::runtime_error(
         "check-condition of for statement must be of boolean type to avoid "
         "confusion");
@@ -185,11 +159,11 @@ void Statements::ReturnStatement::accept(StatementVisitor* visitor) {
     throw std::runtime_error(
         "return statements must return the correct type in fn " +
         visitor->contextFn.name + " expected " +
-        visitor->typeTable.getType(visitor->contextFn.returnType).typeStr +
-        " but got " + " " +
+        visitor->typeTable.getType(visitor->contextFn.returnType).toString() +
+        " but got " +
         visitor->typeTable
             .getType(expression->getType(visitor->expressionVisitor))
-            .typeStr);
+            .toString());
 }
 void Statements::VariableDefinitionStatement::accept(
     StatementVisitor* visitor) {
@@ -222,7 +196,7 @@ std::size_t Expressions::Binary::getType(Analysis::ExpressionVisitor& c) const {
     case BinaryOperatorType::Less:
     case BinaryOperatorType::LessEqual:
     case BinaryOperatorType::UnEqual:
-      return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean);
+      return c.types.getBaseTypeId(TypeExpressions::Boolean);
     case BinaryOperatorType::Plus:
     case BinaryOperatorType::Minus:
     case BinaryOperatorType::Multiplication:
@@ -231,29 +205,29 @@ std::size_t Expressions::Binary::getType(Analysis::ExpressionVisitor& c) const {
     case BinaryOperatorType::RightShift:
       return lhsType;
     default:
-      return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Void);
+      return c.types.getBaseTypeId(TypeExpressions::Void);
   }
   return lhsType;
 }
 std::size_t Expressions::BooleanLiteral::getType(
     Analysis::ExpressionVisitor& c) const {
-  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Boolean);
+  return c.types.getBaseTypeId(BaseType::Boolean);
 }
 std::size_t Expressions::IntegerLiteral::getType(
     Analysis::ExpressionVisitor& c) const {
-  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Integer);
+  return c.types.getBaseTypeId(BaseType::Integer);
 }
 std::size_t Expressions::CharacterLiteral::getType(
     Analysis::ExpressionVisitor& c) const {
-  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Char);
+  return c.types.getBaseTypeId(BaseType::Char);
 }
 std::size_t Expressions::StringLiteral::getType(
     Analysis::ExpressionVisitor& c) const {
-  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::CString);
+  return c.types.TypeTable::getBaseTypeId(BaseType::CString);
 }
 std::size_t Expressions::NullExpression::getType(
     Analysis::ExpressionVisitor& c) const {
-  return Analysis::TypeTable::getBaseTypeId(TypeExpressions::Void);
+  return c.types.getBaseTypeId(BaseType::Void);
 }
 std::size_t Expressions::VariableReference::getType(
     Analysis::ExpressionVisitor& c) const {
@@ -270,7 +244,7 @@ std::size_t Expressions::VariableAssign::getType(
 std::size_t Expressions::ArrayLiteral::getType(
     Analysis::ExpressionVisitor& c) const {
   if (elements.size() == 0)
-    return Analysis::TypeTable::getBaseTypeId(TypeExpressions::BaseType::Array);
+    return c.types.getBaseTypeId(TypeExpressions::BaseType::Array);
   const auto firstType = elements[0]->getType(c);
 
   for (const auto element : elements) {

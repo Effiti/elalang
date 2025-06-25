@@ -1,5 +1,8 @@
 ";" @punctuation
 [
+  "if"
+  "else"
+  "import"
   "fn"
   "return"
   "for"

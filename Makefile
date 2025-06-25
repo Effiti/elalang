@@ -10,12 +10,15 @@ endif
 
 ifeq ($(config),debug)
   elalang_config = debug
-endif
-ifeq ($(config),release)
+
+else ifeq ($(config),release)
   elalang_config = release
-endif
-ifeq ($(config),lexer)
+
+else ifeq ($(config),lexer)
   elalang_config = lexer
+
+else
+  $(error "invalid configuration $(config)")
 endif
 
 PROJECTS := elalang

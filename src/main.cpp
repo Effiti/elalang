@@ -1,9 +1,10 @@
+#include <clipp.h>
+
 #include <algorithm>
 #include <cstdlib>
 #include <memory>
 #include <numeric>
 #include <string_view>
-#include <clipp.h>
 
 #include "Ela.hpp"
 #include "analysis/Visitor.h"
@@ -16,31 +17,30 @@ enum class RunConf { LEXER, PARSER, FULL, ANALYSIS };
 struct Settings {
   RunConf runconf;
   std::string filename;
+  std::string outFile;
 };
-std::shared_ptr<Settings> makeSettings(int argc, char * argv[]) {
+std::shared_ptr<Settings> makeSettings(int argc, char *argv[]) {
   using namespace clipp;
   // supplying more thclass n one option does not make sense. We will ignore any
   // option that comes after the first one.
-    Settings settings {RunConf::FULL, "main.ela"};
-    auto cli = (
-        value("input file", settings.filename),
-        (
-          option("-l").set(settings.runconf, RunConf::LEXER)
-          | option("-p").set(settings.runconf, RunConf::PARSER)
-          | option("-a").set(settings.runconf, RunConf::ANALYSIS)
-          | option("-f").set(settings.runconf, RunConf::FULL)
-        )
-    );
+  Settings settings{RunConf::FULL, "main.ela"};
+  auto cli = (value("input file", settings.filename),
+              (option("-l").set(settings.runconf, RunConf::LEXER) |
+               option("-p").set(settings.runconf, RunConf::PARSER) |
+               option("-a").set(settings.runconf, RunConf::ANALYSIS) |
+               option("-f").set(settings.runconf, RunConf::FULL)),
 
-    if(!parse(argc, argv, cli)) std::cout << make_man_page(cli, argv[0]);
-    return std::make_shared<Settings>(settings);
+              option("-o") & value("output file", settings.outFile) );
+
+  if (!parse(argc, argv, cli)) std::cout << make_man_page(cli, argv[0]);
+  return std::make_shared<Settings>(settings);
 }
 }  // namespace Ela::App
 
 using namespace std::string_view_literals;
 using namespace Ela;
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
   const auto settings = App::makeSettings(argc, argv);
   using std::end, std::begin;
   std::ifstream ifs(settings->filename);
@@ -95,7 +95,7 @@ int main(int argc, char * argv[]) {
     return EXIT_SUCCESS;
   }
   Emitter::Emitter emitter{};
-  emitter.compile(*program, "output.o");
+  emitter.compile(*program, settings->outFile);
 
   return EXIT_SUCCESS;
 }

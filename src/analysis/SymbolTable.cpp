@@ -56,72 +56,81 @@ void FunctionSymbolTable::removeAllHigherThan(int nesting) {
   symbols = newSyms;
 }
 
-bool TypeTable::hasType(std::string typeStr) {
-  auto pos = std::find_if(std::begin(types), std::end(types),
-                          [typeStr](auto x) { return x.typeStr == typeStr; });
-  return pos != std::end(types);
-}
+// bool TypeTable::hasType(std::string typeStr) {
+//   auto pos = std::find_if(std::begin(types), std::end(types),
+//                           [typeStr](auto x) { return x.typeStr == typeStr; });
+//   return pos != std::end(types);
+// }
 
-int TypeTable::add(const TypeEntry &type) {
+int TypeTable::add(const Type &type) {
   types.push_back(type);
   return types.size() - 1;
 }
 
-TypeEntry TypeTable::getType(int id) { return types[id]; }
-int TypeTable::getType(std::string typeStr) {
-  for (std::size_t i = 0; i < types.size(); i++) {
-    if (types[i].typeStr == typeStr) return i;
+Type TypeTable::getType(int id) { return types[id]; }
+
+int TypeTable::getTypeId(const Type &type) {
+  int i = 0;
+  for (const auto & it : types) {
+    if (it==type) return 
+    ++i;
   }
-  return -1;
+  return add(type);
 }
+// int TypeTable::getType(std::string typeStr) {
+//   for (std::size_t i = 0; i < types.size(); i++) {
+//     if (types[i].typeStr == typeStr) return i;
+//   }
+//   return -1;
+// }
 void TypeTable::addBaseType(TypeExpressions::BaseType type) {
-  add(TypeEntry(Ela::to_string(type),
-                std::make_shared<TypeExpressions::SimpleType>(type)));
+  add(Type(FundamentalType(type)));
 }
 TypeTable::TypeTable() {
   addBaseType(TypeExpressions::Void);
   addBaseType(TypeExpressions::Integer);
   addBaseType(TypeExpressions::Double);
-  addBaseType(TypeExpressions::Array);
+  // addBaseType(TypeExpressions::Array);
   addBaseType(TypeExpressions::Boolean);
   addBaseType(TypeExpressions::CString);
   addBaseType(TypeExpressions::Char);
   addBaseType(TypeExpressions::Float);
-  addBaseType(TypeExpressions::Pointer);
-  addBaseType(TypeExpressions::Infer);
-  addBaseType(TypeExpressions::Function);
-  addBaseType(TypeExpressions::Null);
+  // addBaseType(TypeExpressions::Pointer);
+  // addBaseType(TypeExpressions::Infer);
+  // addBaseType(TypeExpressions::Function);
+  // addBaseType(TypeExpressions::Null);
 }
 
 std::size_t TypeTable::getBaseTypeId(TypeExpressions::BaseType type) {
-  switch (type) {
-    case TypeExpressions::Array:
-      return 3;
-    case TypeExpressions::Integer:
-      return 1;
-    case TypeExpressions::Boolean:
-      return 4;
-    case TypeExpressions::CString:
-      return 5;
-    case TypeExpressions::Char:
-      return 6;
-    case TypeExpressions::Double:
-      return 2;
-    case TypeExpressions::Float:
-      return 7;
-    case TypeExpressions::Pointer:
-      return 8;
-    case TypeExpressions::Infer:
-      return 9;
-    case TypeExpressions::Function:
-      return 10;
-    case TypeExpressions::Void:
-      return 0;
-    case TypeExpressions::Null:
-      return 11;
-    default:
-      return -1;
-  }
+  // switch (type) {
+  //   // case TypeExpressions::Array:
+  //   //   return 3;
+  //   case TypeExpressions::Integer:
+  //     return 1;
+  //   case TypeExpressions::Boolean:
+  //     return 4;
+  //   case TypeExpressions::CString:
+  //     return 5;
+  //   case TypeExpressions::Char:
+  //     return 6;
+  //   case TypeExpressions::Double:
+  //     return 2;
+  //   case TypeExpressions::Float:
+  //     return 7;
+  //   case TypeExpressions::Pointer:
+  //     return 8;
+  //   case TypeExpressions::Infer:
+  //     return 9;
+  //   case TypeExpressions::Function:
+  //     return 10;
+  //   case TypeExpressions::Void:
+  //     return 0;
+  //   case TypeExpressions::Null:
+  //     return 11;
+  //   default:
+  //     return -1;
+  // }
+  return getTypeId(FundamentalType(type));
 }
 
 }  // namespace Ela::Analysis

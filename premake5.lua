@@ -5,7 +5,7 @@ project "elalang"
   language "C++"
   cppdialect "C++20"
   targetdir "./bin/"
-  links {"LLVM-19"}
+  links {"LLVM-20"}
   -- buildoptions {"${llvm-config --cxxflags --ldflags --system-libs --libs core}"}
   files {"**.hpp", "**.cpp"}
 

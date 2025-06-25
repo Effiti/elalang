@@ -6,7 +6,9 @@
 #include "../BaseType.h"
 #include "../Ela.hpp"
 #include "Node.h"
-
+namespace Ela::Analysis {
+  class Type;
+}
 namespace Ela::TypeExpressions {
 using Ela::BaseType;
 using enum Ela::BaseType;
@@ -17,7 +19,9 @@ class TypeExpression : public Ela::Node {
   virtual bool operator!=(const TypeExpression &other) const { return true; }
   virtual bool operator==(const TypeExpression &other) const { return true; }
   // TODO search some sort of typedef-Table for defined classes.
-  virtual llvm::Type *getIRType(Emitter::Emitter &) { return nullptr; };
+  // virtual llvm::Type *getIRType(Emitter::Emitter &) { return nullptr; };
+  virtual bool isInfer() const { return false; }
+  virtual Analysis::Type toAnalysisType();
 };
 
 class PointerType : public TypeExpression {
@@ -28,7 +32,8 @@ class PointerType : public TypeExpression {
   std::string toString() const override {
     return "Ptr[ " + base_type->toString() + " ]";
   }
-  llvm::Type *getIRType(Emitter::Emitter &) override;
+  // llvm::Type *getIRType(Emitter::Emitter &) override;
+  Analysis::Type toAnalysisType() override;
 };
 
 class SimpleType : public TypeExpression {
@@ -44,7 +49,13 @@ class SimpleType : public TypeExpression {
       return to_string(get<BaseType>(type));
     }
   }
-  llvm::Type *getIRType(Emitter::Emitter &) override;
+
+  // TODO infer should be a seperate struct
+  bool isInfer() const override {
+    return std::holds_alternative<BaseType>(type) && get<BaseType>(type) == BaseType::Infer;
+  }
+  // llvm::Type *getIRType(Emitter::Emitter &) override;
+  Analysis::Type toAnalysisType() override;
 };
 
 class TupleTypeExpression : public TypeExpression {
@@ -61,6 +72,7 @@ class TupleTypeExpression : public TypeExpression {
     }
     return "(" + tuple_args + ")";
   }
+  Analysis::Type toAnalysisType() override;
 };
 
 class TypeTemplateExpression : public TypeExpression {
@@ -87,6 +99,7 @@ class TypeTemplateExpression : public TypeExpression {
     }
     return templatedType.toString() + "[" + template_args + "]";
   }
+  Analysis::Type toAnalysisType() override;
 };
 
 }  // namespace Ela::TypeExpressions
