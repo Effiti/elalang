@@ -80,16 +80,18 @@ Analysis::AnalyzedExpression ArrayLiteral::toAnalyzed(
 }
 }  // namespace Ela::Expressions
 namespace Ela::Statements {
+Analysis::AnalyzedStatement Statement::toAnalyzed(StatementVisitor &c) const {
+  throw std::runtime_error("unimplemented analyzed Statement");
+}
 Analysis::AProgram Program::toAnalyzed(Analysis::StatementVisitor &c) {
   std::vector<std::shared_ptr<AFunctionDefinition>> aFunctions;
   for (const auto &def : functionDefinitions) {
     aFunctions.push_back(
-        // WTF, downcast?
-        std::make_shared<AFunctionDefinition>(def.toAnalyzed(c)));
+        std::make_shared<AFunctionDefinition>(def.toAnalyzedFunction(c)));
   }
   return AProgram{aFunctions};
 }
-Analysis::AnalyzedStatement FunctionDefinition::toAnalyzed(
+Analysis::AFunctionDefinition FunctionDefinition::toAnalyzedFunction(
     StatementVisitor &c) const {
   vector<AParameter> aParams;
   for (const auto &param : parameters) {
@@ -100,7 +102,11 @@ Analysis::AnalyzedStatement FunctionDefinition::toAnalyzed(
   return AFunctionDefinition(
       std::make_shared<Type>(returnType->toAnalysisType()),
       std::string_view(functionName), aParams,
-      std::make_shared<ABlockStatement>(statements->toAnalyzed(c)), isExtern);
+      std::make_shared<ABlockStatement>(statements->toAnalyzedBlock(c)), isExtern);
+}
+Analysis::AnalyzedStatement FunctionDefinition::toAnalyzed(
+    StatementVisitor &c) const {
+  return toAnalyzedFunction(c);
 }
 Analysis::AnalyzedStatement WhileStatement::toAnalyzed(
     StatementVisitor &c) const {
@@ -113,11 +119,28 @@ Analysis::AnalyzedStatement WhileStatement::toAnalyzed(
 Analysis::AnalyzedStatement VariableDefinitionStatement::toAnalyzed(
     StatementVisitor &c) const {
   return AVariableDefinitionStatement(
-    name,
-    std::make_shared<Type>(type->toAnalysisType()),
-    std::make_shared<AnalyzedExpression>(value->toAnalyzed(c.expressionVisitor))
-);
+      name, std::make_shared<Type>(type->toAnalysisType()),
+      std::make_shared<AnalyzedExpression>(
+          value->toAnalyzed(c.expressionVisitor)));
+}
+Analysis::AnalyzedStatement ReturnStatement::toAnalyzed(
+    StatementVisitor &c) const {
+  return AReturnStatement(std::make_shared<AnalyzedExpression>(
+      expression->toAnalyzed(c.expressionVisitor)));
+}
+Analysis::AnalyzedStatement BlockStatement::toAnalyzed(
+    StatementVisitor &c) const {
+  return toAnalyzedBlock(c);
+}
+Analysis::ABlockStatement BlockStatement::toAnalyzedBlock(
+    StatementVisitor &c) const {
+  std::vector<std::shared_ptr<AnalyzedStatement>> statements;
+  for (const auto &statement : subNodes) {
+    statements.push_back(
+        std::make_shared<AnalyzedStatement>(statement->toAnalyzed(c)));
   }
+  return ABlockStatement(statements);
+}
 }  // namespace Ela::Statements
 namespace Ela::Analysis {
 

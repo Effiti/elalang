@@ -95,10 +95,14 @@ class AExpressionStatement : public AnalyzedStatement {
 class ABlockStatement : public AnalyzedStatement {
  public:
   const vector<std::shared_ptr<AnalyzedStatement>> statements;
+  ABlockStatement(const vector<std::shared_ptr<AnalyzedStatement>> statements)
+      : statements(statements) {};
 };
 class AReturnStatement : public AnalyzedStatement {
  public:
   const std::shared_ptr<AnalyzedExpression> expr;
+  AReturnStatement(const std::shared_ptr<AnalyzedExpression> expr)
+      : expr(expr) {};
 };
 class AVariableDefinitionStatement : public AnalyzedStatement {
  public:

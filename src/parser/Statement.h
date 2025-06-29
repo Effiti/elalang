@@ -15,6 +15,7 @@ class TypeTable;
 class AnalyzedStatement;
 class AProgram;
 class AFunctionDefinition;
+class ABlockStatement;
 };  // namespace Ela::Analysis
 namespace Ela::Emitter {
 class Emitter;
@@ -86,6 +87,7 @@ class BlockStatement : public Statement {
   const string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
   AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
+  ABlockStatement toAnalyzedBlock(StatementVisitor&) const;
 };
 BlockStatement emptyBlock();
 class ReturnStatement : public Statement {
@@ -185,6 +187,7 @@ class FunctionDefinition : public Statement {
       std::vector<std::shared_ptr<Analysis::VariableDefinitionSymbol>> vars) {
     for (auto& v : vars) decls.push_back(v);
   }
+  AFunctionDefinition toAnalyzedFunction(StatementVisitor&) const;
   AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
   // AFunctionDefinition toAnalyzedFunction(StatementVisitor&) const;
 };
