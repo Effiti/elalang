@@ -4,6 +4,7 @@ to build, you need
 - [premake](https://premake.github.io/) to generate project files
 alternatively, you could just use the already generate [gnu](https://www.gnu.org)-[make](https://www.gnu.org/software/make/)-[Makefile](https://www.gnu.org/software/make/manual/make.html) which is published in this repo. 
 - [clipp](https://github.com/muellan/clipp) somewhere in your include
+- llvm headers and object files in Include/lib path. (Currently built using LLVM version 20.1.8)
 # TODO.
 - [x] Type Inference for Variable Definitions
 - [x] Array Literals -> check types
