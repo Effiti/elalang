@@ -102,7 +102,8 @@ Analysis::AFunctionDefinition FunctionDefinition::toAnalyzedFunction(
   return AFunctionDefinition(
       std::make_shared<Type>(returnType->toAnalysisType()),
       std::string_view(functionName), aParams,
-      std::make_shared<ABlockStatement>(statements->toAnalyzedBlock(c)), isExtern);
+      std::make_shared<ABlockStatement>(statements->toAnalyzedBlock(c)),
+      isExtern);
 }
 Analysis::AnalyzedStatement FunctionDefinition::toAnalyzed(
     StatementVisitor &c) const {
@@ -114,6 +115,16 @@ Analysis::AnalyzedStatement WhileStatement::toAnalyzed(
       std::make_shared<AnalyzedStatement>(body->toAnalyzed(c)),
       std::make_shared<AnalyzedExpression>(
           cond->toAnalyzed(c.expressionVisitor)));
+}
+
+Analysis::AnalyzedStatement ForStatement::toAnalyzed(
+    StatementVisitor &c) const {
+  return AForStatement(
+      std::make_shared<AnalyzedStatement>(init->toAnalyzed(c)),
+      std::make_shared<AnalyzedExpression>(
+          check->toAnalyzed(c.expressionVisitor)),
+      std::make_shared<AnalyzedStatement>(incr->toAnalyzed(c)),
+      std::make_shared<AnalyzedStatement>(body->toAnalyzed(c)));
 }
 
 Analysis::AnalyzedStatement VariableDefinitionStatement::toAnalyzed(
@@ -131,6 +142,28 @@ Analysis::AnalyzedStatement ReturnStatement::toAnalyzed(
 Analysis::AnalyzedStatement BlockStatement::toAnalyzed(
     StatementVisitor &c) const {
   return toAnalyzedBlock(c);
+}
+Analysis::AnalyzedStatement IfStatement::toAnalyzed(StatementVisitor &c) const {
+  AnalyzedStatement aElse =
+      elseStatement.has_value()
+          // we just take the underlying statement, because this way we don't
+          // have to implement anything about else-stmts at all.
+          ? elseStatement.value()->statement->toAnalyzed(c)
+          : ANoOpStatement();
+  return AIfStatement(
+      std::make_shared<AnalyzedExpression>(
+          condition->toAnalyzed(c.expressionVisitor)),
+      std::make_shared<AnalyzedStatement>(statement->toAnalyzed(c)),
+      std::make_shared<AnalyzedStatement>(aElse));
+}
+Analysis::AnalyzedStatement ElseStatement::toAnalyzed(
+    StatementVisitor &c) const {
+  return ANoOpStatement();
+}
+Analysis::AnalyzedStatement ExpressionStatement::toAnalyzed(
+    StatementVisitor &c) const {
+  return AExpressionStatement(std::make_shared<AnalyzedExpression>(
+      expression->toAnalyzed(c.expressionVisitor)));
 }
 Analysis::ABlockStatement BlockStatement::toAnalyzedBlock(
     StatementVisitor &c) const {

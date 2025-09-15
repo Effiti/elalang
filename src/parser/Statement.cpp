@@ -47,4 +47,14 @@ const string Statements::ForStatement::toString() const {
 BlockStatement emptyBlock() {
  return BlockStatement(std::vector<std::shared_ptr<Statement>>());
 }
+
+const bool Statements::ForStatement::is_returning() const {
+  return body->is_returning();
+}
+const bool Statements::WhileStatement::is_returning() const {
+  return body->is_returning();
+}
+const bool Statements::BlockStatement::is_returning() const {
+  return subNodes.back()->is_returning();
+}
 }  // namespace Ela::Statements

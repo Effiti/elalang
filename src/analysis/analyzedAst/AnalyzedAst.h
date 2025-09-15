@@ -79,18 +79,27 @@ class AArrayLiteral : public AnalyzedExpression {
 };
 
 class AnalyzedStatement {};
+class ANoOpStatement : public AnalyzedStatement {};
 class AElseStatement : public AnalyzedStatement {
  public:
   const std::shared_ptr<AnalyzedStatement> stmt;
+  AElseStatement(const std::shared_ptr<AnalyzedStatement> stmt) : stmt(stmt) {};
 };
 class AIfStatement : public AnalyzedStatement {
  public:
   const std::shared_ptr<AnalyzedStatement> then;
   const std::shared_ptr<AnalyzedExpression> cond;
+  const std::shared_ptr<AnalyzedStatement> elseStmt;
+  AIfStatement(const std::shared_ptr<AnalyzedExpression> cond,
+               const std::shared_ptr<AnalyzedStatement> then,
+               const std::shared_ptr<AnalyzedStatement> elseStmt)
+      : then(then), cond(cond), elseStmt(elseStmt) {};
 };
 class AExpressionStatement : public AnalyzedStatement {
  public:
   const std::shared_ptr<AnalyzedExpression> expr;
+  AExpressionStatement(const std::shared_ptr<AnalyzedExpression> expr)
+      : expr(expr) {};
 };
 class ABlockStatement : public AnalyzedStatement {
  public:
@@ -121,6 +130,19 @@ class AWhileStatement : public AnalyzedStatement {
   AWhileStatement(std::shared_ptr<AnalyzedStatement> body,
                   std::shared_ptr<AnalyzedExpression> cond)
       : body{body}, cond{cond} {}
+};
+class AForStatement : public AnalyzedStatement {
+ public:
+  const std::shared_ptr<AnalyzedStatement> init;
+  const std::shared_ptr<AnalyzedExpression> check;
+  const std::shared_ptr<AnalyzedStatement> incr;
+  const std::shared_ptr<AnalyzedStatement> body;
+
+  AForStatement(const std::shared_ptr<AnalyzedStatement> init,
+                const std::shared_ptr<AnalyzedExpression> check,
+                const std::shared_ptr<AnalyzedStatement> incr,
+                const std::shared_ptr<AnalyzedStatement> body)
+      : init(init), check(check), incr(incr), body(body) {};
 };
 class AParameter {
  public:

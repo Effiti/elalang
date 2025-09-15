@@ -35,7 +35,7 @@ class Statement : public Node {
   virtual void accept(Analysis::StatementVisitor* visitor) {};
   virtual const std::string toString() const;
   virtual llvm::Value* codegen(Emitter::Emitter& e) { return nullptr; }
-  virtual const bool is_return() const { return false; }
+  virtual const bool is_returning() const { return false; }
   virtual Analysis::AnalyzedStatement toAnalyzed(StatementVisitor&) const;
 };
 
@@ -62,6 +62,7 @@ class IfStatement : public Statement {
   const string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
   AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
+  // const bool is_return() const override;
 };
 
 class ExpressionStatement : public Statement {
@@ -88,6 +89,7 @@ class BlockStatement : public Statement {
   llvm::Value* codegen(Emitter::Emitter& e) override;
   AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
   ABlockStatement toAnalyzedBlock(StatementVisitor&) const;
+  const bool is_returning() const override;
 };
 BlockStatement emptyBlock();
 class ReturnStatement : public Statement {
@@ -96,7 +98,7 @@ class ReturnStatement : public Statement {
       : expression{std::move(expr)} {};
   std::shared_ptr<Expressions::Expression> expression;
 
-  const bool is_return() const override { return true; }
+  const bool is_returning() const override { return true; }
   const string toString() const override;
   void accept(Analysis::StatementVisitor* visitor) override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
@@ -140,6 +142,7 @@ class ForStatement : public Statement {
   const std::string toString() const override;
   llvm::Value* codegen(Emitter::Emitter& e) override;
   AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
+  const bool is_returning() const override;
 };
 
 class WhileStatement : public Statement {
@@ -153,6 +156,7 @@ class WhileStatement : public Statement {
   void accept(StatementVisitor* visitor) override;
   const std::string toString() const override;
   AnalyzedStatement toAnalyzed(StatementVisitor&) const override;
+  const bool is_returning() const override;
 };
 
 class Parameter : public Node {

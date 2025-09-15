@@ -79,14 +79,16 @@ llvm::AllocaInst* Emitter::createEntryBlockAlloca(llvm::Function* TheFunction,
 llvm::Value* Emitter::block(const Statements::BlockStatement& b) {
   for (const auto& stmt : b.subNodes) {
     llvm::Value* v = stmt->codegen(*this);
-    if (stmt->is_return()) {
+    if (stmt->is_returning()) {
       return v;
     }
   }
   return nullptr;
 }
 llvm::Value* Emitter::ret(const Statements::ReturnStatement& s) {
-  return s.expression->codegen(*this);
+  llvm::Value* ret = s.expression->codegen(*this);
+  irBuilder->CreateRet(ret);
+  return ret;
 }
 llvm::Value* Emitter::integerLiteralValue(int v) {
   // HACK Bit width and unsigned integers -> enum "IntegerType", later
@@ -180,17 +182,29 @@ llvm::Value* Emitter::ifStmt(const Statements::IfStatement& stmt) {
   if (!CondV) return nullptr;
 
   // Convert condition to a bool by comparing non-equal to 0.0.
-  CondV = irBuilder->CreateFCmpONE(CondV, CondV, "ifcond");
+  // CondV = irBuilder->CreateICmpEQ(CondV, llvm::Literal, "ifcond");
 
   llvm::Function* fn = irBuilder->GetInsertBlock()->getParent();
 
+  const bool thenBranchReturns = stmt.statement->is_returning();
+  // we only bother with the optimizations we try, if there is an else statement
+  // at all.
+  const bool elseBranchReturns =
+      stmt.elseStatement.has_value() &&
+      stmt.elseStatement.value()->statement->is_returning();
   // Create blocks for the then and else cases.  Insert the 'then' block at the
   // end of the function.
   llvm::BasicBlock* ThenBB = llvm::BasicBlock::Create(*llvmContext, "then", fn);
-  llvm::BasicBlock* MergeBB = llvm::BasicBlock::Create(*llvmContext, "ifcont");
+
+  llvm::BasicBlock* MergeBB = nullptr;
+  if (!(thenBranchReturns && elseBranchReturns))
+    MergeBB = llvm::BasicBlock::Create(*llvmContext, "ifcont");
   llvm::BasicBlock* ElseBB =
       stmt.elseStatement.has_value()
           ? llvm::BasicBlock::Create(*llvmContext, "else")
+          // MergeBB *has* to exist, if we dont have an else, because we need
+          // something to return in our else-branch (we dont care about
+          // optimizing anything for void-functions rn)
           : MergeBB;
 
   // create br deciding between branches
@@ -200,10 +214,11 @@ llvm::Value* Emitter::ifStmt(const Statements::IfStatement& stmt) {
   irBuilder->SetInsertPoint(ThenBB);
 
   // emit then block
+  // std::cout << "going into thenB" << stmt.statement->toString();
   llvm::Value* thenBranch = stmt.statement->codegen(*this);
   // if (!thenBranch) return nullptr;
 
-  irBuilder->CreateBr(MergeBB);
+  if (!thenBranchReturns) irBuilder->CreateBr(MergeBB);
   // Codegen of 'Then' can change the current block, update ThenBB for the PHI.
   ThenBB = irBuilder->GetInsertBlock();
   llvm::Value* elseBranch = nullptr;
@@ -212,17 +227,20 @@ llvm::Value* Emitter::ifStmt(const Statements::IfStatement& stmt) {
     fn->insert(fn->end(), ElseBB);
     irBuilder->SetInsertPoint(ElseBB);
 
-    elseBranch = stmt.elseStatement.value()->codegen(*this);
+    elseBranch = stmt.elseStatement.value()->statement->codegen(*this);
     // if (!elseBranch) return nullptr;
 
-    irBuilder->CreateBr(MergeBB);
+    if (!elseBranchReturns) irBuilder->CreateBr(MergeBB);
     // codegen of 'Else' can change the current block, update ElseBB for the
     // PHI.
     ElseBB = irBuilder->GetInsertBlock();
   }
   // Emit merge block.
-  fn->insert(fn->end(), MergeBB);
-  irBuilder->SetInsertPoint(MergeBB);
+  if(!(thenBranchReturns && elseBranchReturns)){
+    fn->insert(fn->end(), MergeBB);
+    // just so we don't pass a nullptr where its not supposed to go
+    irBuilder->SetInsertPoint(MergeBB);
+  }
   /*llvm::PHINode* PN =
   irBuilder->CreatePHI(llvm::Type::getInt32Ty(*llvmContext),
   stmt.elseStatement.has_value() ? 2 : 1, "iftmp");
@@ -317,18 +335,19 @@ llvm::Function* Emitter::function(const Statements::FunctionDefinition& def) {
     ++i;
   }
 
-  if (llvm::Value* retVal = def.statements->codegen(*this)) {
-    irBuilder->CreateRet(retVal);
-    verifyFunction(*function);
-    // fpm->run(*function, *fam);
+  def.statements->codegen(*this);
+  //   irBuilder->CreateRet(retVal);
+  verifyFunction(*function);
+  // fpm->run(*function, *fam);
 
-    return function;
-  }
-  function->eraseFromParent();
-  emitterError("Failure generating IR code for function " + def.functionName +
-               ". No return statement?");
+  return function;
+  // }
+  // function->eraseFromParent();
+  // emitterError("Failure generating IR code for function " + def.functionName
+  // +
+  //              ". No return statement?");
 
-  return nullptr;
+  // return nullptr;
 }
 
 llvm::Type* Emitter::simpleType(FundamentalType& type) {
