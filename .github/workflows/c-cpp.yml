@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install llvm
-      run: sudo apt install llvm-dev llvm-runtime llvm
+      run: sudo apt install llvm-20-dev llvm-20-runtime llvm-20
     - name: Install headers
       run: sudo curl -L https://raw.githubusercontent.com/muellan/clipp/master/include/clipp.h -o /usr/include/clipp.h
     - name: make
